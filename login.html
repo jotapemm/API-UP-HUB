@@ -37,9 +37,7 @@
       align-items: center;
       justify-content: center;
       padding: 24px;
-      /* fundo pontilhado */
-      background-image: radial-gradient(rgba(255, 255, 255, .10) 1px, transparent 1px);
-      background-size: 22px 22px;
+      overflow: hidden;
     }
 
     a {
@@ -47,7 +45,18 @@
       text-decoration: none;
     }
 
+    /* fundo pontilhado interativo (canvas), igual ao hero do hub */
+    canvas#dots {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+    }
+
     .card {
+      position: relative;
+      z-index: 1;
       width: 100%;
       max-width: 400px;
       background: rgba(10, 10, 10, .92);
@@ -177,6 +186,7 @@
 </head>
 
 <body>
+  <canvas id="dots"></canvas>
   <div class="card">
     <div class="brand">
       <img src="assets/logo-up.png" alt="UP" />
@@ -242,6 +252,7 @@
       if (u) localStorage.setItem("up_name", u);
     });
   </script>
+  <script src="dots.js"></script>
 </body>
 
 </html>

@@ -1,0 +1,32 @@
+# ============================================================
+#  Cloudflare Tunnel — config COMBINADA (API-UP + HUB)
+#
+#  Um único tunnel serve OS DOIS serviços, cada um num subdomínio
+#  do MESMO domínio. Isso é o que faz o login ser único: como
+#  hub.SEUDOMINIO e upapi.SEUDOMINIO são o "mesmo site", o cookie
+#  de sessão da API-UP é compartilhado → quem loga pelo hub entra
+#  na API-UP sem ver o login de novo.
+#
+#  COPIE para  C:\Users\UP\.cloudflared\config.yml  (ou para o
+#  cloudflare\config.yml do tunnel) e preencha os <...>.
+#  Pré-requisito: o tunnel da API-UP já criado (API-UP\cloudflare\DEPLOY.md).
+# ============================================================
+
+tunnel: <TUNNEL_UUID>
+credentials-file: C:\Users\UP\.cloudflared\<TUNNEL_UUID>.json
+
+ingress:
+  # ── HUB (site estático servido pelo start_hub.bat, porta 8090) ──
+  # Local é HTTP mesmo; o HTTPS válido é o da borda do Cloudflare.
+  - hostname: <hub.SEUDOMINIO.com.br>
+    service: http://localhost:8090
+
+  # ── API-UP (uvicorn HTTPS local, porta 8000) ────────────────────
+  - hostname: <upapi.SEUDOMINIO.com.br>
+    service: https://localhost:8000
+    originRequest:
+      noTLSVerify: true          # cert mkcert é self-signed no salto local
+      httpHostHeader: <upapi.SEUDOMINIO.com.br>
+
+  # ── Obrigatória: qualquer outra coisa → 404 ─────────────────────
+  - service: http_status:404

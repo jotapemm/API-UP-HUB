@@ -17,12 +17,12 @@
     }
 
     :root {
-      --bg: #000000;
-      --border: #242424;
-      --text: #e8e8e8;
-      --text-muted: #8a8a8a;
-      --green: #2fd96a;
-      --red: #f85149;
+      --bg:         #000000;
+      --border:     #242424;
+      --text:       #e8e8e8;
+      --text-muted: #7a7a7a;
+      --green:      #2fd96a;
+      --red:        #f85149;
       --radius: 8px;
     }
 
@@ -88,6 +88,8 @@
     .brand h1 .g {
       color: var(--green);
     }
+
+    .brand p { color: var(--text-muted); font-size: 13px; }
 
     .field {
       margin-bottom: 14px;
@@ -201,7 +203,9 @@
   <div class="card">
     <div class="brand">
       <img src="assets/logo-up.png" alt="UP" />
-      <h1>Criar conta</h1>
+      <h1><span class="g">UP</span> API <span class="g">HUB</span></h1>
+      <p>Recuperação Tributária — acesso restrito</p>
+      <h2>Criar conta</h2>
     </div>
 
     <div class="msg" id="msg"></div>
@@ -213,8 +217,7 @@
       </div>
       <div class="field">
         <label for="usuario">Usuário</label>
-        <input type="text" id="usuario" name="usuario" required
-          pattern="[A-Za-z0-9._-]{3,32}" />
+        <input type="text" id="usuario" name="usuario" required pattern="[A-Za-z0-9._-]{3,32}" />
         <div class="hint">3 a 32 caracteres — letras, números, ponto, hífen ou underline.</div>
       </div>
       <div class="field">

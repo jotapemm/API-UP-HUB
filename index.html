@@ -257,16 +257,17 @@
     }
 
     .section-title {
+      text-align: center;
       font-size: clamp(26px, 4vw, 34px);
       font-weight: 800;
       letter-spacing: -.5px;
-      margin-bottom: 8px;
+      margin-bottom: 5%;
     }
 
     /* ── Cards de automação ───────────────────────────────────────── */
     .auto-card {
       display: grid;
-      grid-template-columns: 320px 1fr;
+      grid-template-columns: 180px 1fr;
       gap: 40px;
       align-items: center;
       padding: 28px 0;
@@ -280,12 +281,14 @@
 
     .auto-card .thumb img {
       max-width: 100%;
-      width: 50%;
+      width: 60%;
       height: auto;
       filter: brightness(0) invert(1);
     }
 
     .auto-card .body p {
+      width: 100%;
+      max-width: 700px;
       color: #d4d4d4;
       margin-bottom: 6px;
     }
@@ -294,6 +297,36 @@
       display: flex;
       justify-content: flex-end;
       margin-top: 22px;
+    }
+
+    .auto-card .body {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .header-card {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 22px;
+    }
+
+    .title {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .title h2 {
+      margin: 0;
+      line-height: 1;
+    }
+
+    .title small {
+      display: block;
+      margin-top: 3px;
+      line-height: 1;
+      font-size: 12px;
+      color: var(--text-muted);
     }
 
     .divider {
@@ -387,14 +420,17 @@
     .status {
       display: inline-flex;
       align-items: center;
+      position: relative;
+      white-space: nowrap;
       gap: 7px;
+      width: max-content;
       font-size: 12px;
       font-weight: 600;
       padding: 3px 10px;
       border-radius: 20px;
       border: 1px solid var(--border);
       color: var(--text-muted);
-      margin-bottom: 14px;
+      /*margin-left: 20px;*/
     }
 
     .status .dot {
@@ -500,14 +536,21 @@
           <img src="assets/logo-up.png" alt="UP API" />
         </div>
         <div class="body">
-          <span class="status" id="status-apiup">
-            <span class="dot"></span> verificando…
-          </span>
+          <div class="header-card">
+            <div class="title">
+              <h2>API UP</h2>
+              <small>Automação Fiscal</small>
+            </div>
+
+            <span class="status" id="status-apiup">
+              <span class="dot"></span> verificando…
+            </span>
+          </div>
           <p>A API-UP é um sistema destinado a automatizar planilhas fiscais
             (ECD Contábil, EFD Contribuições e EFD ICMS), fazendo o processamento
-            e a transferência dos dados entre os arquivos.</p>
+            e a transferência automático dos dados entre os arquivos.</p>
           <p>Assim, nosso sistema proporciona mais agilidade e dinamismo para
-            finalizar o seu processo.</p>
+            finalizar seu processo.</p>
           <div class="cta">
             <a class="btn btn-primary" id="link-apiup" href="#" target="_blank" rel="noopener">Saiba mais</a>
           </div>
@@ -523,9 +566,9 @@
     <div class="wrap">
       <h2>Marcando presença para<br />que possamos <span class="rotator" id="rotator"></span><span class="caret"
           aria-hidden="true">&nbsp;</span></h2>
-      <p>A UP-API é um sistema de automação de planilhas fiscais que resolve os principais problemas
-        padronizados e que mais consomem tempo para finalizar.</p>
-      <p>Assim trazendo mais agilidade na finalização das planilhas e também dando o tempo que você merece
+      <p>   A UP-API é um sistema de automação de planilhas fiscais, que irá resolver os seus principais problemas
+        relacionados aos processos padronizados e que mais consomem seu tempo para finalizar.</p>
+      <p>   Com isso, trazemos mais agilidade na finalização das planilhas e também dando o tempo que você merece
         para seguir com outras atividades.</p>
     </div>
   </section>

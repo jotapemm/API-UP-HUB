@@ -125,6 +125,16 @@
       color: var(--green);
     }
 
+    .actions .greet {
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    .actions .greet b {
+      color: var(--text);
+      font-weight: 700;
+    }
+
     .btn {
       display: inline-flex;
       align-items: center;
@@ -411,7 +421,7 @@
     <a class="brand" href="#top">
       <img src="assets/logo-up.png" alt="UP" />
       <span class="brand-txt">
-        <b>UP</b>
+        <b>UP API</b>
         <small>Recuperação Tributária</small>
       </span>
     </a>
@@ -422,9 +432,8 @@
       <a href="#solucao">SOLUÇÃO</a>
     </nav>
 
-    <div class="actions">
-      <a class="login" href="#">Entrar</a>
-      <a class="btn" href="#">Cadastrar-se</a>
+    <div class="actions" id="actions">
+      <!-- preenchido via JS conforme o estado de login -->
     </div>
   </header>
 
@@ -492,41 +501,66 @@
     © <span id="ano"></span> UP Recuperação Tributária — UP API HUB
   </footer>
 
+  <script src="config.js"></script>
   <script>
-    /* ════════════════════════════════════════════════════════════════
-       CONFIGURAÇÃO  —  ajuste aqui o endereço da API-UP
-       ────────────────────────────────────────────────────────────────
-       A API-UP roda no uvicorn em https://localhost:8000 na máquina que
-       hospeda o servidor (bat\run_web.bat).
-
-       • Se o HUB e a API-UP rodam na MESMA máquina e você acessa só dali:
-            deixe "https://localhost:8000".
-
-       • Se outras pessoas da REDE LOCAL vão usar o hub:
-            troque por  "https://<IP-DO-SERVIDOR>:8000"
-            (ex.: "https://192.168.0.50:8000").
-
-       • Se o hub for publicado na INTERNET (Vercel/Cloudflare) mas a
-            API-UP continuar local: "localhost" NÃO vai funcionar para
-            quem está fora — aponte para o domínio do Cloudflare Tunnel
-            (ex.: "https://upapi.suaempresa.com.br").
-    ════════════════════════════════════════════════════════════════ */
-    const API_UP_URL = "https://192.168.0.117:8000";
-
-    // Liga o botão "Saiba mais" da API-UP
-    document.getElementById("link-apiup").href = API_UP_URL;
-
+    // Endereço da API-UP vem do config.js (window.API_UP_URL)
+    const API_UP_URL = window.API_UP_URL;
     document.getElementById("ano").textContent = new Date().getFullYear();
 
-    /* ── Verifica se a API-UP está no ar (online/offline) ──────────────
-       Faz um ping em modo "no-cors": se a requisição não estourar erro,
-       consideramos o servidor de pé. Como é self-signed + no-cors, não
-       conseguimos ler a resposta, só saber se houve conexão. */
-    (function pingApiUp() {
+    /* ════════════════════════════════════════════════════════════════
+       LOGIN + GATE DE ACESSO
+       ────────────────────────────────────────────────────────────────
+       A SEGURANÇA REAL é o backend da API-UP: senha em PBKDF2-SHA256,
+       sessão por cookie assinado (HMAC) e um middleware que bloqueia
+       qualquer rota sem login. Aqui no hub guardamos só uma DICA de UI
+       (o nome do usuário) e confirmamos a sessão pingando /api/status.
+       Mesmo que alguém forje essa dica no navegador, a própria API-UP
+       redireciona pro login — então nada fica exposto.
+    ════════════════════════════════════════════════════════════════ */
+    const linkApiUp = document.getElementById("link-apiup");
+    const actions = document.getElementById("actions");
+
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, (c) => (
+        { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]
+      ));
+    }
+
+    function render(logado) {
+      const nome = localStorage.getItem("up_name") || "usuário";
+      if (logado) {
+        actions.innerHTML =
+          '<span class="greet">Olá, <b>' + escapeHtml(nome) + '</b></span>' +
+          '<a class="login" href="#" id="btn-sair">Sair</a>';
+        document.getElementById("btn-sair").addEventListener("click", sair);
+        // Logado → "Saiba mais" entra direto na API-UP (nova aba)
+        linkApiUp.setAttribute("href", API_UP_URL);
+        linkApiUp.setAttribute("target", "_blank");
+      } else {
+        actions.innerHTML =
+          '<a class="login" href="login.html">Entrar</a>' +
+          '<a class="btn" href="cadastro.html">Cadastrar-se</a>';
+        // Deslogado → "Saiba mais" leva pra tela de login do hub
+        linkApiUp.setAttribute("href", "login.html");
+        linkApiUp.removeAttribute("target");
+      }
+    }
+
+    function sair(e) {
+      e.preventDefault();
+      localStorage.removeItem("up_name");
+      fetch(API_UP_URL + "/api/logout", { credentials: "include" }).catch(() => { });
+      render(false);
+    }
+
+    // Render imediato pela dica local (sem flicker); confirmado abaixo.
+    render(!!localStorage.getItem("up_name"));
+
+    /* ── 1) Servidor online? — no-cors funciona mesmo cross-origin ──── */
+    (function pingOnline() {
       const pill = document.getElementById("status-apiup");
       const ctrl = new AbortController();
-      const t = setTimeout(() => ctrl.abort(), 4000);
-
+      const t = setTimeout(() => ctrl.abort(), 4500);
       fetch(API_UP_URL, { mode: "no-cors", signal: ctrl.signal })
         .then(() => {
           clearTimeout(t);
@@ -538,6 +572,19 @@
           pill.className = "status offline";
           pill.innerHTML = '<span class="dot"></span> Servidor desligado';
         });
+    })();
+
+    /* ── 2) Sessão válida? — /api/status (200 logado · 401 deslogado) ──
+       Só é legível quando o hub e a API-UP estão na MESMA origem. Em
+       origem/porta diferente o navegador bloqueia (CORS) e caímos no
+       catch — aí mantemos a dica local, sem derrubar quem acabou de logar. */
+    (function checarSessao() {
+      fetch(API_UP_URL + "/api/status", { credentials: "include" })
+        .then((r) => {
+          if (r.ok) render(true);
+          else if (r.status === 401) { localStorage.removeItem("up_name"); render(false); }
+        })
+        .catch(() => { /* cross-origin/offline → mantém a dica local */ });
     })();
 
     /* ── Efeito máquina de escrever (digita + apaga) ──────────────── */

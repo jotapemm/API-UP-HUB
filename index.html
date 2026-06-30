@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UP API HUB</title>
+  <link rel="icon" type="image/png" href="assets/logo-up.png" />
+
+  <style>
+    /* ── Reset & tokens ───────────────────────────────────────────── */
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg: #000000;
+      --surface: #0a0a0a;
+      --border: #242424;
+      --text: #e8e8e8;
+      --text-muted: #8a8a8a;
+      --green: #2fd96a;
+      --green-soft: #34c759;
+      --radius: 8px;
+      --maxw: 1100px;
+      --pad-x: clamp(20px, 8vw, 120px);
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+      font-size: 15px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    /* ── Navbar ───────────────────────────────────────────────────── */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      height: 76px;
+      padding: 0 var(--pad-x);
+      background: rgba(0, 0, 0, .72);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand img {
+      height: 40px;
+      filter: brightness(0) invert(1);
+    }
+
+    .brand .brand-txt {
+      line-height: 1.1;
+    }
+
+    .brand .brand-txt b {
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+
+    .brand .brand-txt small {
+      display: block;
+      font-size: 10px;
+      color: var(--text-muted);
+      letter-spacing: .5px;
+    }
+
+    nav.links {
+      display: flex;
+      gap: 36px;
+      font-weight: 700;
+      font-size: 14px;
+      letter-spacing: .5px;
+    }
+
+    nav.links a {
+      color: var(--text);
+      transition: color .15s;
+    }
+
+    nav.links a:hover {
+      color: var(--green);
+    }
+
+    .actions {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .actions .login {
+      font-weight: 600;
+      color: var(--text);
+      transition: color .15s;
+    }
+
+    .actions .login:hover {
+      color: var(--green);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 9px 18px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: #fff;
+      color: #000;
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      transition: transform .12s, box-shadow .12s, background .15s;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(255, 255, 255, .12);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--text);
+    }
+
+    .btn-ghost:hover {
+      border-color: var(--green);
+      color: var(--green);
+      box-shadow: none;
+    }
+
+    /* ── Hero ─────────────────────────────────────────────────────── */
+    .hero {
+      position: relative;
+      min-height: 30vh;
+      padding: clamp(48px, 9vw, 30%) var(--pad-x);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      overflow: hidden;
+    }
+
+    /* fundo pontilhado interativo (canvas) */
+    .hero canvas#dots {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      -webkit-mask-image: radial-gradient(ellipse 80% 88% at 50% 50%, #000 52%, transparent 100%);
+      mask-image: radial-gradient(ellipse 80% 88% at 50% 50%, #000 52%, transparent 100%);
+    }
+
+    .hero h1 {
+      position: relative;
+      z-index: 1;
+      pointer-events: none;
+      font-size: clamp(48px, 13vw, 150px);
+      font-weight: 900;
+      letter-spacing: -3px;
+      line-height: .95;
+      text-align: center;
+    }
+
+    .hero h1 .g {
+      color: var(--green);
+    }
+
+    /* ── Seções ───────────────────────────────────────────────────── */
+    section {
+      padding: clamp(40px, 6vw, 72px) var(--pad-x);
+    }
+
+    .wrap {
+      max-width: var(--maxw);
+      margin: 0 auto;
+    }
+
+    .section-title {
+      font-size: clamp(26px, 4vw, 34px);
+      font-weight: 800;
+      letter-spacing: -.5px;
+      margin-bottom: 8px;
+    }
+
+    /* ── Cards de automação ───────────────────────────────────────── */
+    .auto-card {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 40px;
+      align-items: center;
+      padding: 28px 0;
+    }
+
+    .auto-card .thumb {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .auto-card .thumb img {
+      max-width: 100%;
+      height: auto;
+      filter: brightness(0) invert(1);
+    }
+
+    .auto-card .body p {
+      color: #d4d4d4;
+      margin-bottom: 6px;
+    }
+
+    .auto-card .body .cta {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 22px;
+    }
+
+    .divider {
+      height: 1px;
+      background: var(--border);
+      max-width: var(--maxw);
+      margin: 0 auto;
+    }
+
+    /* ── Bloco "Marcando presença" ────────────────────────────────── */
+    .presence h2 {
+      font-size: clamp(28px, 5vw, 48px);
+      font-weight: 900;
+      letter-spacing: -1px;
+      line-height: 1.1;
+      margin-bottom: 24px;
+    }
+
+    .presence h2 .rotator {
+      color: var(--green);
+    }
+
+    .presence h2 .caret {
+      display: inline-block;
+      width: 3px;
+      margin-left: 2px;
+      background: var(--green);
+      animation: caret-blink 1s step-end infinite;
+      vertical-align: -2px;
+    }
+
+    @keyframes caret-blink {
+
+      0%,
+      100% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0;
+      }
+    }
+
+    .presence p {
+      color: #cfcfcf;
+      max-width: 880px;
+      margin-bottom: 6px;
+    }
+
+    /* ── Bloco "Uso" — placeholders ───────────────────────────────── */
+    .uso .section-title {
+      text-align: center;
+      margin-bottom: 36px;
+    }
+
+    .uso-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 28px;
+    }
+
+    .uso-box {
+      aspect-ratio: 16 / 10;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      font-size: 13px;
+      letter-spacing: .5px;
+      background:
+        repeating-linear-gradient(45deg, rgba(255, 255, 255, .015) 0 10px, transparent 10px 20px);
+      transition: border-color .15s;
+    }
+
+    .uso-box:hover {
+      border-color: #3a3a3a;
+    }
+
+    /* ── Footer ───────────────────────────────────────────────────── */
+    footer {
+      padding: 32px var(--pad-x);
+      border-top: 1px solid var(--border);
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 12px;
+    }
+
+    /* ── Status pill nos cards ────────────────────────────────────── */
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      margin-bottom: 14px;
+    }
+
+    .status .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--text-muted);
+    }
+
+    .status.online {
+      color: var(--green);
+      border-color: rgba(47, 217, 106, .35);
+    }
+
+    .status.online .dot {
+      background: var(--green);
+      box-shadow: 0 0 8px var(--green);
+      animation: blink 1.6s infinite;
+    }
+
+    .status.offline {
+      color: #f0883e;
+      border-color: rgba(240, 136, 62, .3);
+    }
+
+    .status.offline .dot {
+      background: #f0883e;
+    }
+
+    @keyframes blink {
+
+      0%,
+      100% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: .4;
+      }
+    }
+
+    /* ── Responsivo ───────────────────────────────────────────────── */
+    @media (max-width: 860px) {
+      nav.links {
+        display: none;
+      }
+
+      .auto-card {
+        grid-template-columns: 1fr;
+        gap: 20px;
+        text-align: center;
+      }
+
+      .auto-card .body .cta {
+        justify-content: center;
+      }
+
+      .uso-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- ── NAVBAR ─────────────────────────────────────────────────── -->
+  <header>
+    <a class="brand" href="#top">
+      <img src="assets/logo-up.png" alt="UP" />
+      <span class="brand-txt">
+        <b>UP</b>
+        <small>Recuperação Tributária</small>
+      </span>
+    </a>
+
+    <nav class="links">
+      <a href="#automacoes">API'S</a>
+      <a href="#uso">USO</a>
+      <a href="#solucao">SOLUÇÃO</a>
+    </nav>
+
+    <div class="actions">
+      <a class="login" href="#">Entrar</a>
+      <a class="btn" href="#">Cadastrar-se</a>
+    </div>
+  </header>
+
+  <!-- ── HERO ───────────────────────────────────────────────────── -->
+  <div class="hero" id="top">
+    <canvas id="dots"></canvas>
+    <h1><span class="g">UP</span> API <span class="g">HUB</span></h1>
+  </div>
+
+  <!-- ── AUTOMAÇÕES ─────────────────────────────────────────────── -->
+  <section id="automacoes">
+    <div class="wrap">
+      <h2 class="section-title">Automações:</h2>
+    </div>
+
+    <div class="wrap">
+      <!-- Card 1 — API-UP (única aplicação real por enquanto) -->
+      <article class="auto-card">
+        <div class="thumb">
+          <img src="assets/logo-up.png" alt="UP API" />
+        </div>
+        <div class="body">
+          <span class="status" id="status-apiup">
+            <span class="dot"></span> verificando…
+          </span>
+          <p>A UP-API é um sistema de automação de planilhas fiscais, cuja
+            resolve os principais problemas padronizados e que consomem
+            mais tempo para finalizar.</p>
+          <p>Assim trazendo mais agilidade na finalização de planilhas, e
+            também dando o tempo que você merece ter para dar sequência
+            para outras atividades.</p>
+          <div class="cta">
+            <a class="btn" id="link-apiup" href="#" target="_blank" rel="noopener">Saiba mais</a>
+          </div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ── MARCANDO PRESENÇA ──────────────────────────────────────── -->
+  <section class="presence" id="solucao">
+    <div class="wrap">
+      <h2>Marcando presença para<br />que possamos <span class="rotator" id="rotator"></span><span class="caret" aria-hidden="true">&nbsp;</span></h2>
+      <p>A UP-API são sistemas de automações de planilhas fiscais, cuja resolvem os principais problemas
+        padronizados e que consomem mais tempo para finalizar.</p>
+      <p>Assim trazendo mais agilidade na finalização de planilhas, e também dando o tempo que você merece ter
+        para dar sequência para outras atividades.</p>
+    </div>
+  </section>
+
+  <!-- ── USO ────────────────────────────────────────────────────── -->
+  <section class="uso" id="uso">
+    <div class="wrap">
+      <h2 class="section-title">Uso:</h2>
+      <div class="uso-grid">
+        <div class="uso-box">em breve</div>
+        <div class="uso-box">em breve</div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    © <span id="ano"></span> UP Recuperação Tributária — UP API HUB
+  </footer>
+
+  <script>
+    /* ════════════════════════════════════════════════════════════════
+       CONFIGURAÇÃO  —  ajuste aqui o endereço da API-UP
+       ────────────────────────────────────────────────────────────────
+       A API-UP roda no uvicorn em https://localhost:8000 na máquina que
+       hospeda o servidor (bat\run_web.bat).
+
+       • Se o HUB e a API-UP rodam na MESMA máquina e você acessa só dali:
+            deixe "https://localhost:8000".
+
+       • Se outras pessoas da REDE LOCAL vão usar o hub:
+            troque por  "https://<IP-DO-SERVIDOR>:8000"
+            (ex.: "https://192.168.0.50:8000").
+
+       • Se o hub for publicado na INTERNET (Vercel/Cloudflare) mas a
+            API-UP continuar local: "localhost" NÃO vai funcionar para
+            quem está fora — aponte para o domínio do Cloudflare Tunnel
+            (ex.: "https://upapi.suaempresa.com.br").
+    ════════════════════════════════════════════════════════════════ */
+    const API_UP_URL = "https://192.168.0.117:8000";
+
+    // Liga o botão "Saiba mais" da API-UP
+    document.getElementById("link-apiup").href = API_UP_URL;
+
+    document.getElementById("ano").textContent = new Date().getFullYear();
+
+    /* ── Verifica se a API-UP está no ar (online/offline) ──────────────
+       Faz um ping em modo "no-cors": se a requisição não estourar erro,
+       consideramos o servidor de pé. Como é self-signed + no-cors, não
+       conseguimos ler a resposta, só saber se houve conexão. */
+    (function pingApiUp() {
+      const pill = document.getElementById("status-apiup");
+      const ctrl = new AbortController();
+      const t = setTimeout(() => ctrl.abort(), 4000);
+
+      fetch(API_UP_URL, { mode: "no-cors", signal: ctrl.signal })
+        .then(() => {
+          clearTimeout(t);
+          pill.className = "status online";
+          pill.innerHTML = '<span class="dot"></span> Servidor online';
+        })
+        .catch(() => {
+          clearTimeout(t);
+          pill.className = "status offline";
+          pill.innerHTML = '<span class="dot"></span> Servidor desligado';
+        });
+    })();
+
+    /* ── Efeito máquina de escrever (digita + apaga) ──────────────── */
+    (function typeWords() {
+      const palavras = ["otimizar.", "agilizar.", "ajudar.", "facilitar."];
+      const el = document.getElementById("rotator");
+      let wi = 0, ci = 0, apagando = false;
+
+      function tick() {
+        const w = palavras[wi];
+        ci += apagando ? -1 : 1;
+        el.textContent = w.slice(0, ci);
+
+        let delay = apagando ? 45 : 95;
+        if (!apagando && ci === w.length) {
+          apagando = true;
+          delay = 1500;            // pausa com a palavra inteira na tela
+        } else if (apagando && ci === 0) {
+          apagando = false;
+          wi = (wi + 1) % palavras.length;
+          delay = 350;             // pausa antes da próxima palavra
+        }
+        setTimeout(tick, delay);
+      }
+      tick();
+    })();
+
+    /* ── Pontinhos interativos do hero (desviam do mouse) ─────────── */
+    (function interactiveDots() {
+      const canvas = document.getElementById("dots");
+      const ctx = canvas.getContext("2d");
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const GAP = 24;            // espaçamento entre pontos
+      const RADIUS = 120;        // raio de influência do mouse
+      const PUSH = 22;           // quanto o ponto foge
+      const mouse = { x: -9999, y: -9999 };
+      let pontos = [], W = 0, H = 0;
+
+      function build() {
+        const r = canvas.getBoundingClientRect();
+        W = r.width; H = r.height;
+        canvas.width = W * dpr;
+        canvas.height = H * dpr;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        pontos = [];
+        for (let y = GAP / 2; y < H; y += GAP) {
+          for (let x = GAP / 2; x < W; x += GAP) {
+            pontos.push({ ox: x, oy: y, x, y });
+          }
+        }
+      }
+
+      function draw() {
+        ctx.clearRect(0, 0, W, H);
+        for (const p of pontos) {
+          const dx = p.ox - mouse.x;
+          const dy = p.oy - mouse.y;
+          const dist = Math.hypot(dx, dy);
+
+          let tx = p.ox, ty = p.oy, force = 0;
+          if (dist < RADIUS) {
+            force = (RADIUS - dist) / RADIUS;     // 0 (longe) → 1 (em cima)
+            const ang = Math.atan2(dy, dx);
+            tx = p.ox + Math.cos(ang) * force * PUSH;
+            ty = p.oy + Math.sin(ang) * force * PUSH;
+          }
+          // movimento suave em direção ao alvo
+          p.x += (tx - p.x) * 0.18;
+          p.y += (ty - p.y) * 0.18;
+
+          // base mais clara + verde brilhante perto do cursor
+          const alpha = 0.22 + force * 0.65;
+          const rC = Math.round(200 + (47 - 200) * force);
+          const gC = Math.round(200 + (217 - 200) * force);
+          const bC = Math.round(200 + (106 - 200) * force);
+          const size = 1.2 + force * 1.7;
+
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, size, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(${rC},${gC},${bC},${alpha})`;
+          ctx.fill();
+        }
+        requestAnimationFrame(draw);
+      }
+
+      const hero = canvas.parentElement;
+      hero.addEventListener("mousemove", (e) => {
+        const r = canvas.getBoundingClientRect();
+        mouse.x = e.clientX - r.left;
+        mouse.y = e.clientY - r.top;
+      });
+      hero.addEventListener("mouseleave", () => { mouse.x = mouse.y = -9999; });
+
+      let rt;
+      window.addEventListener("resize", () => {
+        clearTimeout(rt);
+        rt = setTimeout(build, 150);
+      });
+
+      build();
+      draw();
+    })();
+  </script>
+</body>
+
+</html>

@@ -207,30 +207,57 @@
     const form = document.getElementById("form-login");
     const msg = document.getElementById("msg");
 
-    // O POST nativo vai direto pro backend da API-UP: ele valida a senha
-    // (PBKDF2), emite o cookie de sessão e redireciona pra dentro da API-UP.
-    form.action = API_UP_URL + "/login";
+    const btn = form.querySelector(".btn-submit");
 
-    // Mensagens vindas por querystring (?erro=1 do login, ?cadastro=ok do cadastro)
-    const params = new URLSearchParams(location.search);
-    if (params.get("erro")) {
-      msg.className = "msg err";
-      msg.textContent = "Usuário ou senha incorretos.";
-    } else if (params.get("cadastro") === "ok") {
-      msg.className = "msg ok";
-      msg.textContent = "Conta criada! Agora é só entrar.";
+    function mostrar(tipo, texto) {
+      msg.className = "msg " + tipo;
+      msg.textContent = texto;
     }
 
-    // Guarda o nome de usuário só pra exibição no hub (a segurança é o cookie).
-    form.addEventListener("submit", () => {
-      const u = document.getElementById("usuario").value.trim();
-      if (u) localStorage.setItem("up_name", u);
-    });
+    // Mensagem de "conta criada" vinda do cadastro (?cadastro=ok)
+    if (new URLSearchParams(location.search).get("cadastro") === "ok") {
+      mostrar("ok", "Conta criada! Agora é só entrar.");
+    }
 
-    // Se já houver sessão válida, pula a tela e vai direto pra API-UP.
-    fetch(API_UP_URL + "/api/status", { credentials: "include" })
-      .then((r) => { if (r.ok) location.replace(API_UP_URL); })
-      .catch(() => { /* offline ou origem diferente — segue no login */ });
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const usuario = form.usuario.value.trim();
+
+      btn.disabled = true;
+      btn.textContent = "Entrando…";
+
+      try {
+        // Valida a senha no backend da API-UP (PBKDF2). Sem credentials por
+        // ora: a sessão por cookie fica pra quando hub e API-UP estiverem no
+        // mesmo domínio (Cloudflare Tunnel). O backend redireciona: senha
+        // certa → "/" (que, sem sessão, rebate pra "/login"); senha errada →
+        // "/login?erro=1". Detectamos o resultado pela URL final.
+        const resp = await fetch(API_UP_URL + "/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: new URLSearchParams(new FormData(form)),
+        });
+
+        if ((resp.url || "").includes("erro")) {
+          mostrar("err", "Usuário ou senha incorretos.");
+          btn.disabled = false;
+          btn.textContent = "Entrar";
+          return;
+        }
+
+        // Sucesso → guarda o nome (dica de UI) e volta pro HUB logado.
+        if (usuario) localStorage.setItem("up_name", usuario);
+        location.href = "index.html";
+      } catch (err) {
+        mostrar(
+          "err",
+          "Não foi possível falar com a API-UP. Verifique se o servidor está " +
+          "ligado e se você já aceitou o certificado abrindo " + API_UP_URL + " uma vez."
+        );
+        btn.disabled = false;
+        btn.textContent = "Entrar";
+      }
+    });
   </script>
 </body>
 

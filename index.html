@@ -336,20 +336,77 @@
       margin: 0 auto;
     }
 
-    /* ── Bloco "Marcando presença" ────────────────────────────────── */
-    .presence h2 {
+    /* ── Solução — scrollytelling sobre os dots ───────────────────── */
+    .solucao {
+      position: relative;
+      padding: 0;                 /* anula o padding padrão de section */
+    }
+
+    /* fundo de pontos fixo, só aparece enquanto a seção está na tela */
+    .solucao-dots {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      opacity: 0;
+      transition: opacity .6s ease;
+      pointer-events: none;
+    }
+    .solucao.ativa .solucao-dots {
+      opacity: 1;
+    }
+
+    /* as seções vizinhas cobrem o canvas fixo — os dots ficam só na Solução */
+    #automacoes,
+    .uso,
+    footer {
+      position: relative;
+      z-index: 1;
+      background: var(--bg);
+    }
+
+    .panel {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      padding: 14vh var(--pad-x);
+    }
+    .panel.right {
+      justify-content: flex-end;
+    }
+
+    .panel-inner {
+      max-width: 820px;
+      width: 100%;
+      opacity: 0;
+      transform: translateY(46px);
+      transition: opacity .8s ease, transform .8s ease;
+    }
+    .panel-inner.visivel {
+      opacity: 1;
+      transform: none;
+    }
+    .panel.right .panel-inner {
+      text-align: right;
+      margin-left: auto;
+    }
+
+    .panel h2 {
       font-size: clamp(28px, 5vw, 48px);
       font-weight: 900;
       letter-spacing: -1px;
-      line-height: 1.1;
-      margin-bottom: 24px;
+      line-height: 1.12;
+      margin-bottom: 22px;
     }
-
-    .presence h2 .rotator {
+    .panel h2 .g,
+    .panel h2 .rotator {
       color: var(--green);
     }
 
-    .presence h2 .caret {
+    .panel h2 .caret {
       display: inline-block;
       width: 3px;
       margin-left: 2px;
@@ -370,16 +427,41 @@
       }
     }
 
-    .presence p {
+    .panel p {
       color: #cfcfcf;
-      max-width: 880px;
-      margin-bottom: 6px;
+      font-size: clamp(14px, 1.5vw, 17px);
+      margin-bottom: 8px;
     }
 
-    /* ── Bloco "Uso" — placeholders ───────────────────────────────── */
+    /* botão de WhatsApp da solicitação */
+    .btn-wpp {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 28px;
+      padding: 13px 24px;
+      border-radius: 40px;
+      background: var(--green);
+      color: #04210f;
+      font-weight: 800;
+      font-size: 15px;
+      border: none;
+      cursor: pointer;
+      transition: transform .15s, box-shadow .15s, filter .15s;
+    }
+    .btn-wpp:hover {
+      filter: brightness(1.07);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(47, 217, 106, .35);
+    }
+    .btn-wpp svg {
+      display: block;
+    }
+
+    /* ── Uso — cards + gráficos ───────────────────────────────────── */
     .uso .section-title {
       text-align: center;
-      margin-bottom: 36px;
+      margin-bottom: 40px;
     }
 
     .uso-grid {
@@ -388,23 +470,121 @@
       gap: 28px;
     }
 
-    .uso-box {
-      aspect-ratio: 16 / 10;
+    .uso-card {
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--text-muted);
-      font-size: 13px;
-      letter-spacing: .5px;
-      background:
-        repeating-linear-gradient(45deg, rgba(255, 255, 255, .015) 0 10px, transparent 10px 20px);
-      transition: border-color .15s;
+      padding: 28px 30px;
+      background: #060606;
+    }
+    .uso-card h3 {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -.3px;
+      margin-bottom: 14px;
+    }
+    .uso-card p {
+      color: #cfcfcf;
+      font-size: 15px;
     }
 
-    .uso-box:hover {
-      border-color: #3a3a3a;
+    .flow {
+      margin-top: 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .flow-row {
+      display: grid;
+      grid-template-columns: 128px 26px 1fr;
+      align-items: center;
+      gap: 6px;
+    }
+    .flow-row b {
+      font-weight: 800;
+      letter-spacing: .5px;
+      font-size: 15px;
+    }
+    .flow-row .arrow {
+      color: var(--text-muted);
+    }
+    .flow-row small {
+      color: var(--text-muted);
+      font-size: 12.5px;
+    }
+
+    /* painel Recuperação Tributária */
+    .recup-panel {
+      margin-top: 28px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px 30px 34px;
+      background: #060606;
+    }
+    .recup-panel > h3 {
+      font-size: clamp(22px, 3.4vw, 30px);
+      font-weight: 800;
+      letter-spacing: -.4px;
+      margin-bottom: 26px;
+    }
+    .recup-panel > h3 .muted {
+      color: var(--text-muted);
+      font-weight: 800;
+    }
+
+    .charts {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 30px;
+    }
+    .chart .chart-title {
+      font-size: 13px;
+      color: var(--text);
+      margin-bottom: 12px;
+      min-height: 34px;
+    }
+    .chart .chart-title small {
+      display: block;
+      color: var(--text-muted);
+      font-size: 11px;
+    }
+    .chart svg {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+    .chart .chart-foot {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 12px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+      width: 100%;
+    }
+    .chart .chart-foot .chev {
+      margin-left: auto;
+    }
+    .legend {
+      list-style: none;
+      margin-top: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .legend li {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .legend .sw {
+      width: 12px;
+      height: 12px;
+      border-radius: 2px;
+      flex-shrink: 0;
     }
 
     /* ── Footer ───────────────────────────────────────────────────── */
@@ -491,6 +671,19 @@
       .uso-grid {
         grid-template-columns: 1fr;
       }
+
+      .charts {
+        grid-template-columns: 1fr;
+        gap: 34px;
+      }
+
+      .panel.right .panel-inner {
+        text-align: left;
+        margin-left: 0;
+      }
+      .panel.right {
+        justify-content: flex-start;
+      }
     }
   </style>
 </head>
@@ -561,15 +754,47 @@
 
   <div class="divider"></div>
 
-  <!-- ── MARCANDO PRESENÇA ──────────────────────────────────────── -->
-  <section class="presence" id="solucao">
-    <div class="wrap">
-      <h2>Marcando presença para<br />que possamos <span class="rotator" id="rotator"></span><span class="caret"
-          aria-hidden="true">&nbsp;</span></h2>
-      <p>   A UP-API é um sistema de automação de planilhas fiscais, que irá resolver os seus principais problemas
-        relacionados aos processos padronizados e que mais consomem seu tempo para finalizar.</p>
-      <p>   Com isso, trazemos mais agilidade na finalização das planilhas e também dando o tempo que você merece
-        para seguir com outras atividades.</p>
+  <!-- ── SOLUÇÃO — scrollytelling sobre os dots ─────────────────── -->
+  <section class="solucao" id="solucao">
+    <canvas class="solucao-dots" id="dots-solucao"></canvas>
+
+    <!-- Painel 1 -->
+    <div class="panel">
+      <div class="panel-inner" data-reveal>
+        <h2>Marcando presença para<br />que possamos <span class="rotator" id="rotator"></span><span class="caret"
+            aria-hidden="true">&nbsp;</span></h2>
+        <p>A UP-API é um sistema de automação de planilhas fiscais, que irá resolver os seus principais problemas
+          relacionados aos processos padronizados e que mais consomem seu tempo para finalizar.</p>
+        <p>Com isso, trazemos mais agilidade na finalização das planilhas e também damos o tempo que você merece
+          para seguir com outras atividades.</p>
+      </div>
+    </div>
+
+    <!-- Painel 2 -->
+    <div class="panel right">
+      <div class="panel-inner" data-reveal>
+        <h2>Automações personalizadas para todos os processos <span class="g">repetitivos. manuais.</span></h2>
+        <p>Toda automação feita tem regras, um passo a passo, uma sequência, uma solução e um objetivo — com o foco
+          principal em diminuir o tempo repetitivo que é gasto para resolver tais processos manualmente.</p>
+      </div>
+    </div>
+
+    <!-- Painel 3 -->
+    <div class="panel">
+      <div class="panel-inner" data-reveal>
+        <h2>Faça sua solicitação de chamado agora mesmo!</h2>
+        <p>Um site ou uma ferramenta sob medida. Conte o problema e respondemos com um plano: escopo, prazo e a
+          primeira ideia de solução.</p>
+        <a class="btn-wpp"
+          href="https://wa.me/5545999473692?text=Ol%C3%A1!%20Gostaria%20de%20fazer%20uma%20solicita%C3%A7%C3%A3o%20para%20a%20UP."
+          target="_blank" rel="noopener">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M17.5 14.4c-.3-.2-1.8-.9-2-1-.3-.1-.5-.2-.7.1-.2.3-.8 1-.9 1.2-.2.2-.3.2-.6.1-1.8-.9-3-1.6-4.2-3.6-.3-.5.3-.5.9-1.6.1-.2 0-.4 0-.5 0-.1-.7-1.6-.9-2.2-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.2.2 2.1 3.3 5.2 4.6 2 .8 2.7.9 3.7.8.6-.1 1.8-.7 2-1.5.3-.7.3-1.4.2-1.5-.1-.2-.3-.2-.6-.4z" />
+            <path d="M12 2C6.5 2 2 6.5 2 12c0 1.8.5 3.4 1.3 4.9L2 22l5.3-1.4c1.4.8 3 1.2 4.7 1.2 5.5 0 10-4.5 10-10S17.5 2 12 2zm0 18c-1.5 0-3-.4-4.3-1.2l-.3-.2-3.1.8.8-3-.2-.3C4.4 14.9 4 13.5 4 12c0-4.4 3.6-8 8-8s8 3.6 8 8-3.6 8-8 8z" />
+          </svg>
+          Faça sua solicitação
+        </a>
+      </div>
     </div>
   </section>
 
@@ -577,9 +802,116 @@
   <section class="uso" id="uso">
     <div class="wrap">
       <h2 class="section-title">Uso:</h2>
+
       <div class="uso-grid">
-        <div class="uso-box">em breve</div>
-        <div class="uso-box">em breve</div>
+        <!-- Como usar? -->
+        <div class="uso-card">
+          <h3>Como usar?</h3>
+          <p>Em cada sistema, existe uma zona de upload de arquivos, onde o sistema capta os arquivos que são
+            entregues. Em seguida, basta você iniciar o processamento: o sistema automatiza o processo e te
+            entrega o arquivo processado.</p>
+        </div>
+
+        <!-- Como funciona? -->
+        <div class="uso-card">
+          <h3>Como funciona?</h3>
+          <p>Desde o recebimento dos arquivos, o sistema utiliza a orientação de diretórios para manipular as
+            rotas de destino das pastas de cada processo.</p>
+          <div class="flow">
+            <div class="flow-row"><b>PENDENTES</b><span class="arrow">→</span><small>Processos a serem
+                automatizados</small></div>
+            <div class="flow-row"><b>PROCESSADOS</b><span class="arrow">→</span><small>Processos já
+                finalizados</small></div>
+            <div class="flow-row"><b>ERROS</b><span class="arrow">→</span><small>Processados com erros</small></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recuperação Tributária — gráficos -->
+      <div class="recup-panel">
+        <h3>Recuperação <span class="muted">Tributária</span></h3>
+
+        <div class="charts">
+          <!-- Gráfico 1 — barras -->
+          <div class="chart">
+            <div class="chart-title">Tempo gasto a cada processo %</div>
+            <svg viewBox="0 0 230 160" role="img" aria-label="Tempo gasto a cada processo em porcentagem">
+              <g stroke="#242424" stroke-width="1">
+                <line x1="42" y1="15" x2="225" y2="15" />
+                <line x1="42" y1="49" x2="225" y2="49" />
+                <line x1="42" y1="83" x2="225" y2="83" />
+                <line x1="42" y1="117" x2="225" y2="117" />
+                <line x1="42" y1="150" x2="225" y2="150" />
+              </g>
+              <g fill="#8a8a8a" font-size="9" text-anchor="end">
+                <text x="37" y="18">100%</text>
+                <text x="37" y="52">75%</text>
+                <text x="37" y="86">50%</text>
+                <text x="37" y="120">25%</text>
+                <text x="37" y="153">0%</text>
+              </g>
+              <rect x="82" y="130" width="44" height="20" fill="#8a8a8a" />
+              <rect x="152" y="35" width="44" height="115" fill="#f2f2f2" />
+              <g font-size="10" font-weight="700" text-anchor="middle" fill="#e8e8e8">
+                <text x="104" y="125">15%</text>
+                <text x="174" y="30">85%</text>
+              </g>
+            </svg>
+            <div class="chart-foot">Antes da Automação <span class="chev">▾</span></div>
+            <ul class="legend">
+              <li><span class="sw" style="background:#f2f2f2"></span> Tempo gasto com planilhas</li>
+              <li><span class="sw" style="background:#8a8a8a"></span> Tempo gasto com o SPED</li>
+            </ul>
+          </div>
+
+          <!-- Gráfico 2 — pizza -->
+          <div class="chart">
+            <div class="chart-title">Tempo gasto com as planilhas %</div>
+            <svg viewBox="0 0 230 160" role="img" aria-label="Tempo gasto com as planilhas em porcentagem">
+              <g transform="translate(25,-4)">
+                <path d="M90,90 L90,20 A70,70 0 0 1 131.1,146.6 Z" fill="#f2f2f2" />
+                <path d="M90,90 L131.1,146.6 A70,70 0 0 1 33.4,131.1 Z" fill="#cfcfcf" />
+                <path d="M90,90 L33.4,131.1 A70,70 0 0 1 33.4,48.9 Z" fill="#8a8a8a" />
+                <path d="M90,90 L33.4,48.9 A70,70 0 0 1 68.4,23.4 Z" fill="#5a5a5a" />
+                <path d="M90,90 L68.4,23.4 A70,70 0 0 1 90,20 Z" fill="#3a3a3a" />
+              </g>
+            </svg>
+            <div class="chart-foot">Antes da Automação <span class="chev">▾</span></div>
+            <ul class="legend">
+              <li><span class="sw" style="background:#f2f2f2"></span> Tempo com o F100</li>
+              <li><span class="sw" style="background:#cfcfcf"></span> Tempo com blocos diversos</li>
+              <li><span class="sw" style="background:#8a8a8a"></span> Tempo com a ECD → EFD</li>
+              <li><span class="sw" style="background:#5a5a5a"></span> Tempo gasto com o 0150</li>
+              <li><span class="sw" style="background:#3a3a3a"></span> Tempo gasto com o 0500</li>
+            </ul>
+          </div>
+
+          <!-- Gráfico 3 — linha -->
+          <div class="chart">
+            <div class="chart-title">Tempo médio para bater a marca de
+              <small>R$ 14.000.000,00 recuperados.</small>
+            </div>
+            <svg viewBox="0 0 230 160" role="img" aria-label="Tempo médio para bater a marca de recuperação">
+              <g stroke="#242424" stroke-width="1">
+                <line x1="52" y1="30" x2="225" y2="30" />
+                <line x1="52" y1="80" x2="225" y2="80" />
+                <line x1="52" y1="130" x2="225" y2="130" />
+                <line x1="52" y1="150" x2="225" y2="150" />
+              </g>
+              <g fill="#8a8a8a" font-size="9" text-anchor="end">
+                <text x="47" y="33">3 meses</text>
+                <text x="47" y="83">2 meses</text>
+                <text x="47" y="133">1 mês</text>
+              </g>
+              <path d="M56,140 C86,138 104,120 128,98 C152,76 188,44 222,30" fill="none" stroke="#f2f2f2"
+                stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+            <div class="chart-foot">Antes da Automação <span class="chev">▾</span></div>
+            <ul class="legend">
+              <li><span class="sw" style="background:#f2f2f2"></span> Valor recuperado no Trimestre</li>
+            </ul>
+          </div>
+        </div>
       </div>
     </div>
   </section>
@@ -775,6 +1107,84 @@
         clearTimeout(rt);
         rt = setTimeout(build, 150);
       });
+
+      build();
+      draw();
+    })();
+
+    /* ── Solução: revelação dos painéis + dots de fundo no scroll ──── */
+    (function solucao() {
+      const secao = document.getElementById("solucao");
+      if (!secao) return;
+
+      // Revela cada bloco quando ele entra na faixa central da tela.
+      const ioReveal = new IntersectionObserver((entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) {
+            e.target.classList.add("visivel");
+            ioReveal.unobserve(e.target);   // revela uma vez
+          }
+        });
+      }, { rootMargin: "-25% 0px -25% 0px", threshold: 0 });
+      secao.querySelectorAll("[data-reveal]").forEach((el) => ioReveal.observe(el));
+
+      // Dots de fundo: só desenham enquanto a seção está visível (economia).
+      const canvas = document.getElementById("dots-solucao");
+      const ctx = canvas.getContext("2d");
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const GAP = 26, RADIUS = 130, PUSH = 22;
+      const mouse = { x: -9999, y: -9999 };
+      let pontos = [], W = 0, H = 0, ativa = false;
+
+      function build() {
+        W = window.innerWidth; H = window.innerHeight;
+        canvas.width = W * dpr; canvas.height = H * dpr;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        pontos = [];
+        for (let y = GAP / 2; y < H; y += GAP)
+          for (let x = GAP / 2; x < W; x += GAP)
+            pontos.push({ ox: x, oy: y, x, y });
+      }
+
+      function draw() {
+        requestAnimationFrame(draw);
+        if (!ativa) return;                    // fora de vista → não desenha
+        ctx.clearRect(0, 0, W, H);
+        for (const p of pontos) {
+          const dx = p.ox - mouse.x, dy = p.oy - mouse.y, dist = Math.hypot(dx, dy);
+          let tx = p.ox, ty = p.oy, force = 0;
+          if (dist < RADIUS) {
+            force = (RADIUS - dist) / RADIUS;
+            const ang = Math.atan2(dy, dx);
+            tx = p.ox + Math.cos(ang) * force * PUSH;
+            ty = p.oy + Math.sin(ang) * force * PUSH;
+          }
+          p.x += (tx - p.x) * 0.18;
+          p.y += (ty - p.y) * 0.18;
+          const alpha = 0.22 + force * 0.65;
+          const rC = Math.round(200 + (47 - 200) * force);
+          const gC = Math.round(200 + (217 - 200) * force);
+          const bC = Math.round(200 + (106 - 200) * force);
+          const size = 1.2 + force * 1.7;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, size, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(${rC},${gC},${bC},${alpha})`;
+          ctx.fill();
+        }
+      }
+
+      // Liga/desliga os dots conforme a seção entra/sai da tela.
+      new IntersectionObserver((entries) => {
+        entries.forEach((e) => {
+          ativa = e.isIntersecting;
+          secao.classList.toggle("ativa", e.isIntersecting);
+        });
+      }, { threshold: 0 }).observe(secao);
+
+      window.addEventListener("mousemove", (e) => { mouse.x = e.clientX; mouse.y = e.clientY; });
+      window.addEventListener("mouseleave", () => { mouse.x = mouse.y = -9999; });
+      let rt;
+      window.addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(build, 150); });
 
       build();
       draw();

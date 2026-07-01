@@ -28,7 +28,7 @@
       --accent-bh: #208a45;
       --green: #2fd96a;
       --green-soft: #34c759;
-      --radius: 8px;
+      --radius: 2px;
       --maxw: 1100px;
       --pad-x: clamp(20px, 8vw, 120px);
     }
@@ -332,8 +332,7 @@
     .divider {
       height: 1px;
       background: var(--border);
-      max-width: var(--maxw);
-      margin: 0 auto;
+      min-width: 100%;
     }
 
     /* ── Solução — scrollytelling sobre os dots ───────────────────── */
@@ -369,10 +368,10 @@
     .panel {
       position: relative;
       z-index: 1;
-      min-height: 100vh;
+      min-height: 60vh;                        /* menor → trechos mais próximos */
       display: flex;
       align-items: center;
-      padding: 14vh var(--pad-x);
+      padding: 8vh clamp(40px, 14vw, 200px);   /* mais margem nas laterais */
     }
     .panel.right {
       justify-content: flex-end;
@@ -447,12 +446,14 @@
       font-size: 15px;
       border: none;
       cursor: pointer;
-      transition: transform .15s, box-shadow .15s, filter .15s;
+      transition: transform .2s, box-shadow .2s, background-color .2s, color .2s;
     }
     .btn-wpp:hover {
-      filter: brightness(1.07);
-      transform: translateY(-2px);
-      box-shadow: 0 10px 30px rgba(47, 217, 106, .35);
+      background: var(--accent-h);
+      color: var(--text);
+      transform: translateX(2px) translateY(-2px);
+      box-shadow: -5px 5px 0 var(--accent-bh);
+      border-color: var(--accent-h)
     }
     .btn-wpp svg {
       display: block;
@@ -512,6 +513,34 @@
       font-size: 12.5px;
     }
 
+    /* cabeçalho numerado + divider dos blocos do Uso */
+    .card-head {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .card-head .num {
+      flex-shrink: 0;
+      width: 30px;
+      height: 30px;
+      /*border-radius: 50%;
+      border: 1px solid var(--green);*/
+      color: var(--green);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 15px;
+    }
+    .card-head h3 {
+      margin: 0;
+    }
+    .card-sep {
+      height: 1px;
+      background: var(--border);
+      margin: 16px 0 20px;
+    }
+
     /* painel Recuperação Tributária */
     .recup-panel {
       margin-top: 28px;
@@ -562,9 +591,22 @@
       padding-bottom: 12px;
       border-bottom: 1px solid var(--border);
       width: 100%;
+      cursor: pointer;
+      user-select: none;
+      transition: color .15s;
+    }
+    .chart .chart-foot:hover {
+      color: var(--text);
+    }
+    .chart .chart-foot.on {
+      color: var(--green);
     }
     .chart .chart-foot .chev {
       margin-left: auto;
+      transition: transform .3s ease;
+    }
+    .chart .chart-foot.on .chev {
+      transform: rotate(180deg);
     }
     .legend {
       list-style: none;
@@ -773,7 +815,8 @@
     <!-- Painel 2 -->
     <div class="panel right">
       <div class="panel-inner" data-reveal>
-        <h2>Automações personalizadas para todos os processos <span class="g">repetitivos. manuais.</span></h2>
+        <h2>Automações personalizadas para todos os processos<br /><span class="rotator" id="rotator2"></span><span
+            class="caret" aria-hidden="true">&nbsp;</span></h2>
         <p>Toda automação feita tem regras, um passo a passo, uma sequência, uma solução e um objetivo — com o foco
           principal em diminuir o tempo repetitivo que é gasto para resolver tais processos manualmente.</p>
       </div>
@@ -783,7 +826,7 @@
     <div class="panel">
       <div class="panel-inner" data-reveal>
         <h2>Faça sua solicitação de chamado agora mesmo!</h2>
-        <p>Um site ou uma ferramenta sob medida. Conte o problema e respondemos com um plano: escopo, prazo e a
+        <p>Uma ferramenta do jeito que você precisa. Conte o seu problema ou processo atual, que retornamos com: escopo, prazo e a
           primeira ideia de solução.</p>
         <a class="btn-wpp"
           href="https://wa.me/5545999473692?text=Ol%C3%A1!%20Gostaria%20de%20fazer%20uma%20solicita%C3%A7%C3%A3o%20para%20a%20UP."
@@ -796,6 +839,7 @@
         </a>
       </div>
     </div>
+    <div class="divider"></div>
   </section>
 
   <!-- ── USO ────────────────────────────────────────────────────── -->
@@ -806,7 +850,10 @@
       <div class="uso-grid">
         <!-- Como usar? -->
         <div class="uso-card">
-          <h3>Como usar?</h3>
+          <div class="card-head"><span class="num">1.</span>
+            <h3>Como usar?</h3>
+          </div>
+          <div class="card-sep"></div>
           <p>Em cada sistema, existe uma zona de upload de arquivos, onde o sistema capta os arquivos que são
             entregues. Em seguida, basta você iniciar o processamento: o sistema automatiza o processo e te
             entrega o arquivo processado.</p>
@@ -814,7 +861,10 @@
 
         <!-- Como funciona? -->
         <div class="uso-card">
-          <h3>Como funciona?</h3>
+          <div class="card-head"><span class="num">2.</span>
+            <h3>Como funciona?</h3>
+          </div>
+          <div class="card-sep"></div>
           <p>Desde o recebimento dos arquivos, o sistema utiliza a orientação de diretórios para manipular as
             rotas de destino das pastas de cada processo.</p>
           <div class="flow">
@@ -829,7 +879,10 @@
 
       <!-- Recuperação Tributária — gráficos -->
       <div class="recup-panel">
-        <h3>Recuperação <span class="muted">Tributária</span></h3>
+        <div class="card-head"><span class="num">3.</span>
+          <h3>Recuperação <span class="muted">Tributária</span></h3>
+        </div>
+        <div class="card-sep"></div>
 
         <div class="charts">
           <!-- Gráfico 1 — barras -->
@@ -850,39 +903,31 @@
                 <text x="37" y="120">25%</text>
                 <text x="37" y="153">0%</text>
               </g>
-              <rect x="82" y="130" width="44" height="20" fill="#8a8a8a" />
-              <rect x="152" y="35" width="44" height="115" fill="#f2f2f2" />
-              <g font-size="10" font-weight="700" text-anchor="middle" fill="#e8e8e8">
-                <text x="104" y="125">15%</text>
-                <text x="174" y="30">85%</text>
-              </g>
+              <g id="barras-g"></g>
+              <g id="barras-lbl" font-size="10" font-weight="700" text-anchor="middle" fill="#e8e8e8"></g>
             </svg>
             <div class="chart-foot">Antes da Automação <span class="chev">▾</span></div>
             <ul class="legend">
               <li><span class="sw" style="background:#f2f2f2"></span> Tempo gasto com planilhas</li>
               <li><span class="sw" style="background:#8a8a8a"></span> Tempo gasto com o SPED</li>
+              <li><span class="sw" style="background:#b1ffb8"></span> Tempo Livre</li>
             </ul>
           </div>
 
           <!-- Gráfico 2 — pizza -->
           <div class="chart">
-            <div class="chart-title">Tempo gasto com as planilhas %</div>
+            <div class="chart-title">Tempo gasto com as planilhas por dia %</div>
             <svg viewBox="0 0 230 160" role="img" aria-label="Tempo gasto com as planilhas em porcentagem">
-              <g transform="translate(25,-4)">
-                <path d="M90,90 L90,20 A70,70 0 0 1 131.1,146.6 Z" fill="#f2f2f2" />
-                <path d="M90,90 L131.1,146.6 A70,70 0 0 1 33.4,131.1 Z" fill="#cfcfcf" />
-                <path d="M90,90 L33.4,131.1 A70,70 0 0 1 33.4,48.9 Z" fill="#8a8a8a" />
-                <path d="M90,90 L33.4,48.9 A70,70 0 0 1 68.4,23.4 Z" fill="#5a5a5a" />
-                <path d="M90,90 L68.4,23.4 A70,70 0 0 1 90,20 Z" fill="#3a3a3a" />
-              </g>
+              <g id="pizza-g" transform="translate(25,-4)"></g>
             </svg>
             <div class="chart-foot">Antes da Automação <span class="chev">▾</span></div>
             <ul class="legend">
               <li><span class="sw" style="background:#f2f2f2"></span> Tempo com o F100</li>
-              <li><span class="sw" style="background:#cfcfcf"></span> Tempo com blocos diversos</li>
+              <li><span class="sw" style="background:#cfcfcf"></span> Tempo com o 0150</li>
               <li><span class="sw" style="background:#8a8a8a"></span> Tempo com a ECD → EFD</li>
-              <li><span class="sw" style="background:#5a5a5a"></span> Tempo gasto com o 0150</li>
-              <li><span class="sw" style="background:#3a3a3a"></span> Tempo gasto com o 0500</li>
+              <li><span class="sw" style="background:#5a5a5a"></span> Tempo com o 0500</li>
+              <li><span class="sw" style="background:#3a3a3a"></span> Tempo gasto com blocos diversos</li>
+              <li><span class="sw" style="background:#b1ffb8"></span> Tempo para outros serviços</li>
             </ul>
           </div>
 
@@ -1012,9 +1057,8 @@
     })();
 
     /* ── Efeito máquina de escrever (digita + apaga) ──────────────── */
-    (function typeWords() {
-      const palavras = ["otimizar.", "agilizar.", "ajudar.", "facilitar."];
-      const el = document.getElementById("rotator");
+    function maquinaDeEscrever(el, palavras) {
+      if (!el) return;
       let wi = 0, ci = 0, apagando = false;
 
       function tick() {
@@ -1034,7 +1078,11 @@
         setTimeout(tick, delay);
       }
       tick();
-    })();
+    }
+    maquinaDeEscrever(document.getElementById("rotator"),
+      ["otimizar.", "agilizar.", "ajudar.", "facilitar."]);
+    maquinaDeEscrever(document.getElementById("rotator2"),
+      ["repetitivos.", "manuais."]);
 
     /* ── Pontinhos interativos do hero (desviam do mouse) ─────────── */
     (function interactiveDots() {
@@ -1188,6 +1236,108 @@
 
       build();
       draw();
+    })();
+
+    /* ── Uso: gráficos Antes/Depois da Automação (clique no rodapé) ─── */
+    (function graficosUso() {
+      const svgNS = "http://www.w3.org/2000/svg";
+      const easeOut = t => 1 - Math.pow(1 - t, 3);
+
+      function tween(dur, onFrame, onEnd) {
+        const t0 = performance.now();
+        (function step(now) {
+          const t = Math.min(1, (now - t0) / dur);
+          onFrame(easeOut(t));
+          if (t < 1) requestAnimationFrame(step);
+          else if (onEnd) onEnd();
+        })(t0);
+      }
+
+      // ---------- Barras (Tempo gasto a cada processo) ----------
+      const barrasG = document.getElementById("barras-g");
+      const barrasLbl = document.getElementById("barras-lbl");
+      const BW = 40, BASE = 150, SPAN = 135;            // 0% em y=150 · 100% em y=15
+      const barras = [
+        { cor: "#8a8a8a", x: 62,  antes: 15, depois: 15 },   // SPED
+        { cor: "#f2f2f2", x: 116, antes: 85, depois: 40 },   // Planilhas
+        { cor: "#b1ffb8", x: 170, antes: 0,  depois: 45 },   // Tempo Livre
+      ];
+      if (barrasG) barras.forEach(b => {
+        b.rect = document.createElementNS(svgNS, "rect");
+        b.rect.setAttribute("x", b.x);
+        b.rect.setAttribute("width", BW);
+        b.rect.setAttribute("fill", b.cor);
+        barrasG.appendChild(b.rect);
+        b.txt = document.createElementNS(svgNS, "text");
+        b.txt.setAttribute("x", b.x + BW / 2);
+        barrasLbl.appendChild(b.txt);
+      });
+      function desenhaBarras(f) {
+        barras.forEach(b => {
+          const v = b.antes + (b.depois - b.antes) * f;
+          const h = v / 100 * SPAN, y = BASE - h;
+          b.rect.setAttribute("y", y);
+          b.rect.setAttribute("height", Math.max(0, h));
+          b.txt.setAttribute("y", y - 5);
+          b.txt.textContent = v < 0.5 ? "" : Math.round(v) + "%";
+        });
+      }
+
+      // ---------- Pizza (Tempo gasto com as planilhas) ----------
+      const pizzaG = document.getElementById("pizza-g");
+      const CX = 90, CY = 90, R = 70;
+      const pt = a => [(CX + R * Math.sin(a)).toFixed(2), (CY - R * Math.cos(a)).toFixed(2)];
+      // ordem no desenho: F100, outros serviços, 0150, ECD→EFD, 0500, blocos diversos
+      const fatias = [
+        { cor: "#f2f2f2", antes: 30, depois: 8 },   // F100
+        { cor: "#b1ffb8", antes: 0,  depois: 60 },  // outros serviços
+        { cor: "#cfcfcf", antes: 15, depois: 8 },   // 0150
+        { cor: "#8a8a8a", antes: 20, depois: 8 },   // ECD → EFD
+        { cor: "#5a5a5a", antes: 10, depois: 8 },   // 0500
+        { cor: "#3a3a3a", antes: 25, depois: 8 },   // blocos diversos
+      ];
+      if (pizzaG) fatias.forEach(s => {
+        s.path = document.createElementNS(svgNS, "path");
+        s.path.setAttribute("fill", s.cor);
+        pizzaG.appendChild(s.path);
+      });
+      function desenhaPizza(f) {
+        let acc = 0;
+        fatias.forEach(s => {
+          const v = s.antes + (s.depois - s.antes) * f;
+          const a0 = acc / 100 * 2 * Math.PI; acc += v;
+          const a1 = acc / 100 * 2 * Math.PI;
+          if (v <= 0.1) { s.path.setAttribute("d", ""); return; }
+          const [x0, y0] = pt(a0), [x1, y1] = pt(a1);
+          const large = (a1 - a0) > Math.PI ? 1 : 0;
+          s.path.setAttribute("d", `M${CX},${CY} L${x0},${y0} A${R},${R} 0 ${large} 1 ${x1},${y1} Z`);
+        });
+      }
+
+      // Estado inicial "Antes"
+      if (barrasG) desenhaBarras(0);
+      if (pizzaG) desenhaPizza(0);
+
+      // ---------- Toggle no rodapé de cada gráfico ----------
+      const charts = document.querySelectorAll(".recup-panel .chart");
+      function ligar(chart, redraw) {
+        if (!chart) return;
+        const foot = chart.querySelector(".chart-foot");
+        let depois = false, anim = false;
+        foot.addEventListener("click", () => {
+          if (anim) return;
+          anim = true;
+          const de = depois ? 1 : 0, para = depois ? 0 : 1;
+          depois = !depois;
+          foot.classList.toggle("on", depois);
+          foot.firstChild.textContent = depois ? "Depois da Automação " : "Antes da Automação ";
+          if (redraw) tween(680, t => redraw(de + (para - de) * t), () => { anim = false; });
+          else anim = false;
+        });
+      }
+      ligar(charts[0], desenhaBarras);
+      ligar(charts[1], desenhaPizza);
+      ligar(charts[2], null);   // linha: por ora só troca o rótulo (sem base p/ o longo prazo)
     })();
   </script>
 </body>

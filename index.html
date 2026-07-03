@@ -209,6 +209,18 @@
       box-shadow: none;
     }
 
+    /* botão de automação ainda não publicada */
+    .btn-soon {
+      background: transparent;
+      color: var(--text-muted);
+      border-color: var(--border);
+      cursor: default;
+    }
+    .btn-soon:hover {
+      transform: none;
+      box-shadow: none;
+    }
+
     /* ── Hero ─────────────────────────────────────────────────────── */
     .hero {
       position: relative;
@@ -256,6 +268,17 @@
       margin: 0 auto;
     }
 
+    .wrap article {
+      cursor: pointer;
+      transition: transform .2s;
+    }
+
+    .wrap article:hover {
+      background: #202020;
+      border-radius: 3px;
+      transform: translateY(-2px);
+    }
+
     .section-title {
       text-align: center;
       font-size: clamp(26px, 4vw, 34px);
@@ -271,7 +294,15 @@
       gap: 40px;
       align-items: center;
       padding: 28px 0;
+      cursor: pointer;
+      transition: transform .2s;
     }
+
+    .auto-card:hover {
+      background: #202020;
+      transform: translateY(-2px);
+    }
+
 
     .auto-card .thumb {
       display: flex;
@@ -286,6 +317,12 @@
       filter: brightness(0) invert(1);
     }
 
+    /* logos que já têm cor própria — mantém as cores originais do PNG */
+    .auto-card .thumb img.original {
+      filter: none;
+      width: 85%;   /* glifo tem mais margem no PNG → aumenta p/ igualar a UP */
+    }
+
     .auto-card .body p {
       width: 100%;
       max-width: 700px;
@@ -297,6 +334,7 @@
       display: flex;
       justify-content: flex-end;
       margin-top: 22px;
+      margin-right: 28px;
     }
 
     .auto-card .body {
@@ -321,6 +359,10 @@
       line-height: 1;
     }
 
+    .title span {
+      color: var(--green)
+    }
+
     .title small {
       display: block;
       margin-top: 3px;
@@ -338,7 +380,8 @@
     /* ── Solução — scrollytelling sobre os dots ───────────────────── */
     .solucao {
       position: relative;
-      padding: 0;                 /* anula o padding padrão de section */
+      padding: 0;
+      /* anula o padding padrão de section */
     }
 
     /* fundo de pontos fixo, só aparece enquanto a seção está na tela */
@@ -352,6 +395,7 @@
       transition: opacity .6s ease;
       pointer-events: none;
     }
+
     .solucao.ativa .solucao-dots {
       opacity: 1;
     }
@@ -368,11 +412,14 @@
     .panel {
       position: relative;
       z-index: 1;
-      min-height: 60vh;                        /* menor → trechos mais próximos */
+      min-height: 60vh;
+      /* menor → trechos mais próximos */
       display: flex;
       align-items: center;
-      padding: 8vh clamp(40px, 14vw, 200px);   /* mais margem nas laterais */
+      padding: 8vh clamp(40px, 14vw, 200px);
+      /* mais margem nas laterais */
     }
+
     .panel.right {
       justify-content: flex-end;
     }
@@ -384,10 +431,12 @@
       transform: translateY(46px);
       transition: opacity .8s ease, transform .8s ease;
     }
+
     .panel-inner.visivel {
       opacity: 1;
       transform: none;
     }
+
     .panel.right .panel-inner {
       text-align: right;
       margin-left: auto;
@@ -400,6 +449,7 @@
       line-height: 1.12;
       margin-bottom: 22px;
     }
+
     .panel h2 .g,
     .panel h2 .rotator {
       color: var(--green);
@@ -448,6 +498,7 @@
       cursor: pointer;
       transition: transform .2s, box-shadow .2s, background-color .2s, color .2s;
     }
+
     .btn-wpp:hover {
       background: var(--accent-h);
       color: var(--text);
@@ -455,6 +506,7 @@
       box-shadow: -5px 5px 0 var(--accent-bh);
       border-color: var(--accent-h)
     }
+
     .btn-wpp svg {
       display: block;
     }
@@ -476,13 +528,22 @@
       border-radius: var(--radius);
       padding: 28px 30px;
       background: #060606;
+      cursor: pointer;
+      transition: transform .2s;
     }
+
+    .uso-card:hover {
+      background: #202020;
+      transform: translateY(-2px);
+    }
+
     .uso-card h3 {
       font-size: 22px;
       font-weight: 800;
       letter-spacing: -.3px;
       margin-bottom: 14px;
     }
+
     .uso-card p {
       color: #cfcfcf;
       font-size: 15px;
@@ -494,20 +555,24 @@
       flex-direction: column;
       gap: 12px;
     }
+
     .flow-row {
       display: grid;
       grid-template-columns: 128px 26px 1fr;
       align-items: center;
       gap: 6px;
     }
+
     .flow-row b {
       font-weight: 800;
       letter-spacing: .5px;
       font-size: 15px;
     }
+
     .flow-row .arrow {
       color: var(--text-muted);
     }
+
     .flow-row small {
       color: var(--text-muted);
       font-size: 12.5px;
@@ -519,6 +584,7 @@
       align-items: center;
       gap: 14px;
     }
+
     .card-head .num {
       flex-shrink: 0;
       width: 30px;
@@ -532,9 +598,11 @@
       font-weight: 800;
       font-size: 15px;
     }
+
     .card-head h3 {
       margin: 0;
     }
+
     .card-sep {
       height: 1px;
       background: var(--border);
@@ -549,13 +617,15 @@
       padding: 28px 30px 34px;
       background: #060606;
     }
-    .recup-panel > h3 {
+
+    .recup-panel>h3 {
       font-size: clamp(22px, 3.4vw, 30px);
       font-weight: 800;
       letter-spacing: -.4px;
       margin-bottom: 26px;
     }
-    .recup-panel > h3 .muted {
+
+    .recup-panel>h3 .muted {
       color: var(--text-muted);
       font-weight: 800;
     }
@@ -565,22 +635,26 @@
       grid-template-columns: repeat(3, 1fr);
       gap: 30px;
     }
+
     .chart .chart-title {
       font-size: 13px;
       color: var(--text);
       margin-bottom: 12px;
       min-height: 34px;
     }
+
     .chart .chart-title small {
       display: block;
       color: var(--text-muted);
       font-size: 11px;
     }
+
     .chart svg {
       width: 100%;
       height: auto;
       display: block;
     }
+
     .chart .chart-foot {
       display: inline-flex;
       align-items: center;
@@ -595,19 +669,24 @@
       user-select: none;
       transition: color .15s;
     }
+
     .chart .chart-foot:hover {
       color: var(--text);
     }
+
     .chart .chart-foot.on {
       color: var(--green);
     }
+
     .chart .chart-foot .chev {
       margin-left: auto;
       transition: transform .3s ease;
     }
+
     .chart .chart-foot.on .chev {
       transform: rotate(180deg);
     }
+
     .legend {
       list-style: none;
       margin-top: 14px;
@@ -615,6 +694,7 @@
       flex-direction: column;
       gap: 8px;
     }
+
     .legend li {
       display: flex;
       align-items: center;
@@ -622,6 +702,7 @@
       font-size: 12px;
       color: var(--text-muted);
     }
+
     .legend .sw {
       width: 12px;
       height: 12px;
@@ -723,6 +804,7 @@
         text-align: left;
         margin-left: 0;
       }
+
       .panel.right {
         justify-content: flex-start;
       }
@@ -773,7 +855,7 @@
         <div class="body">
           <div class="header-card">
             <div class="title">
-              <h2>API UP</h2>
+              <h2>API <span class="g">UP</span></h2>
               <small>Automação Fiscal</small>
             </div>
 
@@ -788,6 +870,35 @@
             finalizar seu processo.</p>
           <div class="cta">
             <a class="btn btn-primary" id="link-apiup" href="#" target="_blank" rel="noopener">Saiba mais</a>
+          </div>
+        </div>
+      </article>
+    </div>
+
+    <div class="wrap">
+      <!-- Card 2 — API-UP-CONF (em desenvolvimento) -->
+      <article class="auto-card">
+        <div class="thumb">
+          <img class="original" src="assets/up conf bw v2.png" alt="API CONF" />
+        </div>
+        <div class="body">
+          <div class="header-card">
+            <div class="title">
+              <h2>API <span class="g">CONF</span></h2>
+              <small>Automação de Conferência Fiscal</small>
+            </div>
+
+            <span class="status" id="status-conf">
+              <span class="dot"></span> verificando…
+            </span>
+          </div>
+          <p>A API CONF automatiza a conferência fiscal do EFD, validando informações
+            como CNPJ × nome no F100 e sinalizando as divergências (verde, âmbar e
+            vermelho) para revisão antes da entrega.</p>
+          <p>O objetivo é reduzir o retrabalho da revisão manual, trazendo mais
+            segurança e agilidade na validação dos arquivos.</p>
+          <div class="cta">
+            <a class="btn btn-primary" id="link-conf" href="#" target="_blank" rel="noopener">Saiba mais</a>
           </div>
         </div>
       </article>
@@ -826,14 +937,17 @@
     <div class="panel">
       <div class="panel-inner" data-reveal>
         <h2>Faça sua solicitação de chamado agora mesmo!</h2>
-        <p>Uma ferramenta do jeito que você precisa. Conte o seu problema ou processo atual, que retornamos com: escopo, prazo e a
+        <p>Uma ferramenta do jeito que você precisa. Conte o seu problema ou processo atual, que retornamos com: escopo,
+          prazo e a
           primeira ideia de solução.</p>
         <a class="btn-wpp"
           href="https://wa.me/5545999473692?text=Ol%C3%A1!%20Gostaria%20de%20fazer%20uma%20solicita%C3%A7%C3%A3o%20para%20a%20UP."
           target="_blank" rel="noopener">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-            <path d="M17.5 14.4c-.3-.2-1.8-.9-2-1-.3-.1-.5-.2-.7.1-.2.3-.8 1-.9 1.2-.2.2-.3.2-.6.1-1.8-.9-3-1.6-4.2-3.6-.3-.5.3-.5.9-1.6.1-.2 0-.4 0-.5 0-.1-.7-1.6-.9-2.2-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.2.2 2.1 3.3 5.2 4.6 2 .8 2.7.9 3.7.8.6-.1 1.8-.7 2-1.5.3-.7.3-1.4.2-1.5-.1-.2-.3-.2-.6-.4z" />
-            <path d="M12 2C6.5 2 2 6.5 2 12c0 1.8.5 3.4 1.3 4.9L2 22l5.3-1.4c1.4.8 3 1.2 4.7 1.2 5.5 0 10-4.5 10-10S17.5 2 12 2zm0 18c-1.5 0-3-.4-4.3-1.2l-.3-.2-3.1.8.8-3-.2-.3C4.4 14.9 4 13.5 4 12c0-4.4 3.6-8 8-8s8 3.6 8 8-3.6 8-8 8z" />
+            <path
+              d="M17.5 14.4c-.3-.2-1.8-.9-2-1-.3-.1-.5-.2-.7.1-.2.3-.8 1-.9 1.2-.2.2-.3.2-.6.1-1.8-.9-3-1.6-4.2-3.6-.3-.5.3-.5.9-1.6.1-.2 0-.4 0-.5 0-.1-.7-1.6-.9-2.2-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.2.2 2.1 3.3 5.2 4.6 2 .8 2.7.9 3.7.8.6-.1 1.8-.7 2-1.5.3-.7.3-1.4.2-1.5-.1-.2-.3-.2-.6-.4z" />
+            <path
+              d="M12 2C6.5 2 2 6.5 2 12c0 1.8.5 3.4 1.3 4.9L2 22l5.3-1.4c1.4.8 3 1.2 4.7 1.2 5.5 0 10-4.5 10-10S17.5 2 12 2zm0 18c-1.5 0-3-.4-4.3-1.2l-.3-.2-3.1.8.8-3-.2-.3C4.4 14.9 4 13.5 4 12c0-4.4 3.6-8 8-8s8 3.6 8 8-3.6 8-8 8z" />
           </svg>
           Faça sua solicitação
         </a>
@@ -981,7 +1095,9 @@
        Mesmo que alguém forje essa dica no navegador, a própria API-UP
        redireciona pro login — então nada fica exposto.
     ════════════════════════════════════════════════════════════════ */
+    const API_CONF_URL = window.API_CONF_URL;
     const linkApiUp = document.getElementById("link-apiup");
+    const linkConf = document.getElementById("link-conf");
     const actions = document.getElementById("actions");
 
     function escapeHtml(s) {
@@ -1002,9 +1118,13 @@
           '<polyline points="16 17 21 12 16 7" />' +
           '<line x1="21" y1="12" x2="9" y2="12" /></svg>Sair</button>';
         document.getElementById("btn-sair").addEventListener("click", sair);
-        // Logado → "Saiba mais" entra direto na API-UP (nova aba)
+        // Logado → "Saiba mais" entra direto nas APIs (nova aba)
         linkApiUp.setAttribute("href", API_UP_URL);
         linkApiUp.setAttribute("target", "_blank");
+        if (linkConf) {
+          linkConf.setAttribute("href", API_CONF_URL);
+          linkConf.setAttribute("target", "_blank");
+        }
       } else {
         actions.innerHTML =
           '<a class="login" href="login.html">Entrar</a>' +
@@ -1012,6 +1132,10 @@
         // Deslogado → "Saiba mais" leva pra tela de login do hub
         linkApiUp.setAttribute("href", "login.html");
         linkApiUp.removeAttribute("target");
+        if (linkConf) {
+          linkConf.setAttribute("href", "login.html");
+          linkConf.removeAttribute("target");
+        }
       }
     }
 
@@ -1031,6 +1155,25 @@
       const ctrl = new AbortController();
       const t = setTimeout(() => ctrl.abort(), 4500);
       fetch(API_UP_URL, { mode: "no-cors", signal: ctrl.signal })
+        .then(() => {
+          clearTimeout(t);
+          pill.className = "status online";
+          pill.innerHTML = '<span class="dot"></span> Servidor online';
+        })
+        .catch(() => {
+          clearTimeout(t);
+          pill.className = "status offline";
+          pill.innerHTML = '<span class="dot"></span> Servidor desligado';
+        });
+    })();
+
+    /* ── 1b) Servidor da CONF online? (mesmo esquema no-cors) ──────── */
+    (function pingConfOnline() {
+      const pill = document.getElementById("status-conf");
+      if (!pill || !API_CONF_URL) return;
+      const ctrl = new AbortController();
+      const t = setTimeout(() => ctrl.abort(), 4500);
+      fetch(API_CONF_URL, { mode: "no-cors", signal: ctrl.signal })
         .then(() => {
           clearTimeout(t);
           pill.className = "status online";
@@ -1258,9 +1401,9 @@
       const barrasLbl = document.getElementById("barras-lbl");
       const BW = 40, BASE = 150, SPAN = 135;            // 0% em y=150 · 100% em y=15
       const barras = [
-        { cor: "#8a8a8a", x: 62,  antes: 15, depois: 15 },   // SPED
+        { cor: "#8a8a8a", x: 62, antes: 15, depois: 15 },   // SPED
         { cor: "#f2f2f2", x: 116, antes: 85, depois: 40 },   // Planilhas
-        { cor: "#b1ffb8", x: 170, antes: 0,  depois: 45 },   // Tempo Livre
+        { cor: "#b1ffb8", x: 170, antes: 0, depois: 45 },   // Tempo Livre
       ];
       if (barrasG) barras.forEach(b => {
         b.rect = document.createElementNS(svgNS, "rect");
@@ -1289,12 +1432,12 @@
       const pt = a => [(CX + R * Math.sin(a)).toFixed(2), (CY - R * Math.cos(a)).toFixed(2)];
       // ordem no desenho: F100, outros serviços, 0150, ECD→EFD, 0500, blocos diversos
       const fatias = [
-        { cor: "#f2f2f2", antes: 30, depois: 8 },   // F100
-        { cor: "#b1ffb8", antes: 0,  depois: 60 },  // outros serviços
-        { cor: "#cfcfcf", antes: 15, depois: 8 },   // 0150
-        { cor: "#8a8a8a", antes: 20, depois: 8 },   // ECD → EFD
+        { cor: "#f2f2f2", antes: 40, depois: 8 },   // F100
+        { cor: "#b1ffb8", antes: 0, depois: 60 },  // outros serviços
+        { cor: "#cfcfcf", antes: 24, depois: 8 },   // 0150
+        { cor: "#8a8a8a", antes: 16, depois: 8 },   // ECD → EFD
         { cor: "#5a5a5a", antes: 10, depois: 8 },   // 0500
-        { cor: "#3a3a3a", antes: 25, depois: 8 },   // blocos diversos
+        { cor: "#3a3a3a", antes: 10, depois: 8 },   // blocos diversos
       ];
       if (pizzaG) fatias.forEach(s => {
         s.path = document.createElementNS(svgNS, "path");

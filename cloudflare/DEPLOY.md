@@ -1,8 +1,9 @@
-# UP API HUB — Acesso externo (mesmo Cloudflare Tunnel da API-UP)
+# UP API HUB — Acesso externo (um Cloudflare Tunnel para HUB + API-UP + API-CONF)
 
-Objetivo: hub e API-UP **sob o mesmo domínio** → o navegador compartilha o
-cookie de sessão → o usuário **loga uma vez** (pelo hub) e o "Saiba mais"
-entra direto na API-UP, **sem ver o login de novo**.
+Objetivo: os três serviços **sob o mesmo domínio** → o navegador compartilha o
+cookie de sessão → o usuário **loga uma vez** (pelo hub) e o "Saiba mais" da
+API-UP entra direto, **sem ver o login de novo**. A CONF entra no mesmo tunnel
+como um terceiro subdomínio.
 
 ## Por que precisa ser o mesmo domínio
 
@@ -11,65 +12,69 @@ entre origens que são o **"mesmo site"** (mesmo domínio registrável). Dois
 **subdomínios do mesmo domínio** contam como o mesmo site:
 
 ```
-https://hub.suaempresa.com.br     ─┐                      ┌─> http://localhost:8090   (start_hub.bat)
-                                    ├─ Cloudflare (1 tunnel)─┤
-https://upapi.suaempresa.com.br   ─┘                      └─> https://localhost:8000  (run_web.bat)
+https://hub.suaempresa.com.br    ─┐                       ┌─> http://localhost:8090   (start_hub.bat · HUB)
+https://upapi.suaempresa.com.br  ─┼─ Cloudflare (1 tunnel)─┼─> https://localhost:8000  (run_web.bat · API-UP)
+https://conf.suaempresa.com.br   ─┘                       └─> http://localhost:8010   (CONF)
 ```
 
-> Importante: o que vale é a URL **pública** que o navegador vê (ambas em
-> `suaempresa.com.br`). O `http://localhost:8090` local é invisível — quem faz
-> o HTTPS válido é a borda do Cloudflare.
+> Importante: o que vale é a URL **pública** que o navegador vê (todas em
+> `suaempresa.com.br`). Os `localhost:*` locais são invisíveis — quem faz o
+> HTTPS válido é a borda do Cloudflare. Por isso o **IP local da máquina pode
+> mudar à vontade** que nada quebra (o `cloudflared` faz conexão de saída).
 
 ## Pré-requisito
 
 O tunnel da API-UP já criado e funcionando — ver `API-UP/cloudflare/DEPLOY.md`.
-Aqui a gente só **adiciona o hub como 2º hostname no MESMO tunnel**.
+Aqui a gente só **adiciona o hub e a CONF como hostnames no MESMO tunnel**.
 
 ## Passo a passo
 
-1. **Suba os dois servidores locais:**
-   - `API-UP\bat\run_web.bat`  → API-UP em `https://localhost:8000`
-   - `API-UP-HUB\start_hub.bat` → hub em `http://localhost:8090`
+1. **Suba os três servidores locais:**
+   - `API-UP\bat\run_web.bat`   → API-UP em `https://localhost:8000`
+   - CONF (quando a interface estiver pronta) → `http://localhost:8010`
+   - `API-UP-HUB\start_hub.bat`  → hub em `http://localhost:8090`
 
-2. **Edite o `config.yml` do tunnel** (o mesmo da API-UP) para ter os dois
+2. **Edite o `config.yml` do tunnel** (o mesmo da API-UP) para ter os três
    ingress — use `cloudflare\config.example.yml` (ao lado) como base.
 
-3. **Crie o DNS dos dois subdomínios** (aponte ambos para o mesmo tunnel):
+3. **Crie o DNS dos três subdomínios** (todos apontam para o mesmo tunnel):
    ```powershell
    cloudflared tunnel route dns upapi upapi.suaempresa.com.br
    cloudflared tunnel route dns upapi hub.suaempresa.com.br
+   cloudflared tunnel route dns upapi conf.suaempresa.com.br
    ```
 
-4. **Aponte o hub para a API-UP** — em `config.js`:
+4. **Aponte o hub para os backends** — em `config.js`:
    ```js
-   window.API_UP_URL = "https://upapi.suaempresa.com.br";
+   window.API_UP_URL   = "https://upapi.suaempresa.com.br";
+   window.API_CONF_URL = "https://conf.suaempresa.com.br";
    ```
 
 5. **Suba o tunnel** (`API-UP\bat\run_tunnel.bat`) e teste:
    `https://hub.suaempresa.com.br` → "Entrar" → "Saiba mais" deve abrir a
-   API-UP **já logado**.
+   API-UP **já logado**; o card da CONF passa a mostrar "online".
 
-## O que já funciona só com isso (zero mudança na API-UP)
+## O que já funciona só com isso (zero mudança nos backends)
 
 - ✅ **Login único:** logar pelo hub grava a sessão; "Saiba mais" entra na
   API-UP sem novo login.
 - ✅ **Gate:** deslogado, "Saiba mais" leva pra tela de login do hub.
+- ✅ **CONF acessível** pelo card (link "Saiba mais" → `conf.suaempresa.com.br`).
 
-## Opcional — experiência 100% (2 ajustes pequenos na API-UP)
+## Ajustes na API-UP para a experiência 100%
 
-Estes dependem de o navegador deixar o **JavaScript do hub** (origem
-`hub.suaempresa.com.br`) ler respostas da API-UP (`upapi...`) — o que exige
-CORS com credenciais. Tudo abaixo é mexer na **API-UP**, não no hub.
-
-### a) Status "ao vivo" + botão "Sair" funcionando pelo hub
-
-No `.env` da API-UP:
+O `/login` já aceita `next` (voltar pro hub após logar). Falta só **autorizar
+a origem do hub** — no `.env` da API-UP:
 ```
-UPAPI_CORS_ORIGINS=https://hub.suaempresa.com.br
+UPAPI_HUB_ORIGINS=https://hub.suaempresa.com.br
 ```
-E em `API-UP/src/web/app.py`, no `CORSMiddleware`, permitir credenciais
-**quando há origem específica** (não usar com `*`):
+
+Para o **status "ao vivo"** e o **botão "Sair"** funcionarem cross-subdomínio
+(JS do hub lendo a API-UP), habilite CORS com credenciais em
+`API-UP/src/web/app.py`:
 ```python
+UPAPI_CORS_ORIGINS=https://hub.suaempresa.com.br      # no .env
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=_CORS_ORIGINS,
@@ -79,13 +84,54 @@ app.add_middleware(
 )
 ```
 
-### b) "Entrar/Cadastrar" do header voltar pro hub (em vez de cair na API-UP)
-
-Hoje, após o login, a API-UP redireciona para `/` (a própria API-UP). Para
-voltar ao hub, dá pra aceitar um `next` no `/login` (com allowlist, pra evitar
-open-redirect). É uma mudança de ~5 linhas — peça que eu faço quando o domínio
-estiver pronto.
-
-> Sem esses dois ajustes, o essencial (login único + Saiba mais sem re-login)
-> já funciona; o que fica no modo "dica local" é só o status ao vivo e o logout
+> Sem esses ajustes, o essencial (login único + Saiba mais sem re-login) já
+> funciona; o que fica no modo "dica local" é só o status ao vivo e o logout
 > pelo botão do hub.
+
+## Login único entre as automações (SSO)
+
+Objetivo: **um usuário criado no hub vale em todas as automações**, e ele loga
+**uma vez só** — ao abrir a API-UP ou a CONF, não precisa relogar.
+
+O modelo é ter **uma única fonte de identidade** (a **API-UP** é o "dono" do
+login: `usuarios.json` + `/login` + `/cadastro`) e fazer as outras apps
+**confiarem na mesma sessão**. Não é preciso duplicar usuários — a CONF não
+precisa do seu próprio `usuarios.json` no modo SSO; ela só valida o cookie.
+
+Três peças (todas ativam quando tudo está no mesmo domínio, via tunnel):
+
+1. **Mesmo domínio de cookie.** No `.env` da API-UP:
+   ```
+   UP_COOKIE_DOMAIN=.suaempresa.com.br
+   ```
+   Assim o cookie `upapi_session` é enviado para `hub.`, `upapi.` e `conf.`
+   (já implementado no `app.py`; vazio = host-only, como hoje na LAN).
+
+2. **Mesmo segredo de assinatura.** A sessão é um token assinado por HMAC. Para
+   a CONF aceitar um token emitido pela API-UP, as duas precisam do MESMO
+   `UP_API_SECRET`. Gere uma vez e cole nos dois `.env`:
+   ```
+   python -c "import secrets; print(secrets.token_hex(32))"
+   UP_API_SECRET=<mesmo_valor_nas_duas>
+   ```
+
+3. **A CONF valida o cookie compartilhado.** No backend da CONF, o middleware de
+   auth deve: ler o cookie `upapi_session`, validar com o mesmo `UP_API_SECRET`
+   e o mesmo formato de token (`<emitido_em>.<nonce>.<hmac_sha256>`); se válido,
+   libera; se ausente/inválido, manda pro login do hub. Ou seja, a CONF passa a
+   **reaproveitar a sessão da API-UP** em vez de ter login próprio. (O login/
+   `usuarios.json` locais da CONF viram só fallback para uso standalone na LAN.)
+
+Com isso: cadastro pelo hub → grava na API-UP → login uma vez → cookie `.dominio`
+→ hub, API-UP e CONF reconhecem a mesma sessão. Zero re-login.
+
+## Observações sobre a CONF
+
+- A CONF roda **local** porque precisa dos arquivos no drive da UP (`Z:`) —
+  por isso entra via tunnel na máquina da UP, e **não** faz sentido movê-la
+  para um VPS (a não ser migrando os dados junto).
+- Hoje a porta é **8010** em HTTP (definida no `config.js`). Se a CONF passar
+  a rodar HTTPS (mkcert), troque o ingress para `https://localhost:8010` com o
+  bloco `originRequest` (noTLSVerify + httpHostHeader), igual à API-UP.
+- Se no futuro a CONF reusar o login da API-UP (sessão única), ela precisa
+  estar no mesmo domínio — o que este esquema de subdomínios já garante.

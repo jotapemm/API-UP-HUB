@@ -1,15 +1,13 @@
 # ============================================================
-#  Cloudflare Tunnel — config COMBINADA (API-UP + HUB)
+#  Cloudflare Tunnel — config COMBINADA (HUB + API-UP + API-CONF)
 #
-#  Um único tunnel serve OS DOIS serviços, cada um num subdomínio
-#  do MESMO domínio. Isso é o que faz o login ser único: como
-#  hub.SEUDOMINIO e upapi.SEUDOMINIO são o "mesmo site", o cookie
-#  de sessão da API-UP é compartilhado → quem loga pelo hub entra
-#  na API-UP sem ver o login de novo.
+#  Um único tunnel serve OS TRÊS serviços, cada um num subdomínio
+#  do MESMO domínio. Mesmo domínio = "mesmo site" → o cookie de
+#  sessão da API-UP é compartilhado com o HUB (login único).
 #
 #  COPIE para  C:\Users\UP\.cloudflared\config.yml  (ou para o
 #  cloudflare\config.yml do tunnel) e preencha os <...>.
-#  Pré-requisito: o tunnel da API-UP já criado (API-UP\cloudflare\DEPLOY.md).
+#  Pré-requisito: o tunnel já criado (API-UP\cloudflare\DEPLOY.md).
 # ============================================================
 
 tunnel: <TUNNEL_UUID>
@@ -27,6 +25,13 @@ ingress:
     originRequest:
       noTLSVerify: true          # cert mkcert é self-signed no salto local
       httpHostHeader: <upapi.SEUDOMINIO.com.br>
+
+  # ── API-CONF — conferência fiscal (porta 8010) ──────────────────
+  # Hoje roda em HTTP local (API_CONF_URL no config.js). Se um dia a
+  # CONF passar a rodar HTTPS (mkcert), troque para https://localhost:8010
+  # e replique o bloco originRequest (noTLSVerify + httpHostHeader).
+  - hostname: <conf.SEUDOMINIO.com.br>
+    service: http://localhost:8010
 
   # ── Obrigatória: qualquer outra coisa → 404 ─────────────────────
   - service: http_status:404

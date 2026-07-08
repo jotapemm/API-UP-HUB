@@ -31,3 +31,14 @@ window.API_UP_URL = "https://192.168.0.117:8000";
    tunnel dos dois lados e o status volta a funcionar.
    ──────────────────────────────────────────────────────────────── */
 window.API_CONF_URL = "http://192.168.0.117:8010";
+
+/* ────────────────────────────────────────────────────────────────
+   Endereço da API-UP-CTRL-CRED (controle de crédito do SPED) — usado
+   pelo card "API CTRL CRED". Roda LOCAL (porta 8100) e é exposta via
+   Cloudflare Tunnel — NÃO vai pro Vercel. Mesmo detalhe de mixed-content
+   do status que a CONF (ver acima).
+
+   • Rede local (LAN):     "http://192.168.0.117:8100"
+   • Internet (tunnel):    "https://ctrl.suaempresa.com.br"
+   ──────────────────────────────────────────────────────────────── */
+window.API_CTRL_URL = "http://192.168.0.117:8100";

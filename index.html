@@ -323,6 +323,13 @@
       width: 85%;   /* glifo tem mais margem no PNG → aumenta p/ igualar a UP */
     }
 
+    /* ícone-placeholder p/ automação sem logo própria ainda */
+    .auto-card .thumb .thumb-icon {
+      width: 46%;
+      height: auto;
+      color: #cfcfcf;
+    }
+
     .auto-card .body p {
       width: 100%;
       max-width: 700px;
@@ -903,6 +910,43 @@
         </div>
       </article>
     </div>
+
+    <div class="divider"></div>
+
+    <div class="wrap">
+      <!-- Card 3 — API-UP-CTRL-CRED (controle de crédito do SPED) -->
+      <article class="auto-card">
+        <div class="thumb">
+          <svg class="thumb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"
+            stroke-linecap="round" stroke-linejoin="round" aria-label="API CTRL CRED">
+            <rect x="2" y="5" width="20" height="14" rx="2.5" />
+            <line x1="2" y1="9.5" x2="22" y2="9.5" />
+            <line x1="5" y1="14.5" x2="11" y2="14.5" />
+            <path d="M16 13.5l1.6 1.6L20 12.5" />
+          </svg>
+        </div>
+        <div class="body">
+          <div class="header-card">
+            <div class="title">
+              <h2>API <span class="g">CTRL CRED</span></h2>
+              <small>Controle de Crédito</small>
+            </div>
+
+            <span class="status" id="status-ctrl">
+              <span class="dot"></span> verificando…
+            </span>
+          </div>
+          <p>A API CTRL CRED automatiza o controle de crédito do SPED: lê os documentos
+            em PDF, extrai e organiza os dados em planilha e monta um resumo consolidado
+            do crédito apurado.</p>
+          <p>Assim, elimina a digitação manual e dá uma visão rápida e confiável do
+            crédito disponível.</p>
+          <div class="cta">
+            <a class="btn btn-primary" id="link-ctrl" href="#" target="_blank" rel="noopener">Saiba mais</a>
+          </div>
+        </div>
+      </article>
+    </div>
   </section>
 
   <div class="divider"></div>
@@ -1096,8 +1140,10 @@
        redireciona pro login — então nada fica exposto.
     ════════════════════════════════════════════════════════════════ */
     const API_CONF_URL = window.API_CONF_URL;
+    const API_CTRL_URL = window.API_CTRL_URL;
     const linkApiUp = document.getElementById("link-apiup");
     const linkConf = document.getElementById("link-conf");
+    const linkCtrl = document.getElementById("link-ctrl");
     const actions = document.getElementById("actions");
 
     function escapeHtml(s) {
@@ -1125,6 +1171,10 @@
           linkConf.setAttribute("href", API_CONF_URL);
           linkConf.setAttribute("target", "_blank");
         }
+        if (linkCtrl) {
+          linkCtrl.setAttribute("href", API_CTRL_URL);
+          linkCtrl.setAttribute("target", "_blank");
+        }
       } else {
         actions.innerHTML =
           '<a class="login" href="login.html">Entrar</a>' +
@@ -1135,6 +1185,10 @@
         if (linkConf) {
           linkConf.setAttribute("href", "login.html");
           linkConf.removeAttribute("target");
+        }
+        if (linkCtrl) {
+          linkCtrl.setAttribute("href", "login.html");
+          linkCtrl.removeAttribute("target");
         }
       }
     }
@@ -1174,6 +1228,25 @@
       const ctrl = new AbortController();
       const t = setTimeout(() => ctrl.abort(), 4500);
       fetch(API_CONF_URL, { mode: "no-cors", signal: ctrl.signal })
+        .then(() => {
+          clearTimeout(t);
+          pill.className = "status online";
+          pill.innerHTML = '<span class="dot"></span> Servidor online';
+        })
+        .catch(() => {
+          clearTimeout(t);
+          pill.className = "status offline";
+          pill.innerHTML = '<span class="dot"></span> Servidor desligado';
+        });
+    })();
+
+    /* ── 1c) Servidor da CTRL CRED online? (mesmo esquema no-cors) ─── */
+    (function pingCtrlOnline() {
+      const pill = document.getElementById("status-ctrl");
+      if (!pill || !API_CTRL_URL) return;
+      const ctrl = new AbortController();
+      const t = setTimeout(() => ctrl.abort(), 4500);
+      fetch(API_CTRL_URL, { mode: "no-cors", signal: ctrl.signal })
         .then(() => {
           clearTimeout(t);
           pill.className = "status online";

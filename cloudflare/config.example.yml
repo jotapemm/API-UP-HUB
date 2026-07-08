@@ -33,5 +33,11 @@ ingress:
   - hostname: <conf.SEUDOMINIO.com.br>
     service: http://localhost:8010
 
+  # ── API-CTRL-CRED — controle de crédito do SPED (porta 8100) ────
+  # HTTP local (API_CTRL_URL no config.js). Se rodar HTTPS no futuro,
+  # troque para https://localhost:8100 + bloco originRequest.
+  - hostname: <ctrl.SEUDOMINIO.com.br>
+    service: http://localhost:8100
+
   # ── Obrigatória: qualquer outra coisa → 404 ─────────────────────
   - service: http_status:404

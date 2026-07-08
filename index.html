@@ -216,6 +216,7 @@
       border-color: var(--border);
       cursor: default;
     }
+
     .btn-soon:hover {
       transform: none;
       box-shadow: none;
@@ -256,6 +257,10 @@
 
     .hero h1 .g {
       color: var(--green);
+    }
+
+    .c {
+      color: var(--text-muted);
     }
 
     /* ── Seções ───────────────────────────────────────────────────── */
@@ -320,7 +325,8 @@
     /* logos que já têm cor própria — mantém as cores originais do PNG */
     .auto-card .thumb img.original {
       filter: none;
-      width: 85%;   /* glifo tem mais margem no PNG → aumenta p/ igualar a UP */
+      width: 85%;
+      /* glifo tem mais margem no PNG → aumenta p/ igualar a UP */
     }
 
     /* ícone-placeholder p/ automação sem logo própria ainda */
@@ -914,18 +920,16 @@
       <!-- Card 3 — API-UP-CTRL-CRED (controle de crédito do SPED) -->
       <article class="auto-card">
         <div class="thumb">
-          <svg class="thumb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"
-            stroke-linecap="round" stroke-linejoin="round" aria-label="API CTRL CRED">
-            <rect x="2" y="5" width="20" height="14" rx="2.5" />
-            <line x1="2" y1="9.5" x2="22" y2="9.5" />
-            <line x1="5" y1="14.5" x2="11" y2="14.5" />
-            <path d="M16 13.5l1.6 1.6L20 12.5" />
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-cpu"
+            viewBox="0 0 16 16">
+            <path
+              d="M5 0a.5.5 0 0 1 .5.5V2h1V.5a.5.5 0 0 1 1 0V2h1V.5a.5.5 0 0 1 1 0V2h1V.5a.5.5 0 0 1 1 0V2A2.5 2.5 0 0 1 14 4.5h1.5a.5.5 0 0 1 0 1H14v1h1.5a.5.5 0 0 1 0 1H14v1h1.5a.5.5 0 0 1 0 1H14v1h1.5a.5.5 0 0 1 0 1H14a2.5 2.5 0 0 1-2.5 2.5v1.5a.5.5 0 0 1-1 0V14h-1v1.5a.5.5 0 0 1-1 0V14h-1v1.5a.5.5 0 0 1-1 0V14h-1v1.5a.5.5 0 0 1-1 0V14A2.5 2.5 0 0 1 2 11.5H.5a.5.5 0 0 1 0-1H2v-1H.5a.5.5 0 0 1 0-1H2v-1H.5a.5.5 0 0 1 0-1H2v-1H.5a.5.5 0 0 1 0-1H2A2.5 2.5 0 0 1 4.5 2V.5A.5.5 0 0 1 5 0m-.5 3A1.5 1.5 0 0 0 3 4.5v7A1.5 1.5 0 0 0 4.5 13h7a1.5 1.5 0 0 0 1.5-1.5v-7A1.5 1.5 0 0 0 11.5 3zM5 6.5A1.5 1.5 0 0 1 6.5 5h3A1.5 1.5 0 0 1 11 6.5v3A1.5 1.5 0 0 1 9.5 11h-3A1.5 1.5 0 0 1 5 9.5zM6.5 6a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 0-.5-.5z" />
           </svg>
         </div>
         <div class="body">
           <div class="header-card">
             <div class="title">
-              <h2>API <span class="g">CTRL CRED</span></h2>
+              <h2>API <span class="c">CTRL </span><span class="g">CRED</span></h2>
               <small>Controle de Crédito</small>
             </div>
 
@@ -936,7 +940,7 @@
           <p>A API CTRL CRED automatiza o controle de crédito do SPED: lê os documentos
             em PDF, extrai e organiza os dados em planilha e monta um resumo consolidado
             do crédito apurado.</p>
-          <p>Assim, elimina necessidade de precisar imprimir os demonstrativos de crédito, a 
+          <p>Assim, elimina necessidade de precisar imprimir os demonstrativos de crédito, a
             digitação manual e dá uma visão rápida e confiável do crédito disponível.</p>
           <div class="cta">
             <a class="btn btn-primary" id="link-ctrl" href="#" target="_blank" rel="noopener">Saiba mais</a>

@@ -346,11 +346,13 @@
       font-size: 12.5px;
       color: var(--text-muted);
     }
+
     .legenda-dept span {
       display: inline-flex;
       align-items: center;
       gap: 8px;
     }
+
     .dot-dept {
       width: 11px;
       height: 11px;
@@ -358,11 +360,26 @@
       flex-shrink: 0;
       display: inline-block;
     }
-    .dot-dept.branco { background: #ffffff; }
-    .dot-dept.azul { background: #3b9eff; }
-    .dot-dept.verde-claro { background: #86efac; }
-    .dot-dept.verde { background: #2fd96a; }
-    .dot-dept.verde-escuro { background: #12855a; }
+
+    .dot-dept.branco {
+      background: #ffffff;
+    }
+
+    .dot-dept.azul {
+      background: #3b9eff;
+    }
+
+    .dot-dept.verde-claro {
+      background: #86efac;
+    }
+
+    .dot-dept.verde {
+      background: #2fd96a;
+    }
+
+    .dot-dept.verde-escuro {
+      background: #12855a;
+    }
 
     .dept-accordion {
       max-width: var(--maxw);
@@ -371,10 +388,12 @@
       flex-direction: column;
       gap: 12px;
     }
+
     .dept {
       border-radius: var(--radius);
       overflow: hidden;
     }
+
     .dept-head {
       width: 100%;
       display: flex;
@@ -392,14 +411,23 @@
       cursor: pointer;
       transition: background .15s;
     }
-    .dept-head:hover { background: rgba(255, 255, 255, .03); }
+
+    .dept-head:hover {
+      background: #202020;
+    }
+
     .dept-title {
       display: inline-flex;
       align-items: center;
       gap: 13px;
       text-align: left;
     }
-    .dept-title .dot-dept { width: 13px; height: 13px; }
+
+    .dept-title .dot-dept {
+      width: 13px;
+      height: 13px;
+    }
+
     .dept-head .chevron {
       width: 20px;
       height: 20px;
@@ -407,7 +435,10 @@
       color: var(--text-muted);
       transition: transform .3s ease;
     }
-    .dept.open .dept-head .chevron { transform: rotate(90deg); }
+
+    .dept.open .dept-head .chevron {
+      transform: rotate(90deg);
+    }
 
     /* corpo colapsável (grid 0fr→1fr = animação suave) */
     .dept-body {
@@ -415,7 +446,11 @@
       grid-template-rows: 0fr;
       transition: grid-template-rows .35s ease;
     }
-    .dept.open .dept-body { grid-template-rows: 1fr; }
+
+    .dept.open .dept-body {
+      grid-template-rows: 1fr;
+    }
+
     .dept-body-inner {
       overflow: hidden;
       min-height: 0;
@@ -429,9 +464,11 @@
       border-radius: var(--radius);
       transition: background .15s;
     }
+
     .autom:hover {
       background: #202020;
     }
+
     .autom-main {
       display: flex;
       align-items: center;
@@ -439,6 +476,7 @@
       flex: 1;
       min-width: 0;
     }
+
     .autom-thumb {
       width: 68px;
       flex-shrink: 0;
@@ -446,14 +484,27 @@
       align-items: center;
       justify-content: center;
     }
+
     .autom-thumb img {
       max-width: 100%;
       height: auto;
       filter: brightness(0) invert(1);
     }
-    .autom-thumb img.original { filter: none; width: 100%; }
-    .autom-thumb .thumb-icon { width: 92%; color: #cfcfcf; }
-    .autom-text { min-width: 0; }
+
+    .autom-thumb img.original {
+      filter: none;
+      width: 100%;
+    }
+
+    .autom-thumb .thumb-icon {
+      width: 92%;
+      color: #cfcfcf;
+    }
+
+    .autom-text {
+      min-width: 0;
+    }
+
     .autom-title {
       display: flex;
       align-items: center;
@@ -463,7 +514,11 @@
       font-weight: 800;
       margin-bottom: 5px;
     }
-    .autom-title .g { color: var(--green); }
+
+    .autom-title .g {
+      color: var(--green);
+    }
+
     .autom-text p {
       color: #b9b9b9;
       font-size: 13.5px;
@@ -471,7 +526,11 @@
       margin: 0;
       max-width: 620px;
     }
-    .autom-cta { flex-shrink: 0; }
+
+    .autom-cta {
+      flex-shrink: 0;
+    }
+
     .dept-vazio {
       padding: 20px 24px;
       color: var(--text-muted);
@@ -479,9 +538,19 @@
     }
 
     @media (max-width: 720px) {
-      .autom { flex-direction: column; align-items: flex-start; gap: 14px; }
-      .autom-cta { align-self: stretch; }
-      .autom-cta .btn { width: 100%; }
+      .autom {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 14px;
+      }
+
+      .autom-cta {
+        align-self: stretch;
+      }
+
+      .autom-cta .btn {
+        width: 100%;
+      }
     }
 
     .auto-card .body p {
@@ -538,12 +607,18 @@
       min-width: 100%;
     }
 
+    /* divider dos setores (acordeão): largura do botão + cor do hover */
+    .dept .divider {
+      background: #202020;
+    }
+
     /* ── Solução — scrollytelling sobre os dots ───────────────────── */
     .solucao {
       position: relative;
       padding: 0;
       /* anula o padding padrão de section */
     }
+
     /* fundo de pontos fixo, só aparece enquanto a seção está na tela */
     .solucao-dots {
       position: fixed;
@@ -1017,6 +1092,7 @@
             <polyline points="9 6 15 12 9 18" />
           </svg>
         </button>
+        <div class="divider"></div>
         <div class="dept-body">
           <div class="dept-body-inner">
 
@@ -1081,6 +1157,7 @@
             <polyline points="9 6 15 12 9 18" />
           </svg>
         </button>
+        <div class="divider"></div>
         <div class="dept-body">
           <div class="dept-body-inner">
             <p class="dept-vazio">Automações deste setor em breve.</p>
@@ -1097,6 +1174,7 @@
             <polyline points="9 6 15 12 9 18" />
           </svg>
         </button>
+        <div class="divider"></div>
         <div class="dept-body">
           <div class="dept-body-inner">
 
@@ -1111,8 +1189,8 @@
                 </div>
               </div>
               <div class="autom-cta">
-                <a class="btn btn-primary autom-link" data-app="eventos" href="#" target="_blank"
-                  rel="noopener">Saiba mais</a>
+                <a class="btn btn-primary autom-link" data-app="eventos" href="#" target="_blank" rel="noopener">Saiba
+                  mais</a>
               </div>
             </div>
 
@@ -1129,6 +1207,7 @@
             <polyline points="9 6 15 12 9 18" />
           </svg>
         </button>
+        <div class="divider"></div>
         <div class="dept-body">
           <div class="dept-body-inner">
 
@@ -1143,8 +1222,8 @@
                 </div>
               </div>
               <div class="autom-cta">
-                <a class="btn btn-primary autom-link" data-app="status" href="#" target="_blank"
-                  rel="noopener">Saiba mais</a>
+                <a class="btn btn-primary autom-link" data-app="status" href="#" target="_blank" rel="noopener">Saiba
+                  mais</a>
               </div>
             </div>
 
@@ -1161,6 +1240,7 @@
             <polyline points="9 6 15 12 9 18" />
           </svg>
         </button>
+        <div class="divider"></div>
         <div class="dept-body">
           <div class="dept-body-inner">
 
@@ -1175,8 +1255,8 @@
                 </div>
               </div>
               <div class="autom-cta">
-                <a class="btn btn-primary autom-link" data-app="fiscal" href="#" target="_blank"
-                  rel="noopener">Saiba mais</a>
+                <a class="btn btn-primary autom-link" data-app="fiscal" href="#" target="_blank" rel="noopener">Saiba
+                  mais</a>
               </div>
             </div>
 
@@ -1191,8 +1271,8 @@
                 </div>
               </div>
               <div class="autom-cta">
-                <a class="btn btn-primary autom-link" data-app="icms" href="#" target="_blank"
-                  rel="noopener">Saiba mais</a>
+                <a class="btn btn-primary autom-link" data-app="icms" href="#" target="_blank" rel="noopener">Saiba
+                  mais</a>
               </div>
             </div>
 

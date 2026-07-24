@@ -336,6 +336,154 @@
       color: #cfcfcf;
     }
 
+    /* ══ Automações — acordeão por departamento ══════════════════════ */
+    .legenda-dept {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 24px;
+      max-width: var(--maxw);
+      margin: 0 auto 30px;
+      font-size: 12.5px;
+      color: var(--text-muted);
+    }
+    .legenda-dept span {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .dot-dept {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      display: inline-block;
+    }
+    .dot-dept.branco { background: #ffffff; }
+    .dot-dept.azul { background: #3b9eff; }
+    .dot-dept.verde-claro { background: #86efac; }
+    .dot-dept.verde { background: #2fd96a; }
+    .dot-dept.verde-escuro { background: #12855a; }
+
+    .dept-accordion {
+      max-width: var(--maxw);
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .dept {
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .dept-head {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 18px 24px;
+      background: transparent;
+      border: none;
+      color: var(--text);
+      font-family: inherit;
+      font-size: clamp(17px, 2.3vw, 22px);
+      font-weight: 800;
+      letter-spacing: -.3px;
+      cursor: pointer;
+      transition: background .15s;
+    }
+    .dept-head:hover { background: rgba(255, 255, 255, .03); }
+    .dept-title {
+      display: inline-flex;
+      align-items: center;
+      gap: 13px;
+      text-align: left;
+    }
+    .dept-title .dot-dept { width: 13px; height: 13px; }
+    .dept-head .chevron {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+      color: var(--text-muted);
+      transition: transform .3s ease;
+    }
+    .dept.open .dept-head .chevron { transform: rotate(90deg); }
+
+    /* corpo colapsável (grid 0fr→1fr = animação suave) */
+    .dept-body {
+      display: grid;
+      grid-template-rows: 0fr;
+      transition: grid-template-rows .35s ease;
+    }
+    .dept.open .dept-body { grid-template-rows: 1fr; }
+    .dept-body-inner {
+      overflow: hidden;
+      min-height: 0;
+    }
+
+    .autom {
+      display: flex;
+      align-items: center;
+      gap: 22px;
+      padding: 20px 24px;
+      border-radius: var(--radius);
+      transition: background .15s;
+    }
+    .autom:hover {
+      background: #202020;
+    }
+    .autom-main {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      flex: 1;
+      min-width: 0;
+    }
+    .autom-thumb {
+      width: 68px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .autom-thumb img {
+      max-width: 100%;
+      height: auto;
+      filter: brightness(0) invert(1);
+    }
+    .autom-thumb img.original { filter: none; width: 100%; }
+    .autom-thumb .thumb-icon { width: 92%; color: #cfcfcf; }
+    .autom-text { min-width: 0; }
+    .autom-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      font-size: 18px;
+      font-weight: 800;
+      margin-bottom: 5px;
+    }
+    .autom-title .g { color: var(--green); }
+    .autom-text p {
+      color: #b9b9b9;
+      font-size: 13.5px;
+      line-height: 1.5;
+      margin: 0;
+      max-width: 620px;
+    }
+    .autom-cta { flex-shrink: 0; }
+    .dept-vazio {
+      padding: 20px 24px;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    @media (max-width: 720px) {
+      .autom { flex-direction: column; align-items: flex-start; gap: 14px; }
+      .autom-cta { align-self: stretch; }
+      .autom-cta .btn { width: 100%; }
+    }
+
     .auto-card .body p {
       width: 100%;
       max-width: 700px;
@@ -858,94 +1006,200 @@
       <h2 class="section-title">Automações:</h2>
     </div>
 
-    <div class="wrap">
-      <!-- Card 1 — API-UP (única aplicação real por enquanto) -->
-      <article class="auto-card">
-        <div class="thumb">
-          <img src="assets/logo-up.png" alt="UP API" />
-        </div>
-        <div class="body">
-          <div class="header-card">
-            <div class="title">
-              <h2>API <span class="g">UP</span></h2>
-              <small>Automação Fiscal</small>
-            </div>
+    <div class="dept-accordion">
 
-            <span class="status" id="status-apiup">
-              <span class="dot"></span> verificando…
-            </span>
-          </div>
-          <p>A API-UP é um sistema destinado a automatizar planilhas fiscais
-            (ECD Contábil, EFD Contribuições e EFD ICMS), fazendo o processamento
-            e a transferência automático dos dados entre os arquivos.</p>
-          <p>Assim, nosso sistema proporciona mais agilidade e dinamismo para
-            finalizar seu processo.</p>
-          <div class="cta">
-            <a class="btn btn-primary" id="link-apiup" href="#" target="_blank" rel="noopener">Saiba mais</a>
-          </div>
-        </div>
-      </article>
-    </div>
-
-    <div class="wrap">
-      <!-- Card 2 — API-UP-CONF (em desenvolvimento) -->
-      <article class="auto-card">
-        <div class="thumb">
-          <svg xmlns="http://www.w3.org/2000/svg" class="thumb-icon" fill="currentColor" viewBox="0 0 16 16"
-            aria-label="API CONF">
-            <path
-              d="M5 0a.5.5 0 0 1 .5.5V2h1V.5a.5.5 0 0 1 1 0V2h1V.5a.5.5 0 0 1 1 0V2h1V.5a.5.5 0 0 1 1 0V2A2.5 2.5 0 0 1 14 4.5h1.5a.5.5 0 0 1 0 1H14v1h1.5a.5.5 0 0 1 0 1H14v1h1.5a.5.5 0 0 1 0 1H14v1h1.5a.5.5 0 0 1 0 1H14a2.5 2.5 0 0 1-2.5 2.5v1.5a.5.5 0 0 1-1 0V14h-1v1.5a.5.5 0 0 1-1 0V14h-1v1.5a.5.5 0 0 1-1 0V14h-1v1.5a.5.5 0 0 1-1 0V14A2.5 2.5 0 0 1 2 11.5H.5a.5.5 0 0 1 0-1H2v-1H.5a.5.5 0 0 1 0-1H2v-1H.5a.5.5 0 0 1 0-1H2v-1H.5a.5.5 0 0 1 0-1H2A2.5 2.5 0 0 1 4.5 2V.5A.5.5 0 0 1 5 0m-.5 3A1.5 1.5 0 0 0 3 4.5v7A1.5 1.5 0 0 0 4.5 13h7a1.5 1.5 0 0 0 1.5-1.5v-7A1.5 1.5 0 0 0 11.5 3zM5 6.5A1.5 1.5 0 0 1 6.5 5h3A1.5 1.5 0 0 1 11 6.5v3A1.5 1.5 0 0 1 9.5 11h-3A1.5 1.5 0 0 1 5 9.5zM6.5 6a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 0-.5-.5z" />
+      <!-- ══ Recuperação Tributária (aberto por padrão) ══ -->
+      <div class="dept open" data-dept>
+        <button class="dept-head" type="button" aria-expanded="true">
+          <span class="dept-title">Recuperação Tributária</span>
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 6 15 12 9 18" />
           </svg>
-        </div>
-        <div class="body">
-          <div class="header-card">
-            <div class="title">
-              <h2>API <span class="g">CONF</span></h2>
-              <small>Automação de Conferência Fiscal</small>
+        </button>
+        <div class="dept-body">
+          <div class="dept-body-inner">
+
+            <!-- API UP -->
+            <div class="autom">
+              <div class="autom-main">
+                <div class="autom-text">
+                  <div class="autom-title">API <span class="g">UP</span>
+                    <span class="status" id="status-apiup"><span class="dot"></span> verificando…</span>
+                  </div>
+                  <p>Automação fiscal: processa e transfere os dados entre ECD Contábil, EFD Contribuições e
+                    EFD ICMS.</p>
+                </div>
+              </div>
+              <div class="autom-cta">
+                <a class="btn btn-primary" id="link-apiup" href="#" target="_blank" rel="noopener">Saiba mais</a>
+              </div>
             </div>
 
-            <span class="status" id="status-conf">
-              <span class="dot"></span> verificando…
-            </span>
-          </div>
-          <p>A API CONF automatiza a conferência fiscal do EFD, validando informações
-            como CNPJ × nome no F100 e sinalizando as divergências (verde, âmbar e
-            vermelho) para revisão antes da entrega.</p>
-          <p>O objetivo é reduzir o retrabalho da revisão manual, trazendo mais
-            segurança e agilidade na validação dos arquivos.</p>
-          <div class="cta">
-            <a class="btn btn-primary" id="link-conf" href="#" target="_blank" rel="noopener">Saiba mais</a>
-          </div>
-        </div>
-      </article>
-    </div>
-    <div class="wrap">
-      <!-- Card 3 — API-UP-CTRL-CRED (controle de crédito do SPED) -->
-      <article class="auto-card">
-        <div class="thumb">
-          <img class="original" src="assets/up conf bw v2.png" alt="API CTRL CRED" />
-        </div>
-        <div class="body">
-          <div class="header-card">
-            <div class="title">
-              <h2>API <span class="c">CTRL </span><span class="g">CRED</span></h2>
-              <small>Controle de Crédito</small>
+            <!-- API CONF -->
+            <div class="autom">
+              <div class="autom-main">
+                <div class="autom-text">
+                  <div class="autom-title">API <span class="g">CONF</span>
+                    <span class="status" id="status-conf"><span class="dot"></span> verificando…</span>
+                  </div>
+                  <p>Conferência do EFD: valida CNPJ × nome no F100 e sinaliza as divergências (verde, âmbar,
+                    vermelho) antes da entrega.</p>
+                </div>
+              </div>
+              <div class="autom-cta">
+                <a class="btn btn-primary" id="link-conf" href="#" target="_blank" rel="noopener">Saiba mais</a>
+              </div>
             </div>
 
-            <span class="status" id="status-ctrl">
-              <span class="dot"></span> verificando…
-            </span>
-          </div>
-          <p>A API CTRL CRED automatiza o controle de crédito do SPED: lê os documentos
-            em PDF, extrai e organiza os dados em planilha e monta um resumo consolidado
-            do crédito apurado.</p>
-          <p>Assim, elimina necessidade de precisar imprimir os demonstrativos de crédito, a
-            digitação manual e dá uma visão rápida e confiável do crédito disponível.</p>
-          <div class="cta">
-            <a class="btn btn-primary" id="link-ctrl" href="#" target="_blank" rel="noopener">Saiba mais</a>
+            <!-- API CTRL CRED -->
+            <div class="autom">
+              <div class="autom-main">
+                <div class="autom-text">
+                  <div class="autom-title">API <span class="c">CTRL </span><span class="g">CRED</span>
+                    <span class="status" id="status-ctrl"><span class="dot"></span> verificando…</span>
+                  </div>
+                  <p>Controle de crédito do SPED: lê os PDFs, organiza em planilha e consolida o crédito apurado —
+                    sem digitação manual.</p>
+                </div>
+              </div>
+              <div class="autom-cta">
+                <a class="btn btn-primary" id="link-ctrl" href="#" target="_blank" rel="noopener">Saiba mais</a>
+              </div>
+            </div>
+
           </div>
         </div>
-      </article>
+      </div>
+
+      <!-- ══ Financeiro ══ -->
+      <div class="dept" data-dept>
+        <button class="dept-head" type="button" aria-expanded="false">
+          <span class="dept-title">Financeiro</span>
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 6 15 12 9 18" />
+          </svg>
+        </button>
+        <div class="dept-body">
+          <div class="dept-body-inner">
+            <p class="dept-vazio">Automações deste setor em breve.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ Departamento Pessoal ══ -->
+      <div class="dept" data-dept>
+        <button class="dept-head" type="button" aria-expanded="false">
+          <span class="dept-title">Departamento Pessoal</span>
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 6 15 12 9 18" />
+          </svg>
+        </button>
+        <div class="dept-body">
+          <div class="dept-body-inner">
+
+            <!-- API EVENTOS -->
+            <div class="autom">
+              <div class="autom-main">
+                <div class="autom-text">
+                  <div class="autom-title">API <span class="g">EVENTOS</span>
+                    <span class="status autom-status" data-app="eventos"><span class="dot"></span> verificando…</span>
+                  </div>
+                  <p>Importação de eventos do DP para o QUESTOR.</p>
+                </div>
+              </div>
+              <div class="autom-cta">
+                <a class="btn btn-primary autom-link" data-app="eventos" href="#" target="_blank"
+                  rel="noopener">Saiba mais</a>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ Gerência ══ -->
+      <div class="dept" data-dept>
+        <button class="dept-head" type="button" aria-expanded="false">
+          <span class="dept-title">Gerência</span>
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 6 15 12 9 18" />
+          </svg>
+        </button>
+        <div class="dept-body">
+          <div class="dept-body-inner">
+
+            <!-- API STATUS -->
+            <div class="autom">
+              <div class="autom-main">
+                <div class="autom-text">
+                  <div class="autom-title">API <span class="g">STATUS</span>
+                    <span class="status autom-status" data-app="status"><span class="dot"></span> verificando…</span>
+                  </div>
+                  <p>Painel de acompanhamento do status das automações.</p>
+                </div>
+              </div>
+              <div class="autom-cta">
+                <a class="btn btn-primary autom-link" data-app="status" href="#" target="_blank"
+                  rel="noopener">Saiba mais</a>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ Fiscal ══ -->
+      <div class="dept" data-dept>
+        <button class="dept-head" type="button" aria-expanded="false">
+          <span class="dept-title">Fiscal</span>
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 6 15 12 9 18" />
+          </svg>
+        </button>
+        <div class="dept-body">
+          <div class="dept-body-inner">
+
+            <!-- API FISCAL -->
+            <div class="autom">
+              <div class="autom-main">
+                <div class="autom-text">
+                  <div class="autom-title">API <span class="g">FISCAL</span>
+                    <span class="status autom-status" data-app="fiscal"><span class="dot"></span> verificando…</span>
+                  </div>
+                  <p>Correção do ICMS Monofásico nas notas de combustível.</p>
+                </div>
+              </div>
+              <div class="autom-cta">
+                <a class="btn btn-primary autom-link" data-app="fiscal" href="#" target="_blank"
+                  rel="noopener">Saiba mais</a>
+              </div>
+            </div>
+
+            <!-- API ICMS -->
+            <div class="autom">
+              <div class="autom-main">
+                <div class="autom-text">
+                  <div class="autom-title">API <span class="g">ICMS</span>
+                    <span class="status autom-status" data-app="icms"><span class="dot"></span> verificando…</span>
+                  </div>
+                  <p>Recuperação de ICMS-ST na revenda de combustíveis.</p>
+                </div>
+              </div>
+              <div class="autom-cta">
+                <a class="btn btn-primary autom-link" data-app="icms" href="#" target="_blank"
+                  rel="noopener">Saiba mais</a>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
     </div>
   </section>
 
@@ -1146,6 +1400,15 @@
     const linkCtrl = document.getElementById("link-ctrl");
     const actions = document.getElementById("actions");
 
+    // Demais automações (data-app) — resolvidas por config.js. Facilita
+    // adicionar novas: é só criar o link/status com data-app e a URL aqui.
+    const APPS_URL = {
+      fiscal: window.API_FISCAL_URL,
+      icms: window.API_ICMS_URL,
+      status: window.API_STATUS_URL,
+      eventos: window.API_EVENTOS_URL,
+    };
+
     function escapeHtml(s) {
       return String(s).replace(/[&<>"']/g, (c) => (
         { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]
@@ -1191,6 +1454,18 @@
           linkCtrl.removeAttribute("target");
         }
       }
+
+      // demais automações (data-app): logado → URL (se houver), senão login
+      document.querySelectorAll(".autom-link[data-app]").forEach((a) => {
+        const url = APPS_URL[a.dataset.app];
+        if (logado && url) {
+          a.setAttribute("href", url);
+          a.setAttribute("target", "_blank");
+        } else {
+          a.setAttribute("href", "login.html");
+          a.removeAttribute("target");
+        }
+      });
     }
 
     function sair(e) {
@@ -1202,6 +1477,17 @@
 
     // Render imediato pela dica local (sem flicker); confirmado abaixo.
     render(!!localStorage.getItem("up_name"));
+
+    /* ── Acordeão de departamentos (abre/fecha ao clicar no cabeçalho) ── */
+    (function accordionDept() {
+      document.querySelectorAll(".dept-head").forEach((head) => {
+        head.addEventListener("click", () => {
+          const dept = head.closest(".dept");
+          const aberto = dept.classList.toggle("open");
+          head.setAttribute("aria-expanded", aberto ? "true" : "false");
+        });
+      });
+    })();
 
     /* ── 1) Servidor online? — no-cors funciona mesmo cross-origin ──── */
     (function pingOnline() {
@@ -1257,6 +1543,31 @@
           pill.className = "status offline";
           pill.innerHTML = '<span class="dot"></span> Servidor desligado';
         });
+    })();
+
+    /* ── 1d) Status das demais automações (data-app), no-cors ─────── */
+    (function pingApps() {
+      document.querySelectorAll(".autom-status[data-app]").forEach((pill) => {
+        const url = APPS_URL[pill.dataset.app];
+        if (!url) {
+          pill.className = "status";
+          pill.innerHTML = '<span class="dot"></span> em breve';
+          return;
+        }
+        const ac = new AbortController();
+        const t = setTimeout(() => ac.abort(), 4500);
+        fetch(url, { mode: "no-cors", signal: ac.signal })
+          .then(() => {
+            clearTimeout(t);
+            pill.className = "status online";
+            pill.innerHTML = '<span class="dot"></span> Servidor online';
+          })
+          .catch(() => {
+            clearTimeout(t);
+            pill.className = "status offline";
+            pill.innerHTML = '<span class="dot"></span> Servidor desligado';
+          });
+      });
     })();
 
     /* ── 2) Sessão válida? — /api/status (200 logado · 401 deslogado) ──

@@ -1119,8 +1119,7 @@
                   <div class="autom-title">API <span class="g">CONF</span>
                     <span class="status" id="status-conf"><span class="dot"></span> verificando…</span>
                   </div>
-                  <p>Conferência do EFD: valida CNPJ × nome no F100 e sinaliza as divergências (verde, âmbar,
-                    vermelho) antes da entrega.</p>
+                  <p>Conferência do EFD: valida CNPJ × nome no F100 e sinaliza as divergências antes da entrega.</p>
                 </div>
               </div>
               <div class="autom-cta">
@@ -1273,6 +1272,22 @@
               <div class="autom-cta">
                 <a class="btn btn-primary autom-link" data-app="icms" href="#" target="_blank" rel="noopener">Saiba
                   mais</a>
+              </div>
+            </div>
+
+            <!-- API BANCÁRIO -->
+            <div class="autom">
+              <div class="autom-main">
+                <div class="autom-text">
+                  <div class="autom-title">API <span class="g">BANCÁRIO</span>
+                    <span class="status autom-status" data-app="bancario"><span class="dot"></span> verificando…</span>
+                  </div>
+                  <p>Leitura de XLSX bancário: converte o extrato em lançamentos para o QUESTOR.</p>
+                </div>
+              </div>
+              <div class="autom-cta">
+                <a class="btn btn-primary autom-link" data-app="bancario" href="#" target="_blank"
+                  rel="noopener">Saiba mais</a>
               </div>
             </div>
 
@@ -1487,6 +1502,7 @@
       icms: window.API_ICMS_URL,
       status: window.API_STATUS_URL,
       eventos: window.API_EVENTOS_URL,
+      bancario: window.API_BANCARIO_URL,
     };
 
     function escapeHtml(s) {

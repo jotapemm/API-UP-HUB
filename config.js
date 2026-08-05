@@ -59,3 +59,7 @@ window.API_STATUS_URL = "http://192.168.0.117:8010";
 // API EVENTOS: frontend já publicado no Vercel (o backend é que ainda depende
 // do tunnel pra funcionar 100%, mas o "Saiba mais" já abre a interface).
 window.API_EVENTOS_URL = "https://apieventos-gules.vercel.app/";
+
+// API BANCÁRIO (Extrato → QUESTOR): leitura de XLSX bancário. Só frontend
+// estático por ora — preencher com a URL (Vercel/tunnel) quando existir.
+window.API_BANCARIO_URL = "";

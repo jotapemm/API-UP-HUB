@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Entrar - UP API HUB</title>
+    <link rel="stylesheet" href="css/base.css" />
+    <link rel="stylesheet" href="css/entrar.css" />
+</head>
+
+<body>
+    <main class="entrar" data-tela="login">
+
+        <div class="metade metade-cartao">
+            <section class="cartao">
+
+                <!-- irmão dos formulários: nunca troca, nunca se mexe -->
+                <div class="logo">
+                    <img src="assets/logo-up.png" alt="" />
+                    <span class="logo-txt"><b>UP</b><span>Recuperação Tributária</span></span>
+                </div>
+
+                <form class="painel" data-painel="login">
+                    <h2>Entrar em sua conta</h2>
+                    <p class="sub">Sistema de uso interno para operadores</p>
+
+                    <div class="field">
+                        <label for="login-email">Email</label>
+                        <input id="login-email" name="email" type="email" autocomplete="username" required />
+                    </div>
+                    <div class="field">
+                        <label for="login-senha">Senha</label>
+                        <input id="login-senha" name="senha" type="password" autocomplete="current-password" required />
+                    </div>
+
+                    <a class="link" href="#">Esqueci a senha</a>
+
+                    <div class="acoes">
+                        <button class="btn" type="button" data-ir="cadastro">Cadastrar-se</button>
+                        <button class="btn btn-solid" type="submit">Entrar</button>
+                    </div>
+                </form>
+
+                <form class="painel" data-painel="cadastro">
+                    <h2>Cadastrar conta</h2>
+                    <p class="sub">Sistema de uso interno para operadores</p>
+
+                    <div class="field">
+                        <label for="cad-nome">Nome completo</label>
+                        <input id="cad-nome" type="text" autocomplete="name" required />
+                    </div>
+                    <div class="field">
+                        <label for="cad-apelido">Apelido</label>
+                        <input id="cad-apelido" type="text" autocomplete="nickname" required />
+                    </div>
+                    <div class="field">
+                        <label for="cad-email">Email</label>
+                        <input id="cad-email" type="email" autocomplete="Email" required />
+                    </div>
+                    <div class="field">
+                        <label for="cad-senha">Senha</label>
+                        <input id="cad-senha" type="password" autocomplete="new-password" required />
+                    </div>
+                    <div class="field">
+                        <label for="cad-confirmar">Confirmar senha</label>
+                        <input id="cad-confirmar" type="password" autocomplete="new-password" required />
+                    </div>
+
+                    <div class="acoes">
+                        <button class="btn" type="button" data-ir="login">Entrar</button>
+                        <button class="btn btn-solid" type="submit">Cadastrar-se</button>
+                    </div>
+                </form>
+
+            </section>
+        </div>
+
+        <div class="metade metade-hero">
+            <div class="hero" data-hero="login">
+                <h1>Bem vindo<br /><span class="b">de volta</span></h1>
+                <p>Entre em sua conta da <span class="b">UP</span> para acessar todas as nossas automações na palma da
+                    sua mão.
+                </p>
+            </div>
+            <div class="hero" data-hero="cadastro">
+                <h1>Bem vindo ao<br /><span class="b">UP</span> API <span class="b">HUB</span></h1>
+                <p>Sistema central de automações e sistemas personalizados da <span class="b">UP</span> para todos os
+                    setores na
+                    palma da sua mão.</p>
+            </div>
+        </div>
+
+    </main>
+</body>
+
+</html>

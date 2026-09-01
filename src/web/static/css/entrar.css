@@ -1,0 +1,71 @@
+/* o interruptor: o data-tela do pai decide quem existe */
+[data-tela="login"] [data-painel="cadastro"],
+[data-tela="login"] [data-hero="cadastro"],
+[data-tela="cadastro"] [data-painel="login"],
+[data-tela="cadastro"] [data-hero="login"] {
+    display: none;
+}
+
+.entrar {
+    min-height: 100dvh;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    gap: clamp(24px, 5vw, 64px);
+    padding: clamp(24px, 5vw, 48px);
+}
+
+.metade {
+    display: grid;
+    place-items: center;
+}
+
+/* o cartão passa por cima na hora do cruzamento.
+   z-index só obedece com position junto — a pegadinha de ontem. */
+.metade-cartao {
+    position: relative;
+    z-index: 2;
+}
+
+.cartao {
+  width: 100%;
+  max-width: 380px;
+  height: clamp(665px, calc(100dvh - 96px), 780px);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  padding: 34px 30px;
+}
+
+/* solto e centralizado — a sua escolha */
+.hero {
+    max-width: 520px;
+    text-align: center;
+}
+
+.cartao .logo {
+    justify-content: center;
+    margin-bottom: 22px;
+}
+
+.cartao h2 {
+  text-align: center;
+  font-size: 21px;
+  font-weight: 700;
+  letter-spacing: -.02em;
+  margin: 0 0 3px;
+}
+
+.cartao .sub {
+  text-align: center;
+  font-size: 11px;
+  color: var(--text-3);
+  margin: 0 0 24px;
+}
+
+.acoes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 20px;
+}

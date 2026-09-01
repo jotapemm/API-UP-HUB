@@ -1,0 +1,740 @@
+/* ═══════════════════════════════════════════════════════════════════
+   UP API HUB — folha compartilhada do protótipo
+   Um arquivo só, usado pelas 3 telas (login, cadastro, app).
+   A ordem importa: tokens → base → componentes → layouts → responsivo.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── 1. TOKENS ──────────────────────────────────────────────────────
+   Tudo que é decisão de marca mora aqui. Trocar o verde da UP é trocar
+   uma linha, não caçar hex espalhado por 3 arquivos.                  */
+:root {
+  --bg: #000000;
+  --panel: #0D0D0D;
+  --panel-2: #141414;
+  --panel-3: #1B1B1B;
+  --line: #232323;
+  --line-hi: #333333;
+
+  --text: #FFFFFF;
+  --text-2: #B4B4B4;
+  --text-3: #7A7A7A;
+
+  --brand: #00C48C;
+  --brand-dim: #0A6B51;
+  --danger: #E5484D;
+  --warn: #E5A23D;
+
+  --r-sm: 6px;
+  --r-md: 10px;
+  --r-lg: 16px;
+
+  --sidebar-w: 236px;
+  --topbar-h: 60px;
+  --gap: 12px;
+
+  --font: 'Inter', -apple-system, 'Segoe UI', system-ui, sans-serif;
+}
+
+/* ── 2. BASE ──────────────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+  border-radius: var(--r-sm);
+}
+
+::placeholder {
+  color: var(--text-3);
+}
+
+/* trama de pontos do fundo — o mesmo grão dos dois frames */
+.grain {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image: radial-gradient(circle, #1A1A1A 1px, transparent 1px);
+  background-size: 22px 22px;
+  opacity: .55;
+}
+
+/* ── 3. COMPONENTES ───────────────────────────────────────────────── */
+
+/* marca */
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.logo img {
+  width: 30px;
+  height: 30px;
+  flex: none;
+}
+
+.logo-txt b {
+  display: block;
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: -.02em;
+  line-height: 1.05;
+  color: var(--brand);
+}
+
+.logo-txt span {
+  display: block;
+  font-size: 10px;
+  color: var(--text-3);
+  letter-spacing: .01em;
+}
+
+/* wordmark UP API HUB */
+.wordmark {
+  font-weight: 900;
+  letter-spacing: -.035em;
+  line-height: 1;
+  margin: 0;
+}
+
+.wordmark .b {
+  color: var(--brand);
+}
+
+/* botões */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 9px 18px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--line-hi);
+  background: transparent;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background .15s, border-color .15s, color .15s;
+  white-space: nowrap;
+}
+
+.btn:hover {
+  border-color: var(--text-3);
+  background: var(--panel-2);
+}
+
+.btn-solid {
+  background: var(--text);
+  color: #000;
+  border-color: var(--text);
+  font-weight: 600;
+}
+
+.btn-solid:hover {
+  background: var(--brand);
+  border-color: var(--brand);
+  color: #000;
+}
+
+.btn-ghost {
+  border-color: transparent;
+}
+
+#btn-menu {
+  display: none;
+}
+
+.btn-icon {
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--line);
+  background: var(--panel-2);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-2);
+  cursor: pointer;
+  transition: background .15s, color .15s;
+}
+
+.btn-icon:hover {
+  background: var(--panel-3);
+  color: var(--text);
+}
+
+/* campos */
+.field {
+  margin-bottom: 14px;
+}
+
+.field label {
+  display: block;
+  font-size: 12px;
+  color: var(--text-2);
+  margin-bottom: 5px;
+}
+
+.field input {
+  width: 100%;
+  padding: 9px 12px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--line-hi);
+  background: var(--panel-2);
+  color: var(--text);
+  font: inherit;
+  transition: border-color .15s;
+}
+
+.field input:focus {
+  outline: none;
+  border-color: var(--brand);
+}
+
+.link {
+  font-size: 12px;
+  color: var(--text-3);
+  transition: color .15s;
+}
+
+.link:hover {
+  color: var(--brand);
+}
+
+/* avatar */
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--panel-3);
+  border: 1px solid var(--line-hi);
+  flex: none;
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-2);
+  cursor: pointer;
+}
+
+/* ── 4. LAYOUT DO APP ─────────────────────────────────────────────── */
+.app {
+  display: grid;
+  grid-template-columns: var(--sidebar-w) minmax(0, 1fr);
+  gap: var(--gap);
+  padding: var(--gap);
+  height: 100vh;
+  position: relative;
+  z-index: 1;
+}
+
+/* -- sidebar -- */
+.side {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  padding: 18px 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.side-logo {
+  padding: 0 18px 20px;
+}
+
+.side-group {
+  margin-bottom: 6px;
+}
+
+.side-head {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 18px;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--text);
+  text-align: left;
+}
+
+/* setor: um nível abaixo do grupo */
+.side-sector>.side-head {
+  padding: 6px 18px 6px 26px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--text-2);
+}
+
+.side-sector>.side-head:hover {
+  color: var(--text);
+}
+
+.side-head .chev {
+  flex: none;
+  transition: transform .2s ease;
+  color: var(--text-3);
+}
+
+.side-group.open>.side-head .chev,
+.side-sector.open>.side-head .chev {
+  transform: rotate(90deg);
+}
+
+/* o corpo colapsável — grid 0fr→1fr anima sem altura fixa */
+.side-body {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows .22s ease;
+}
+
+.side-group.open>.side-body,
+.side-sector.open>.side-body {
+  grid-template-rows: 1fr;
+}
+
+.side-body>div {
+  overflow: hidden;
+}
+
+.side-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 18px 6px 38px;
+  font-size: 12.5px;
+  color: var(--text-3);
+  transition: color .15s, background .15s;
+}
+
+.side-link:hover {
+  color: var(--text);
+  background: var(--panel-2);
+}
+
+.side-link .dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--text-3);
+  flex: none;
+}
+
+.side-link.on .dot {
+  background: var(--brand);
+}
+
+/* AJUDA e USO usam link raso, sem setor no meio */
+.side-flat .side-link {
+  padding-left: 26px;
+}
+
+/* -- coluna principal -- */
+.main {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  gap: var(--gap);
+}
+
+.topbar {
+  height: var(--topbar-h);
+  flex: none;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 0 14px;
+}
+
+.topsearch {
+  margin-left: auto;
+  position: relative;
+  width: min(340px, 34vw);
+}
+
+.topsearch input {
+  width: 100%;
+  padding: 8px 12px 8px 32px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--line);
+  background: var(--panel-2);
+  color: var(--text);
+  font: inherit;
+  font-size: 12.5px;
+}
+
+.topsearch input:focus {
+  outline: none;
+  border-color: var(--line-hi);
+}
+
+.topsearch svg {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-3);
+  pointer-events: none;
+}
+
+/* -- palco central -- */
+.stage {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  padding: clamp(30px, 7vh, 72px) clamp(20px, 5vw, 48px);
+}
+
+.stage-in {
+  max-width: 620px;
+  margin: 0 auto;
+}
+
+.stage .wordmark {
+  font-size: clamp(30px, 5.2vw, 50px);
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+/* -- a caixa de comando: a peça central -- */
+.cmd {
+  border: 1px solid var(--line-hi);
+  background: var(--panel-2);
+  border-radius: var(--r-md);
+  padding: 14px;
+  transition: border-color .18s, background .18s;
+}
+
+.cmd:focus-within {
+  border-color: var(--line-hi);
+}
+
+/* modo chamado — o @ muda o estado da caixa inteira */
+.cmd.is-chamado {
+  border-color: var(--brand);
+  background: rgba(0, 196, 140, .05);
+}
+
+.cmd textarea {
+  width: 100%;
+  border: 0;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  font-size: 13.5px;
+  resize: none;
+  min-height: 46px;
+  display: block;
+}
+
+.cmd textarea:focus {
+  outline: none;
+}
+
+.cmd-foot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.cmd-mode {
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  padding: 4px 9px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+}
+
+.cmd.is-chamado .cmd-mode {
+  color: var(--brand);
+  border-color: var(--brand-dim);
+}
+
+.cmd-foot .right {
+  margin-left: auto;
+  display: flex;
+  gap: 6px;
+}
+
+/* resultados da busca */
+.results {
+  margin-top: 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--panel-2);
+  overflow: hidden;
+}
+
+.results:empty {
+  display: none;
+}
+
+.res {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 13px;
+  border-bottom: 1px solid var(--line);
+  cursor: pointer;
+  transition: background .12s;
+}
+
+.res:last-child {
+  border-bottom: 0;
+}
+
+.res:hover,
+.res.sel {
+  background: var(--panel-3);
+}
+
+.res b {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.res small {
+  color: var(--text-3);
+  font-size: 11.5px;
+}
+
+.res .setor {
+  margin-left: auto;
+  font-size: 10px;
+  color: var(--text-3);
+  border: 1px solid var(--line-hi);
+  border-radius: 999px;
+  padding: 2px 8px;
+  white-space: nowrap;
+}
+
+.res-none {
+  padding: 12px 13px;
+  color: var(--text-3);
+  font-size: 12.5px;
+}
+
+/* recentes */
+.recentes {
+  margin-top: 34px;
+}
+
+.recentes h3 {
+  font-size: 12.5px;
+  font-weight: 600;
+  margin: 0 0 10px;
+}
+
+.recentes-box {
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--panel-2);
+  min-height: 96px;
+  padding: 8px;
+}
+
+.recentes-vazio {
+  display: grid;
+  place-items: center;
+  min-height: 80px;
+  color: var(--text-3);
+  font-size: 12.5px;
+  text-align: center;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 11px;
+  margin: 4px;
+  border: 1px solid var(--line-hi);
+  border-radius: var(--r-sm);
+  font-size: 12.5px;
+  cursor: pointer;
+  transition: border-color .15s;
+}
+
+.chip:hover {
+  border-color: var(--brand);
+}
+
+.chip .dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--text-3);
+}
+
+.chip.on .dot {
+  background: var(--brand);
+}
+
+/* -- painel do usuário -- */
+.userpanel {
+  position: fixed;
+  top: calc(var(--gap) + var(--topbar-h) + 6px);
+  right: var(--gap);
+  width: 216px;
+  z-index: 40;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  padding: 6px;
+  display: none;
+}
+
+.userpanel.open {
+  display: block;
+}
+
+.userpanel-id {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+}
+
+.userpanel-id b {
+  display: block;
+  font-size: 13px;
+}
+
+.userpanel-id span {
+  display: block;
+  font-size: 11px;
+  color: var(--text-3);
+}
+
+.userpanel hr {
+  border: 0;
+  border-top: 1px solid var(--line);
+  margin: 6px 0;
+}
+
+.userpanel a {
+  display: block;
+  padding: 7px 10px;
+  border-radius: var(--r-sm);
+  font-size: 12.5px;
+  color: var(--text-2);
+  transition: background .12s, color .12s;
+}
+
+.userpanel a:hover {
+  background: var(--panel-2);
+  color: var(--text);
+}
+
+.userpanel a.sair:hover {
+  color: var(--danger);
+}
+
+/* rotulo so pra leitor de tela */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* ── 6. RESPONSIVO ────────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .auth {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+
+  /* no celular o texto sempre vem antes do formulário */
+  .auth-hero {
+    order: -1;
+  }
+}
+
+@media (max-width: 780px) {
+  .app {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .side {
+    display: none;
+  }
+
+  .side.open {
+    display: flex;
+    position: fixed;
+    inset: var(--gap) auto var(--gap) var(--gap);
+    width: var(--sidebar-w);
+    z-index: 50;
+  }
+
+  .topsearch {
+    width: auto;
+    flex: 1;
+  }
+
+  #btn-menu {
+    display: inline-flex;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  *,
+  *::before,
+  *::after {
+    transition-duration: .01ms !important;
+    animation-duration: .01ms !important;
+  }
+}

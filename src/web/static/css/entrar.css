@@ -3,49 +3,104 @@
 [data-tela="login"] [data-hero="cadastro"],
 [data-tela="cadastro"] [data-painel="login"],
 [data-tela="cadastro"] [data-hero="login"] {
-    display: none;
+  opacity: 0;
+  pointer-events: none;
 }
 
 .entrar {
-    min-height: 100dvh;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    align-items: center;
-    gap: clamp(24px, 5vw, 64px);
-    padding: clamp(24px, 5vw, 48px);
+  --w-cartao: 40vw;
+  --vao: clamp(24px, 5vw, 64px);
+  position: relative;
+  overflow: hidden;
+  align-items: center;
+  min-height: 100dvh;
+  padding: 0;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--vao);
 }
 
 .metade {
-    display: grid;
-    place-items: center;
+  display: grid;
+  position: absolute;
+  place-items: center;
+  top: 0;
+  bottom: 0;
+  transition: transform .4s ease;
 }
 
 /* o cartão passa por cima na hora do cruzamento.
    z-index só obedece com position junto — a pegadinha de ontem. */
 .metade-cartao {
-    position: relative;
-    z-index: 2;
+  left: 0;
+  width: var(--w-cartao);
+  z-index: 2;
+}
+
+.metade-hero {
+  left: var(--w-cartao);
+  right: 0;
+  z-index: 1;
+}
+
+[data-tela="cadastro"] .metade-cartao {
+  transform: translateX(calc(100vw - var(--w-cartao)));
+}
+
+[data-tela="cadastro"] .metade-hero {
+  transform: translateX(calc(-1 * var(--w-cartao)));
 }
 
 .cartao {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  position: relative;
   width: 100%;
-  max-width: 380px;
-  height: clamp(665px, calc(100dvh - 96px), 780px);
-  background: var(--panel);
-  border: 1px solid var(--line);
-  border-radius: var(--r-lg);
+  max-width: none;
+  height: 100dvh;
+  background: rgba(13, 13, 13, .55);
+  backdrop-filter: blur(24px) saturate(115%);
+  border: 1px solid rgba(255, 255, 255, .07);
+  border-radius: 0;
   padding: 34px 30px;
 }
 
 /* solto e centralizado — a sua escolha */
 .hero {
-    max-width: 520px;
-    text-align: center;
+  grid-area: 1 / 1;
+  max-width: 520px;
+  text-align: center;
+  transition: opacity .3s ease 50ms;
+}
+
+.hero h1 {
+  font-size: clamp(34px, 5vw, 58px);
+  font-weight: 900;
+  letter-spacing: -.035em;
+  line-height: 1.02;
+  text-transform: uppercase;
+  margin: 0 0 18px;
+}
+
+.hero h1 .b {
+  color: var(--brand);
+}
+
+.hero p {
+  color: var(--text-3);
+  font-size: 13px;
+  line-height: 1.65;
+  margin: 0;
+}
+
+.hero p .b {
+  color: var(--brand);
 }
 
 .cartao .logo {
-    justify-content: center;
-    margin-bottom: 22px;
+  justify-content: center;
+  margin-bottom: 22px;
 }
 
 .cartao h2 {
@@ -68,4 +123,14 @@
   grid-template-columns: 1fr 1fr;
   gap: 10px;
   margin-top: 20px;
+}
+
+.painel {
+  display: grid;
+  width: 100%;
+  max-width: 380px;
+  margin-inline: auto;
+  grid-area: 2 / 1;
+  position: static;
+  transition: opacity .4s ease;
 }

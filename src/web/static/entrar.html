@@ -7,10 +7,12 @@
     <title>Entrar - UP API HUB</title>
     <link rel="stylesheet" href="css/base.css" />
     <link rel="stylesheet" href="css/entrar.css" />
+    <script src="js/entrar.js" defer></script>
 </head>
 
 <body>
-    <main class="entrar" data-tela="login">
+    <canvas id="trama" aria-hidden="true"></canvas>
+    <main class="entrar" data-tela="cadastro">
 
         <div class="metade metade-cartao">
             <section class="cartao">
@@ -56,7 +58,7 @@
                     </div>
                     <div class="field">
                         <label for="cad-email">Email</label>
-                        <input id="cad-email" type="email" autocomplete="Email" required />
+                        <input id="cad-email" type="email" autocomplete="email" required />
                     </div>
                     <div class="field">
                         <label for="cad-senha">Senha</label>

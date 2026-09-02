@@ -689,7 +689,15 @@ button {
   white-space: nowrap;
 }
 
-/* ── 6. RESPONSIVO ────────────────────────────────────────────────── */
+/* ── 6. CANVAS ────────────────────────────────────────────────────── */
+#trama {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* ── 7. RESPONSIVO ────────────────────────────────────────────────── */
 @media (max-width: 900px) {
   .auth {
     grid-template-columns: 1fr;

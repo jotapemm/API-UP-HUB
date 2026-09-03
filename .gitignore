@@ -1,0 +1,15 @@
+
+
+#claude
+.claude
+
+#protótipo
+/proto
+
+#redesign
+redesign.html
+
+
+#.env
+.env
+__pycache__/

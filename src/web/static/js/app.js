@@ -15,10 +15,11 @@ function dimensionar() {
 }
 
 function campo(x, y, t) {
-  return Math.sin(x * 0.0075 + t)
-       + Math.sin(y * 0.011 - t * 0.7)
-       + Math.sin((x + y) * 0.0052 + t * 1.4);
+    return Math.sin(x * 0.0075 + t)
+        + Math.sin(y * 0.012 - t * 0.7)
+        + Math.sin((x * 0.6 + y * 1.3) * 0.004 + t * 0.35);
 }
+
 
 const GAP = 11;
 const FAIXAS = [
@@ -27,36 +28,29 @@ const FAIXAS = [
     { largura: 380, periodo: 21000, fase: 0.75 },
 ];
 const NIVEIS = 16;
-const CINZA  = [200, 205, 202];
+const CINZA = [200, 205, 202];
 const BRANCO = [255, 255, 255];
-const VERDE  = [  0, 196, 140];
+const VERDE = [0, 196, 140];
+const TONS = [], TAMANHOS = [];
+const baldes = Array.from({ length: NIVEIS }, () => []);
 
 function construir() {
     pontos = [];
-    // sua vez: dois laços aninhados, y e x, de GAP/2 até H (e W), de GAP em GAP.
-    // cada ponto é só { x, y } — por enquanto não precisa de mais nada.
     for (let y = GAP / 2; y < H; y += GAP) {
         for (let x = GAP / 2; x < W; x += GAP) {
-            pontos.push({ x, y })
+            pontos.push({
+                x: x + (Math.random() - 0.5) * GAP * 0.5,
+                y: y + (Math.random() - 0.5) * GAP * 0.5,
+            });
         }
     }
 }
 
-const baldes = Array.from({length: NIVEIS }, () => []);
-
 function pintar(tempo) {
     ctx.clearRect(0, 0, W, H);
-    const t = tempo * 0.001;
-    
-    for(const b of baldes) b.length = 0;
-    //ctx.fillStyle = "rgba(200, 205, 202, 0.22)";  // um cinza só, por enquanto
-    /*const frentes = FAIXAS.map(f => {
-        const curso = W + H + f.largura * 2;
-        return {
-            pos: (((tempo / f.periodo) + f.fase) % 1) * curso - f.largura,
-            meia: f.largura / 2,
-        };
-    });*/
+    const t = tempo * 0.00012;
+
+    for (const b of baldes) b.length = 0;
 
     // ── por PONTO ───────────────────────────────────────────────
     for (const p of pontos) {
@@ -66,32 +60,54 @@ function pintar(tempo) {
         const n = Math.min(NIVEIS - 1, Math.floor(v * NIVEIS));
 
         baldes[n].push(Math.round(p.x + desl), Math.round(p.y + desl * 0.6));
-        //let i = 0;
 
-        /*for (const f of frentes) {
-            const d = Math.abs(eixo - f.pos);
-            if (d < f.meia) i += 1 - d / f.meia;
-        }*/
+    }
 
-        //i = Math.min(1, i);
-        //ctx.fillStyle = `rgba(255, 255, 255, ${0.20 + (0.55 - 0.20) * i})`;
-        //ctx.fillRect(Math.round(p.x), Math.round(p.y), 1, 1);
-        ctx.fillRect(Math.round(p.x + desl), Math.round(p.y + desl * 0.6), 1, 1);
+    for (let n = 0; n < NIVEIS; n++) {
+        const b = baldes[n];
+        if (b.length === 0) continue;
+
+        const sp = SPRITES[n];
+        const s = TAMANHOS[n];
+
+        for (let k = 0; k < b.length; k += 2) {
+            ctx.drawImage(sp, b[k] - s, b[k + 1] - s, s * 2, s * 2);
+        }
     }
 }
 
+const semMovimento = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+if (semMovimento) pintar(0);              // um frame só, bonito e parado
+
+
 const misturar = (a, b, k) => a.map((c, n) => Math.round(c + (b[n] - c) * k));
 
-const TONS = [], TAMANHOS = [];
-for(let n = 0; m < NIVEIS; n++) {
+for (let n = 0; n < NIVEIS; n++) {
     const v = n / (NIVEIS - 1);
 
     const cor = v < 0.5
-        ? misturar (CINZA, BRANCO, v * 2)           //cinza -> branco
-        : misturar (BRANCO, VERDE, (v - 0.5) * 2);  // branco -> verde
+        ? misturar(CINZA, BRANCO, v * 2)           //cinza -> branco
+        : misturar(BRANCO, VERDE, (v - 0.5) * 2);  // branco -> verde
 
     TONS[n] = `rgba(${cor},${(0.12 + v * 0.45).toFixed(3)})`;
     TAMANHOS[n] = v < 0.34 ? 1 : (v < 0.70 ? 2 : 3);
+}
+
+const SPRITES = [];
+for (let n = 0; n < NIVEIS; n++) {
+    const s = TAMANHOS[n];
+    const off = document.createElement("canvas")
+    off.width = off.height = Math.ceil(2 * s * dpr);
+
+    const o = off.getContext("2d");
+    o.scale(dpr, dpr);
+    o.fillStyle = TONS[n];
+    o.beginPath();
+    o.arc(s, s, s, 0, Math.PI * 2);
+    o.fill();
+
+    SPRITES[n] = off;
 }
 
 function loop(tempo) {

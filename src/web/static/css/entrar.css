@@ -49,8 +49,9 @@
 
 .cartao {
   display: grid;
-  grid-template-rows: auto 1fr;
+  grid-template-rows: auto auto;
   position: relative;
+  align-content: center;
   width: 100%;
   min-width: 0;
   max-width: none;
@@ -114,9 +115,23 @@
   margin: 0 0 24px;
 }
 
+.cartao .logo img {
+  width: 60px;
+  height: 60px;
+}
+
+.cartao .logo-txt b {
+  font-size: 25px;
+}
+
+.cartao .logo-txt span {
+  font-size: 13px;
+}
+
 .acoes {
-  display: flex;
-  justify-content: center;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  
   gap: 10px;
   margin-top: 20px;
 }
@@ -127,8 +142,20 @@
   min-width: 0;
   max-width: 380px;
   margin-inline: auto;
-  align-content: start;
+  align-content: center;
   grid-area: 2 / 1;
   position: static;
   transition: opacity .4s ease;
+}
+
+.marca {
+  position: absolute;
+  bottom: 22px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  margin: 0;
+  font-size: 11px;
+  color: var(--text-3);
+  opacity: .45;
 }

@@ -1,7 +1,8 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Cookie, Depends, Request, Response
 from pydantic import BaseModel, EmailStr, Field
 
-from src.auth import gerar_hash
+from src.auth import gerar_hash, conferir, criar_sessao, encerrar_sessao
+from src.web.seguranca import NOME_COOKIE, usuario_atual
 from src.db import conexao
 
 router = APIRouter(prefix="/api", tags=["auth"])
@@ -32,3 +33,49 @@ def cadastrar(dados: CadastroEntrada):
         )
         
     return {"ok": True}
+
+
+class LoginEntrada(BaseModel):
+    email: EmailStr
+    senha: str
+    
+
+@router.post("/login")
+def entrar(dados: LoginEntrada, request: Request, response: Response):
+    email= dados.email.lower().strip()
+    
+    with conexao() as con:
+        usuario = con.execute(
+            "SELECT id, senha_hash FROM usuarios WHERE email = %s AND ativo",(email,),
+        ).fetchone()
+        
+        if not usuario or not conferir(usuario["senha_hash"], dados.senha):
+            raise HTTPException(401, "Email ou senha incorretos")
+        
+        token = criar_sessao(
+            con,
+            usuario["id"],
+            ip=request.client.host if request.client else None,
+            user_agent=request.headers.get("user-agent"),
+        )
+        
+    response.set_cookie(
+        NOME_COOKIE, token,
+        httponly=True, samesite="lax", secure=False,
+        max_age=7 * 24 * 3600,
+    )
+    return {"ok": True}
+
+
+@router.post("/logout")
+def sair(response: Response, sessao: str | None = Cookie(default=None, alias=NOME_COOKIE)):
+    if sessao:
+        with conexao() as con:
+            encerrar_sessao(con, sessao)
+    response.delete_cookie(NOME_COOKIE)
+    return {"ok": True}
+
+
+@router.get("/eu")
+def eu(usuario=Depends(usuario_atual)):
+    return usuario

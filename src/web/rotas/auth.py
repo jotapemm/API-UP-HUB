@@ -8,10 +8,10 @@ router = APIRouter(prefix="/api", tags=["auth"])
 
 
 class CadastroEntrada(BaseModel):
-    nome: str = Field(min_lenght=3)
+    nome: str = Field(min_length=3)
     apelido: str | None = None
     email: EmailStr
-    senha: str = Field(min_lenght=8)
+    senha: str = Field(min_length=8)
     
     
 @router.post("/cadastro", status_code=201)

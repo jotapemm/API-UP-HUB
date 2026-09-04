@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UP API HUB</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="css/base.css" />
+</head>
+
+<body>
+  <div class="grain"></div>
+
+  <div class="app">
+    <!-- ── SIDEBAR ─────────────────────────────────────────────────── -->
+    <aside class="side" id="side">
+      <div class="side-logo">
+        <div class="logo"><img src="assets/logo-up.png" alt="" /></div>
+      </div>
+
+      <div class="side-group open" data-collapse>
+        <button class="side-head" type="button" aria-expanded="true">
+          <svg class="chev" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polyline points="9 6 15 12 9 18" />
+          </svg>
+          Automações
+        </button>
+        <div class="side-body">
+          <div id="side-setores"></div>
+        </div>
+      </div>
+
+      <div class="side-group open side-flat" data-collapse>
+        <button class="side-head" type="button" aria-expanded="true">
+          <svg class="chev" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polyline points="9 6 15 12 9 18" />
+          </svg>
+          Ajuda
+        </button>
+        <div class="side-body">
+          <div id="side-ajuda"></div>
+        </div>
+      </div>
+
+      <div class="side-group open side-flat" data-collapse>
+        <button class="side-head" type="button" aria-expanded="true">
+          <svg class="chev" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polyline points="9 6 15 12 9 18" />
+          </svg>
+          Uso
+        </button>
+        <div class="side-body">
+          <div id="side-uso"></div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ── COLUNA PRINCIPAL ────────────────────────────────────────── -->
+    <div class="main">
+      <header class="topbar">
+        <button class="btn-icon" id="btn-menu" type="button" aria-label="Abrir menu">&#9776;</button>
+
+        <a class="logo" href="app.html">
+          <img src="assets/logo-up.png" alt="" />
+          <span class="logo-txt"><b>UP</b><span>Recuperação Tributária</span></span>
+        </a>
+
+        <div class="topsearch">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"
+            aria-hidden="true">
+            <circle cx="11" cy="11" r="7" />
+            <path d="m20 20-3.2-3.2" stroke-linecap="round" />
+          </svg>
+          <label class="sr-only" for="topq">Pesquisar automações</label>
+          <input id="topq" type="search" placeholder="Digite para pesquisar as automações" />
+        </div>
+
+        <button class="btn-icon" type="button" aria-label="Notificações">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            aria-hidden="true">
+            <path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" stroke-linejoin="round" />
+            <path d="M13.7 21a2 2 0 0 1-3.4 0" stroke-linecap="round" />
+          </svg>
+        </button>
+        <button class="btn-icon" type="button" aria-label="Ajuda">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            aria-hidden="true">
+            <circle cx="12" cy="12" r="9" />
+            <path d="M9.6 9.2a2.5 2.5 0 1 1 3.3 2.4c-.6.2-.9.8-.9 1.4v.5" stroke-linecap="round" />
+            <path d="M12 17.2v.01" stroke-linecap="round" />
+          </svg>
+        </button>
+
+        <button class="avatar" id="btn-avatar" type="button" aria-haspopup="true" aria-expanded="false"
+          aria-label="Conta">U</button>
+      </header>
+
+      <!-- palco -->
+      <main class="stage">
+        <div class="stage-in">
+          <h1 class="wordmark"><span class="b">UP</span> API <span class="b">HUB</span></h1>
+
+          <!-- A caixa de comando. Uma entrada, dois modos:
+               texto normal = busca · começa com @ = chamado. -->
+          <div class="cmd" id="cmd">
+            <label class="sr-only" for="q">Buscar ou abrir chamado</label>
+            <textarea id="q" rows="2"
+              placeholder="Buscar automação/solução  |  Digite @ para solicitar um chamado  |  O que você precisa hoje?"></textarea>
+            <div class="cmd-foot">
+              <span class="cmd-mode" id="modo">Busca</span>
+              <span style="font-size:11px;color:var(--text-3)" id="dica">Enter abre o primeiro resultado</span>
+              <span class="right">
+                <button class="btn-icon" type="button" aria-label="Favoritar">&#9733;</button>
+                <button class="btn-icon" id="btn-go" type="button" aria-label="Executar">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"
+                    aria-hidden="true">
+                    <circle cx="11" cy="11" r="7" />
+                    <path d="m20 20-3.2-3.2" stroke-linecap="round" />
+                  </svg>
+                </button>
+              </span>
+            </div>
+          </div>
+
+          <div class="results" id="results"></div>
+
+          <section class="recentes">
+            <h3>Recentes</h3>
+            <div class="recentes-box" id="recentes"></div>
+          </section>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- painel do usuário -->
+  <div class="userpanel" id="userpanel" role="menu">
+    <div class="userpanel-id">
+      <span class="avatar">U</span>
+      <span><b>User</b><span>Nome completo do user</span></span>
+    </div>
+    <a href="#" role="menuitem">Personalizar</a>
+    <hr />
+    <a href="#" role="menuitem">Perfil</a>
+    <a href="#" role="menuitem">Caixa de entrada</a>
+    <a href="#" role="menuitem">Automações</a>
+    <a href="#" role="menuitem">Setor</a>
+    <a href="#" role="menuitem">Configurações</a>
+    <hr />
+    <a href="entrar.html" class="sair" role="menuitem">Sair</a>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/dados.js"></script>
+  <script>
+    const $ = (s) => document.querySelector(s);
+    const esc = (s) => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+    // tira acento pra busca: quem digita "recuperacao" tem que achar "Recuperação"
+    const norm = (s) => String(s).normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+
+    /* ── 1. Índice de busca ────────────────────────────────────────
+       Achata setores + páginas numa lista só. Fazer isso UMA vez no
+       load é o que deixa a busca instantânea a cada tecla.          */
+    const INDICE = [];
+    SETORES.forEach(s => s.itens.forEach(it => INDICE.push({
+      tipo: "automacao", nome: it.nome, desc: it.desc, grupo: s.nome,
+      url: (window[it.urlVar] || "").trim(),
+      chave: norm(it.nome + " " + it.desc + " " + it.busca + " " + s.nome)
+    })));
+    PAGINAS.forEach(p => INDICE.push({
+      tipo: "pagina", nome: p.nome, desc: p.desc, grupo: p.grupo, url: "",
+      chave: norm(p.nome + " " + p.desc + " " + p.busca)
+    }));
+
+    /* ── 2. Sidebar montada a partir dos dados ─────────────────────── */
+    const chev = '<svg class="chev" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 6 15 12 9 18"/></svg>';
+
+    $("#side-setores").innerHTML = SETORES.map(s => `
+      <div class="side-sector" data-collapse>
+        <button class="side-head" type="button" aria-expanded="false">${chev}${esc(s.nome)}</button>
+        <div class="side-body"><div>${s.itens.length
+        ? s.itens.map(it => `<a class="side-link" href="#" data-abrir="${esc(it.urlVar)}"><span class="dot"></span>${esc(it.nome)}</a>`).join("")
+        : '<span class="side-link" style="cursor:default"><span class="dot"></span>Em breve</span>'
+      }</div></div>
+      </div>`).join("");
+
+    const porGrupo = (g) => PAGINAS.filter(p => p.grupo === g)
+      .map(p => `<a class="side-link" href="#">${esc(p.nome)}</a>`).join("");
+    $("#side-ajuda").innerHTML = porGrupo("Ajuda");
+    $("#side-uso").innerHTML = porGrupo("Uso");
+
+    // um só listener pro documento inteiro cuida de todo colapsável
+    document.addEventListener("click", (e) => {
+      const head = e.target.closest(".side-head");
+      if (!head) return;
+      const box = head.closest("[data-collapse]");
+      const on = box.classList.toggle("open");
+      head.setAttribute("aria-expanded", String(on));
+    });
+
+    /* ── 3. Painel do usuário ─────────────────────────────────────── */
+    const painel = $("#userpanel"), botaoAvatar = $("#btn-avatar");
+    botaoAvatar.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const on = painel.classList.toggle("open");
+      botaoAvatar.setAttribute("aria-expanded", String(on));
+    });
+    document.addEventListener("click", (e) => {
+      if (!painel.contains(e.target)) { painel.classList.remove("open"); botaoAvatar.setAttribute("aria-expanded", "false"); }
+    });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") { painel.classList.remove("open"); botaoAvatar.setAttribute("aria-expanded", "false"); }
+    });
+
+    /* ── 4. Recentes (localStorage — no hub real vira o backend) ───── */
+    const CHAVE = "up-hub-recentes";
+    const lerRecentes = () => { try { return JSON.parse(localStorage.getItem(CHAVE)) || []; } catch { return []; } };
+    const salvarRecente = (nome) => {
+      try {
+        const l = [nome, ...lerRecentes().filter(n => n !== nome)].slice(0, 6);
+        localStorage.setItem(CHAVE, JSON.stringify(l));
+      } catch { /* aba anônima: segue sem recentes */ }
+      pintarRecentes();
+    };
+    function pintarRecentes() {
+      const l = lerRecentes();
+      $("#recentes").innerHTML = l.length
+        ? l.map(n => {
+          const it = INDICE.find(i => i.nome === n);
+          return `<span class="chip${it && it.url ? " on" : ""}" data-chip="${esc(n)}"><span class="dot"></span>${esc(n)}</span>`;
+        }).join("")
+        : '<div class="recentes-vazio">O que você abrir aparece aqui.</div>';
+    }
+    pintarRecentes();
+
+    /* ── 5. Abrir um item ─────────────────────────────────────────── */
+    function abrir(item) {
+      salvarRecente(item.nome);
+      if (item.tipo === "pagina") { alert("Protótipo: aqui abriria a página “" + item.nome + "”."); return; }
+      if (!item.url) { alert("“" + item.nome + "” ainda não tem endereço no config.js."); return; }
+      window.open(item.url, "_blank", "noopener");
+    }
+
+    /* ── 6. A CAIXA DE COMANDO ────────────────────────────────────
+       Um campo, dois modos. O @ na primeira posição troca o modo —
+       é a mesma tecla que o pessoal já usa pra marcar alguém, então
+       não precisa ensinar.                                          */
+    const campo = $("#q"), caixa = $("#cmd"), saida = $("#results");
+    let achados = [], sel = 0;
+
+    function ehChamado(v) { return v.trimStart().startsWith("@"); }
+
+    function render() {
+      const bruto = campo.value;
+      const chamado = ehChamado(bruto);
+
+      caixa.classList.toggle("is-chamado", chamado);
+      $("#modo").textContent = chamado ? "Chamado" : "Busca";
+      $("#dica").textContent = chamado
+        ? "Descreva o problema e aperte Enter para abrir o chamado"
+        : "Enter abre o primeiro resultado";
+
+      if (chamado) { achados = []; saida.innerHTML = ""; return; }
+
+      const termo = norm(bruto).trim();
+      if (!termo) { achados = []; saida.innerHTML = ""; return; }
+
+      // toda palavra digitada precisa aparecer em algum campo do item
+      const partes = termo.split(/\s+/);
+      achados = INDICE.filter(i => partes.every(p => i.chave.includes(p))).slice(0, 6);
+      sel = 0;
+
+      saida.innerHTML = achados.length
+        ? achados.map((i, n) => `
+            <div class="res${n === sel ? " sel" : ""}" data-i="${n}">
+              <span><b>${esc(i.nome)}</b><br><small>${esc(i.desc)}</small></span>
+              <span class="setor">${esc(i.grupo)}</span>
+            </div>`).join("")
+        : `<div class="res-none">Nada encontrado. Digite <b style="color:var(--brand)">@</b> para abrir um chamado sobre isso.</div>`;
+    }
+
+    campo.addEventListener("input", render);
+
+    campo.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        if (ehChamado(campo.value)) {
+          const texto = campo.value.trimStart().slice(1).trim();
+          if (!texto) return;
+          alert("Protótipo: chamado aberto —\n\n" + texto);
+          campo.value = ""; render();
+          return;
+        }
+        if (achados[sel]) { abrir(achados[sel]); }
+        return;
+      }
+      if (!achados.length) return;
+      if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+        e.preventDefault();
+        sel = (sel + (e.key === "ArrowDown" ? 1 : achados.length - 1)) % achados.length;
+        saida.querySelectorAll(".res").forEach((el, n) => el.classList.toggle("sel", n === sel));
+      }
+    });
+
+    saida.addEventListener("click", (e) => {
+      const linha = e.target.closest(".res");
+      if (linha) abrir(achados[+linha.dataset.i]);
+    });
+
+    $("#btn-go").addEventListener("click", () => { if (achados[sel]) abrir(achados[sel]); });
+
+    // a busca da topbar joga o termo na caixa central — um só motor
+    $("#topq").addEventListener("input", (e) => {
+      campo.value = e.target.value; render(); campo.focus();
+    });
+
+    // atalhos da sidebar e dos chips reusam o mesmo abrir()
+    document.addEventListener("click", (e) => {
+      const link = e.target.closest("[data-abrir]");
+      if (link) {
+        e.preventDefault();
+        const it = INDICE.find(i => i.url === (window[link.dataset.abrir] || "").trim() && i.tipo === "automacao");
+        if (it) abrir(it);
+        return;
+      }
+      const chip = e.target.closest("[data-chip]");
+      if (chip) {
+        const it = INDICE.find(i => i.nome === chip.dataset.chip);
+        if (it) abrir(it);
+      }
+    });
+
+    // "/" foca a caixa de qualquer lugar
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "/" && document.activeElement !== campo && !/INPUT|TEXTAREA/.test(document.activeElement.tagName)) {
+        e.preventDefault(); campo.focus();
+      }
+    });
+
+    // o CSS decide SE o botao aparece; o JS so cuida do que ele faz
+    $("#btn-menu").addEventListener("click", () => $("#side").classList.toggle("open"));
+  </script>
+</body>
+
+</html>

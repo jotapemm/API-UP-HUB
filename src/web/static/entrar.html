@@ -13,7 +13,7 @@
 
 <body>
     <canvas id="trama" aria-hidden="true"></canvas>
-    <main class="entrar" data-tela="cadastro">
+    <main class="entrar" data-tela="login">
 
         <div class="metade metade-cartao">
             <section class="cartao">
@@ -52,25 +52,27 @@
                     <p class="sub">Sistema de uso interno para operadores</p>
 
                     <div class="field">
-                        <label for="cad-nome">Nome completo</label>
-                        <input id="cad-nome" type="text" autocomplete="name" required />
+                        <label for="cadastro-nome">Nome completo</label>
+                        <input id="cadastro-nome" type="text" autocomplete="name" required />
                     </div>
                     <div class="field">
-                        <label for="cad-apelido">Apelido</label>
-                        <input id="cad-apelido" type="text" autocomplete="nickname"/>
+                        <label for="cadastro-apelido">Apelido</label>
+                        <input id="cadastro-apelido" type="text" autocomplete="nickname"/>
                     </div>
                     <div class="field">
-                        <label for="cad-email">Email</label>
-                        <input id="cad-email" type="email" autocomplete="email" required />
+                        <label for="cadastro-email">Email</label>
+                        <input id="cadastro-email" type="email" autocomplete="email" required />
                     </div>
                     <div class="field">
-                        <label for="cad-senha">Senha</label>
-                        <input id="cad-senha" type="password" autocomplete="new-password" required />
+                        <label for="cadastro-senha">Senha</label>
+                        <input id="cadastro-senha" type="password" autocomplete="new-password" required />
                     </div>
                     <div class="field">
-                        <label for="cad-confirmar">Confirmar senha</label>
-                        <input id="cad-confirmar" type="password" autocomplete="new-password" required />
+                        <label for="cadastro-confirmar">Confirmar senha</label>
+                        <input id="cadastro-confirmar" type="password" autocomplete="new-password" required />
                     </div>
+
+                    <p class="erro-cadastro" id="cadastro-erro" hidden></p>
 
                     <div class="acoes">
                         <button class="btn" type="button" data-ir="login">Entrar</button>

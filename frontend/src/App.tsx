@@ -53,7 +53,7 @@ function App() {
     <>
       <div className="grain"></div>
 
-      <aside className={menuAberto ? 'side aberta' : 'side'}>
+      <aside className={menuAberto ? 'side aberta' : 'side'} inert={!menuAberto}>
         <div className="side-logo">
           <div className="logo"><img src="/assets/logo-up.png" alt="" /></div>
         </div>
@@ -129,6 +129,8 @@ function App() {
               className="avatar" 
               type="button" 
               aria-label="Conta"
+              aria-haspopup="menu"
+              aria-expanded={painelAberto}
               onClick={() => setPainelAberto(true)}
             >U</button>
           </header>

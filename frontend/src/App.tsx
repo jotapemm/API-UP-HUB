@@ -10,10 +10,19 @@ const SETORES = [
   'Recuperação Tributária',
 ]
 
+type Usuario = {
+  id: number
+  nome: string
+  apelido: string | null
+  email: string
+  setor_id: number | null
+}
+
 function App() {
 
   const [menuAberto, setMenuAberto] = useState(false)
   const [painelAberto, setPainelAberto] = useState(false)
+  const [usuario, setUsuario] = useState<Usuario | null>(null)
 
   const botaoMenu = useRef<HTMLButtonElement>(null)
   const botaoAvatar = useRef<HTMLButtonElement>(null)
@@ -48,6 +57,23 @@ function App() {
       botaoAvatar.current?.focus()
     }
   }, [painelAberto])
+
+  useEffect(() => {
+    let vivo = true
+
+    fetch('/api/eu')
+      .then((r) => {
+        if (r.status === 401) { location.href = '/entrar.html'; return null }
+        if (!r.ok) throw new Error('perfil')
+        return r.json()
+      })
+      .then((dados) => { if (vivo && dados) setUsuario(dados) })
+      .catch(() => {/* rede caiu: fica sem nome, mas não quebra a tela */ })
+    return () => { vivo = false }
+  }, [])
+
+  const tratamento = usuario ? (usuario.apelido || usuario.nome.split(' ')[0]) : ''
+  const inicial = tratamento ? tratamento[0].toUpperCase() : ''
 
   return (
     <>
@@ -124,10 +150,10 @@ function App() {
               <input id="topq" type="search" placeholder="Digite para pesquisar as automações" />
             </div>
 
-            <button 
-              ref={botaoAvatar} 
-              className="avatar" 
-              type="button" 
+            <button
+              ref={botaoAvatar}
+              className="avatar"
+              type="button"
               aria-label="Conta"
               aria-haspopup="menu"
               aria-expanded={painelAberto}

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import './App.css'
 
 const SETORES = [
@@ -13,6 +13,23 @@ const SETORES = [
 function App() {
 
   const [menuAberto, setMenuAberto] = useState(false)
+
+  const botaoMenu = useRef<HTMLButtonElement>(null)
+
+  useEffect(() => {
+    if (!menuAberto) return          // gaveta fechada: nada pra escutar
+
+    const aoTeclar = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setMenuAberto(false)
+    }
+    document.addEventListener('keydown', aoTeclar)
+
+    // roda quando a gaveta fecha - as duas coisas significam "fechou"
+    return() => {
+      document.removeEventListener('keydown', aoTeclar)
+      botaoMenu.current?.focus()
+    }
+  }, [menuAberto])
 
   return (
     <>
@@ -37,20 +54,22 @@ function App() {
         </div>
       </aside>
 
-      <div 
+      <div
         className={menuAberto ? 'scrim visivel' : 'scrim'}
         onClick={() => setMenuAberto(false)}
       />
 
-      <div className="app">
+      <div className="app" inert={menuAberto}>
         <div className="main">
           <header className="topbar">
-            <button className="btn-icon" 
-                    type="button" 
-                    aria-label="Abrir Menu" 
-                    aria-expanded={menuAberto} 
-                    onClick={() => setMenuAberto(true)}
-                    >☰</button>
+            <button
+              ref={botaoMenu} 
+              className="btn-icon"
+              type="button"
+              aria-label="Abrir Menu"
+              aria-expanded={menuAberto}
+              onClick={() => setMenuAberto(true)}
+            >☰</button>
 
             <a className="logo" href="/app/">
               <img src="/assets/logo-up.png" alt="" />

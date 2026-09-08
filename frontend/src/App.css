@@ -32,6 +32,11 @@
 .stage {
   border: 0;
   border-radius: 0;
+
+  /* O base.css pede clamp(30px, 7vh, 72px). O valor do MEIO e o que
+     manda: os das pontas so entram em telas extremas. Subindo o meio
+     de 7vh para 18vh o conteudo desce e o palco respira. */
+  padding: clamp(30px, 18vh, 160px) clamp(20px, 5vw, 48px);
 }
 
 /* ── 2. SAUDAÇÃO ───────────────────────────────────────────────────

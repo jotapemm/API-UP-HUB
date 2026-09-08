@@ -75,6 +75,11 @@ function App() {
   const tratamento = usuario ? (usuario.apelido || usuario.nome.split(' ')[0]) : ''
   const inicial = tratamento ? tratamento[0].toUpperCase() : ''
 
+  const sair = async () => {
+    try { await fetch('/api/logout', { method: 'POST' }) }
+    finally { location.href = '/entrar.html' }
+  }
+
   return (
     <>
       <div className="grain"></div>
@@ -124,7 +129,12 @@ function App() {
         <a href="#" role="menuitem">Setor</a>
         <a href="#" role="menuitem">Configurações</a>
         <hr />
-        <a href="/entrar.html" className="sair" role="menuitem">Sair</a>
+        <a 
+          href="/entrar.html" 
+          className="sair" 
+          role="menuitem"
+          onClick={(e) => { e.preventDefault(); sair() }}
+        >Sair</a>
       </div>
 
       <div className="app" inert={menuAberto || painelAberto}>
@@ -163,7 +173,11 @@ function App() {
 
           <main className="stage">
             <div className="stage-in">
-              <p className="saudacao">Olá <span className="nome">User</span>, bem-vindo ao</p>
+              <p className="saudacao">
+                {usuario
+                  ? <>Olá <span className="nome">{tratamento}</span>, bem-vindo ao</>
+                  : <>&nbsp;</>}
+              </p>
               <h1 className="wordmark"><span className="b">UP</span> API <span className="b">HUB</span></h1>
 
               <div className="cmd">

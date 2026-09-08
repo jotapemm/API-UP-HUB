@@ -38,14 +38,19 @@ function App() {
       </aside>
 
       <div 
-        className={menuAberto ? 'scrim visível' : 'scrim'}
+        className={menuAberto ? 'scrim visivel' : 'scrim'}
         onClick={() => setMenuAberto(false)}
       />
-      
+
       <div className="app">
         <div className="main">
           <header className="topbar">
-            <button className="btn-icon" type="button" aria-label="Abrir Menu">☰</button>
+            <button className="btn-icon" 
+                    type="button" 
+                    aria-label="Abrir Menu" 
+                    aria-expanded={menuAberto} 
+                    onClick={() => setMenuAberto(true)}
+                    >☰</button>
 
             <a className="logo" href="/app/">
               <img src="/assets/logo-up.png" alt="" />

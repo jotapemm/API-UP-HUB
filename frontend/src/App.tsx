@@ -13,8 +13,10 @@ const SETORES = [
 function App() {
 
   const [menuAberto, setMenuAberto] = useState(false)
+  const [painelAberto, setPainelAberto] = useState(false)
 
   const botaoMenu = useRef<HTMLButtonElement>(null)
+  const botaoAvatar = useRef<HTMLButtonElement>(null)
 
   useEffect(() => {
     if (!menuAberto) return          // gaveta fechada: nada pra escutar
@@ -25,11 +27,27 @@ function App() {
     document.addEventListener('keydown', aoTeclar)
 
     // roda quando a gaveta fecha - as duas coisas significam "fechou"
-    return() => {
+    return () => {
       document.removeEventListener('keydown', aoTeclar)
       botaoMenu.current?.focus()
     }
   }, [menuAberto])
+
+
+  useEffect(() => {
+    if (!painelAberto) return          // gaveta fechada: nada pra escutar
+
+    const aoTeclar = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setPainelAberto(false)
+    }
+    document.addEventListener('keydown', aoTeclar)
+
+    // roda quando a gaveta fecha - as duas coisas significam "fechou"
+    return () => {
+      document.removeEventListener('keydown', aoTeclar)
+      botaoAvatar.current?.focus()
+    }
+  }, [painelAberto])
 
   return (
     <>
@@ -59,11 +77,35 @@ function App() {
         onClick={() => setMenuAberto(false)}
       />
 
-      <div className="app" inert={menuAberto}>
+      {painelAberto && (
+        <div className="captura" onClick={() => setPainelAberto(false)} />
+      )}
+
+      <div
+        className={painelAberto ? 'userpanel aberto' : 'userpanel'}
+        role="menu"
+        inert={!painelAberto}
+      >
+        <div className="userpanel-id">
+          <span className="avatar">U</span>
+          <span><b>user</b><span>Nome completo do user</span></span>
+        </div>
+        <a href="#" role="menuitem">Personalizar</a>
+        <hr />
+        <a href="#" role="menuitem">Perfil</a>
+        <a href="#" role="menuitem">Caixa de entrada</a>
+        <a href="#" role="menuitem">Automações</a>
+        <a href="#" role="menuitem">Setor</a>
+        <a href="#" role="menuitem">Configurações</a>
+        <hr />
+        <a href="/entrar.html" className="sair" role="menuitem">Sair</a>
+      </div>
+
+      <div className="app" inert={menuAberto || painelAberto}>
         <div className="main">
           <header className="topbar">
             <button
-              ref={botaoMenu} 
+              ref={botaoMenu}
               className="btn-icon"
               type="button"
               aria-label="Abrir Menu"
@@ -82,7 +124,13 @@ function App() {
               <input id="topq" type="search" placeholder="Digite para pesquisar as automações" />
             </div>
 
-            <button className="avatar" type="button" aria-label="Conta"></button>
+            <button 
+              ref={botaoAvatar} 
+              className="avatar" 
+              type="button" 
+              aria-label="Conta"
+              onClick={() => setPainelAberto(true)}
+            >U</button>
           </header>
 
           <main className="stage">

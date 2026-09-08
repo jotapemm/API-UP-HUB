@@ -4,7 +4,7 @@
    fonte, botões, campos, a sidebar por dentro — continua vindo de lá.
    ═══════════════════════════════════════════════════════════════════ */
 
-/* ── 1. LAYOUT: uma coluna, colada nas bordas ──────────────────────
+/* ── LAYOUT: uma coluna, colada nas bordas ──────────────────────
    O base.css desenha o app "flutuando": moldura preta em volta,
    respiro entre a topbar e o palco, cantos arredondados. O Figma
    pede o contrário — tela cheia. São três medidas zeradas, e cada
@@ -39,7 +39,7 @@
   padding: clamp(30px, 18vh, 160px) clamp(20px, 5vw, 48px);
 }
 
-/* ── 2. SAUDAÇÃO ───────────────────────────────────────────────────
+/* ── SAUDAÇÃO ───────────────────────────────────────────────────
    Sussurro em cima do grito: 14px normal logo acima de um 900 de 50px.
    O verde aqui é o apelido do usuário — o único verde da página que
    vai ganhar movimento depois. O wordmark fica parado de propósito. */
@@ -56,7 +56,7 @@
   font-weight: 600;
 }
 
-/* ── 3. GAVETA ESQUERDA ────────────────────────────────────────────
+/* ── GAVETA ESQUERDA ────────────────────────────────────────────
    O .side já é bonito no base.css (fundo, borda, padding, rolagem).
    Aqui só mudamos ONDE ele fica. Colado na borda igual ao resto:
    sem raio, sem afastamento, e uma borda só do lado que encosta
@@ -95,4 +95,63 @@
 .scrim.visivel {
   opacity: 1;
   pointer-events: auto;
+}
+
+.avatar {
+  border-radius: var(--r-sm);
+  border: 1px solid var(--line);
+  background: var(--panel-2);
+  width: 34px;
+  height: 34px;
+  color: var(--text-2);
+  cursor: pointer;
+  justify-content: center;
+  align-items: center;
+  padding: 0;
+}
+
+/* ── CARD DO USUÁRIO ────────────────────────────────────────────
+   Não é gaveta: é um card que nasce do avatar, estilo iOS. O base.css
+   liga e desliga ele com display:none/block, que não anima — aqui
+   viramos pra opacity + transform, que animam.                      */
+.userpanel {
+  display: block;
+  top: calc(var(--topbar-h) + 8px);
+  right: 18px;
+  width: 232px;
+  z-index: 45;
+
+  /*background: rgba(20, 20, 20, .72);
+  backdrop-filter: blur(24px) saturate(160%);*/
+  border: 1px solid var(--line-hi);
+  border-radius: 14px;
+  box-shadow: 0 18px 44px rgba(0, 0, 0, .6);
+
+  /* ↓ O CORAÇÃO DO EFEITO. O card cresce a partir do canto que
+     encosta no avatar, então parece sair do botão. Trocando por
+     "center" isto vira um modal genérico. */  
+  transform-origin: top right;
+
+  opacity: 0;
+  transform: scale(.86) translateY(-8px);
+  pointer-events: none;
+
+  /* fechar: rápido e reto, sai da frente */
+  transition: opacity .12s ease, transform .12s ease;
+}
+
+.userpanel.aberto {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+  pointer-events: auto;
+  /* abrir: o "pop" da mola. O 1.56 passa de 1 de propósito — a escala
+     ultrapassa o tamanho final e volta. É o exagero que dá vida. */
+  transition: opcity .16s ease, transform .26s cubic-bezier(.34, 1.56, .64, 1);
+}
+
+/* pega o clique de fora sem escurecer nada */
+.captura {
+  position: fixed;
+  inset: 0;
+  z-index: 44;
 }

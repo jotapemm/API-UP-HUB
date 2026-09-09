@@ -123,4 +123,6 @@ addEventListener("resize", () => {
     clearTimeout(remontar);
     remontar = setTimeout(construir, 150);
 });
+
+dimensionar();
 construir();

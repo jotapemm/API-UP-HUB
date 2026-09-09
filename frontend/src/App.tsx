@@ -118,8 +118,8 @@ function App() {
         inert={!painelAberto}
       >
         <div className="userpanel-id">
-          <span className="avatar">U</span>
-          <span><b>user</b><span>Nome completo do user</span></span>
+          <span className="avatar">{inicial}</span>
+          <span><b>{tratamento}</b><span>{usuario?.nome ?? ''}</span></span>
         </div>
         <a href="#" role="menuitem">Personalizar</a>
         <hr />

@@ -42,7 +42,7 @@ formCadastro.addEventListener("submit", async (e) => {
     const confirmar = document.querySelector("#cadastro-confirmar").value;
 
     if (senha !== confirmar) {
-        erroCadastro.textContent = mensagemDoErro(corpo, "Não foi possível cadastrar.");
+        erroCadastro.textContent = "As senhas inseridas não coincidem";;
         erroCadastro.hidden = false;
         return;
     }
@@ -61,7 +61,7 @@ formCadastro.addEventListener("submit", async (e) => {
     }
 
     const corpo = await resposta.json().catch(() => ({}));
-    erroCadastro.textContent = corpo.detail || "Não foi possível cadastrar.";
+    erroCadastro.textContent = mensagemDoErro(corpo, "Não foi possível cadastrar.");
     erroCadastro.hidden = false
 
 });

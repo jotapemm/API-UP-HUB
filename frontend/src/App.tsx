@@ -168,7 +168,7 @@ function App() {
               aria-haspopup="menu"
               aria-expanded={painelAberto}
               onClick={() => setPainelAberto(true)}
-            >U</button>
+            >{inicial}</button>
           </header>
 
           <main className="stage">

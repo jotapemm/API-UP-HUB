@@ -116,5 +116,11 @@ function loop(tempo) {
 }
 requestAnimationFrame(loop);
 
-dimensionar();
+let remontar;
+addEventListener("resize", () => {
+    dimensionar();
+    
+    clearTimeout(remontar);
+    remontar = setTimeout(construir, 150);
+});
 construir();

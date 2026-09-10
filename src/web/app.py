@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from src.db import conexao
+from src.web.rotas.catalogo import router as rotas_catalogo
 
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
@@ -22,6 +23,7 @@ def saude():
     return {"ok": True, "setores": n}
 
 app.include_router(rotas_auth)
+app.include_router(rotas_catalogo)
 
 # o mount em "/" tem que ser SEMPRE a ÚLTIMA coisa do arquivo
 app.mount("/", StaticFiles(directory=str(STATIC), html=True), name="static")

@@ -18,11 +18,27 @@ type Usuario = {
   setor_id: number | null
 }
 
+type Automacao = {
+  id: number
+  slug: string
+  nome: string
+  descricao: string
+  url: string | null
+  palavras_chave: string | null
+}
+
+type Setor = {
+  id: number
+  nome: string
+  automacoes: Automacao[]
+}
+
 function App() {
 
   const [menuAberto, setMenuAberto] = useState(false)
   const [painelAberto, setPainelAberto] = useState(false)
   const [usuario, setUsuario] = useState<Usuario | null>(null)
+  const [setores, setSetores] = useState<Setor[]>([])
 
   const botaoMenu = useRef<HTMLButtonElement>(null)
   const botaoAvatar = useRef<HTMLButtonElement>(null)
@@ -80,6 +96,18 @@ function App() {
     finally { location.href = '/entrar.html' }
   }
 
+  useEffect(() => {
+    let vivo = true
+
+    fetch("/api/automacoes")
+      .then((r) => (r.ok ? r.json() : []))
+      .then((dados) => { if (vivo) setSetores(dados) }).catch(() => {
+        /* sem catálogo a sidebar fica vazia, o resto funciona */
+      })
+
+    return () => { vivo = false }
+  }, [])
+
   return (
     <>
       <div className="grain"></div>
@@ -93,10 +121,31 @@ function App() {
           <button className="side-head" type="button">Automações</button>
           <div className="side-body">
             <div>
-              {SETORES.map((nome) => (
-                <a className="side-link" href="#" key={nome}>
-                  <span className="dot"></span>{nome}
-                </a>
+              {setores.map((setor) => (
+                <div className="side-sector open" key={setor.id}>
+                  <button className="side-head" type="button">{setor.nome}</button>
+                  <div className="side-body">
+                    <div>
+                      {setor.automacoes.length > 0 ? (
+                        setor.automacoes.map((a) => (
+                          <a
+                            className={a.url ? 'side-link on' : 'side-link'}
+                            href={a.url ?? '#'}
+                            target={a.url ? '_blank' : undefined}
+                            rel="noopener noreferrer"
+                            title={a.descricao}
+                            key={a.slug}
+                          >
+                            <span className="dot"></span>
+                            {a.nome}
+                          </a>
+                        ))
+                      ) : (
+                        <span className="side-link"><span className="dot"></span>Em breve</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
               ))}
             </div>
           </div>
@@ -129,9 +178,9 @@ function App() {
         <a href="#" role="menuitem">Setor</a>
         <a href="#" role="menuitem">Configurações</a>
         <hr />
-        <a 
-          href="/entrar.html" 
-          className="sair" 
+        <a
+          href="/entrar.html"
+          className="sair"
           role="menuitem"
           onClick={(e) => { e.preventDefault(); sair() }}
         >Sair</a>

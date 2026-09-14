@@ -264,6 +264,8 @@ function App() {
                 <textarea 
                   id="q" 
                   rows={3} 
+                  value={termo}
+                  onChange={(e) => setTermo(e.target.value)}
                   placeholder="Buscar automação | Digite @ para solicitar um chamado | Buscar solução | O que você precisa hoje?" 
                 />
               </div>

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import './App.css'
 
 type Usuario = {
@@ -24,6 +24,9 @@ type Setor = {
   automacoes: Automacao[]
 }
 
+const normalizar = (s: string) =>
+  s.normalize('NFD').replace(/\p{Diacritic}/gu,'').toLowerCase()
+
 function App() {
 
   const [menuAberto, setMenuAberto] = useState(false)
@@ -43,6 +46,27 @@ function App() {
 
   const botaoMenu = useRef<HTMLButtonElement>(null)
   const botaoAvatar = useRef<HTMLButtonElement>(null)
+
+  const TODAS = useMemo(
+    () =>
+      setores.flatMap((s) => 
+        s.automacoes.map((a) => ({
+        ...a,
+        setor: s.nome,
+        chave: normalizar(`${a.nome} ${a.descricao} ${a.palavras_chave ?? ''} ${s.nome}`),
+      })),
+    ),
+    [setores],
+  )
+
+  const [termo, setTermo] = useState('')
+
+  const achados = useMemo(() => {
+    const t = normalizar(termo).trim()
+    if (!t) return []
+    const partes = t.split(/\s+/)
+    return TODAS.filter((i) => partes.every((p) => i.chave.includes(p))).slice(0, 6)
+  }, [termo, TODAS])
 
   useEffect(() => {
     if (!menuAberto) return          // gaveta fechada: nada pra escutar
@@ -130,7 +154,7 @@ function App() {
                     aria-expanded={abertos.has(setor.id)}
                     onClick={() => alternarSetor(setor.id)}
                   >{setor.nome}</button>
-                  <div className="side-body">
+                  <div className="side-body" inert={!abertos.has(setor.id)}>
                     <div>
                       {setor.automacoes.length > 0 ? (
                         setor.automacoes.map((a) => (
@@ -237,7 +261,29 @@ function App() {
 
               <div className="cmd">
                 <label className="sr-only" htmlFor="q">Buscar ou abrir chamado</label>
-                <textarea id="q" rows={3} placeholder="Buscar automação | Digite @ para solicitar um chamado | Buscar solução | O que você precisa hoje?" />
+                <textarea 
+                  id="q" 
+                  rows={3} 
+                  placeholder="Buscar automação | Digite @ para solicitar um chamado | Buscar solução | O que você precisa hoje?" 
+                />
+              </div>
+
+              <div className="results">
+                {achados.map((i) => (
+                  <a 
+                   className="res"
+                   href={i.url ?? '#'}
+                   target={i.url ? '_blank' : undefined}
+                   rel="noopener noreferrer"
+                   key={i.slug}
+                  >
+                    <span><b>{i.nome}</b><br /><small>{i.descricao}</small></span>
+                    <span className="setor">{i.setor}</span>
+                  </a>
+                ))}
+                {termo.trim() && achados.length === 0 && (
+                  <div className="res-none">Nada encontrado para "{termo.trim()}".</div>
+                )}
               </div>
 
               <section className="recentes">

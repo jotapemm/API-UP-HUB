@@ -25,7 +25,10 @@ type Setor = {
 }
 
 const normalizar = (s: string) =>
-  s.normalize('NFD').replace(/\p{Diacritic}/gu,'').toLowerCase()
+  s.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase()
+
+const ehChamado = (v: string) =>
+  v.trim().startsWith('@')
 
 function App() {
 
@@ -49,19 +52,21 @@ function App() {
 
   const TODAS = useMemo(
     () =>
-      setores.flatMap((s) => 
+      setores.flatMap((s) =>
         s.automacoes.map((a) => ({
-        ...a,
-        setor: s.nome,
-        chave: normalizar(`${a.nome} ${a.descricao} ${a.palavras_chave ?? ''} ${s.nome}`),
-      })),
-    ),
+          ...a,
+          setor: s.nome,
+          chave: normalizar(`${a.nome} ${a.descricao} ${a.palavras_chave ?? ''} ${s.nome}`),
+        })),
+      ),
     [setores],
   )
 
   const [termo, setTermo] = useState('')
+  const modoChamado = ehChamado(termo)
 
   const achados = useMemo(() => {
+    if (ehChamado(termo)) return []
     const t = normalizar(termo).trim()
     if (!t) return []
     const partes = t.split(/\s+/)
@@ -148,8 +153,8 @@ function App() {
             <div>
               {setores.map((setor) => (
                 <div className={abertos.has(setor.id) ? 'side-sector open' : 'side-sector'} key={setor.id}>
-                  <button 
-                    className="side-head" 
+                  <button
+                    className="side-head"
                     type="button"
                     aria-expanded={abertos.has(setor.id)}
                     onClick={() => alternarSetor(setor.id)}
@@ -259,25 +264,32 @@ function App() {
               </p>
               <h1 className="wordmark"><span className="b">UP</span> API <span className="b">HUB</span></h1>
 
-              <div className="cmd">
+              <div className={modoChamado ? 'cmd is-chamado' : 'cmd'}>
                 <label className="sr-only" htmlFor="q">Buscar ou abrir chamado</label>
-                <textarea 
-                  id="q" 
-                  rows={3} 
+                <textarea
+                  id="q"
+                  rows={3}
                   value={termo}
                   onChange={(e) => setTermo(e.target.value)}
-                  placeholder="Buscar automação | Digite @ para solicitar um chamado | Buscar solução | O que você precisa hoje?" 
+                  placeholder="Buscar automação | Digite @ para solicitar um chamado | Buscar solução | O que você precisa hoje?"
                 />
+
+                <div className="cmd-foot">
+                  <span className="cmd-mode">{modoChamado ? 'Chamado' : 'Busca'}</span>
+                  <span style={{ fontSize: 11, color: 'var(-text-3)' }}>
+                    {modoChamado ? 'Descreva o problema e aperte Enter para abrir o chamado' : 'Enter abre o primeiro resultado'}
+                  </span>
+                </div>
               </div>
 
               <div className="results">
                 {achados.map((i) => (
-                  <a 
-                   className="res"
-                   href={i.url ?? '#'}
-                   target={i.url ? '_blank' : undefined}
-                   rel="noopener noreferrer"
-                   key={i.slug}
+                  <a
+                    className="res"
+                    href={i.url ?? '#'}
+                    target={i.url ? '_blank' : undefined}
+                    rel="noopener noreferrer"
+                    key={i.slug}
                   >
                     <span><b>{i.nome}</b><br /><small>{i.descricao}</small></span>
                     <span className="setor">{i.setor}</span>

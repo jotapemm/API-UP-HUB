@@ -1,15 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import './App.css'
 
-const SETORES = [
-  'Contabilidade',
-  'Departamento Pessoal',
-  'Financeiro',
-  'Fiscal',
-  'Gerência',
-  'Recuperação Tributária',
-]
-
 type Usuario = {
   id: number
   nome: string
@@ -39,6 +30,16 @@ function App() {
   const [painelAberto, setPainelAberto] = useState(false)
   const [usuario, setUsuario] = useState<Usuario | null>(null)
   const [setores, setSetores] = useState<Setor[]>([])
+  const [abertos, setAbertos] = useState<Set<number>>(new Set())
+
+  const alternarSetor = (id: number) => {
+    setAbertos((antigos) => {
+      const novos = new Set(antigos) // <- cópia, não o mesmo Set
+      if (novos.has(id)) novos.delete(id)
+      else novos.add(id)
+      return novos
+    })
+  }
 
   const botaoMenu = useRef<HTMLButtonElement>(null)
   const botaoAvatar = useRef<HTMLButtonElement>(null)
@@ -122,8 +123,13 @@ function App() {
           <div className="side-body">
             <div>
               {setores.map((setor) => (
-                <div className="side-sector open" key={setor.id}>
-                  <button className="side-head" type="button">{setor.nome}</button>
+                <div className={abertos.has(setor.id) ? 'side-sector open' : 'side-sector'} key={setor.id}>
+                  <button 
+                    className="side-head" 
+                    type="button"
+                    aria-expanded={abertos.has(setor.id)}
+                    onClick={() => alternarSetor(setor.id)}
+                  >{setor.nome}</button>
                   <div className="side-body">
                     <div>
                       {setor.automacoes.length > 0 ? (

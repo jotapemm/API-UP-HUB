@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from 'react'
 import './App.css'
 
 type Usuario = {
@@ -37,6 +37,7 @@ function App() {
   const [usuario, setUsuario] = useState<Usuario | null>(null)
   const [setores, setSetores] = useState<Setor[]>([])
   const [abertos, setAbertos] = useState<Set<number>>(new Set())
+  const [sel, setSel] = useState(0)
 
   const alternarSetor = (id: number) => {
     setAbertos((antigos) => {
@@ -45,6 +46,28 @@ function App() {
       else novos.add(id)
       return novos
     })
+  }
+
+  const abrir = (item: (typeof TODAS)[number]) => {
+    if (item.url) window.open(item.url, '_blank','noopener,noreferrer')
+  }
+
+  const aoTeclarNaCaixa = (e: ReactKeyboardEvent<HTMLTextAreaElement>) => {
+    if (modoChamado) return          // chamado ainda não tem envio: Enter segue quebrando linha
+
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      if (!achados.length) return
+      e.preventDefault()             // senão o cursor do texto anda junto
+      const passo = e.key === 'ArrowDown' ? 1 : -1
+      setSel((s) => (s + passo + achados.length) % achados.length)
+      return
+    }
+
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault()             // na busca, Enter não vira quebra de linha
+      const item = achados[sel]
+      if (item) abrir(item)
+    }
   }
 
   const botaoMenu = useRef<HTMLButtonElement>(null)
@@ -270,7 +293,8 @@ function App() {
                   id="q"
                   rows={3}
                   value={termo}
-                  onChange={(e) => setTermo(e.target.value)}
+                  onChange={(e) => { setTermo(e.target.value); setSel(0)}}
+                  onKeyDown={aoTeclarNaCaixa}
                   placeholder="Buscar automação | Digite @ para solicitar um chamado | Buscar solução | O que você precisa hoje?"
                 />
 
@@ -283,19 +307,20 @@ function App() {
               </div>
 
               <div className="results">
-                {achados.map((i) => (
+                {achados.map((i, n) => (
                   <a
-                    className="res"
+                    className={ n === sel ? 'res sel' : 'res' }
                     href={i.url ?? '#'}
                     target={i.url ? '_blank' : undefined}
                     rel="noopener noreferrer"
                     key={i.slug}
+                    onMouseEnter={() => setSel(n)}
                   >
                     <span><b>{i.nome}</b><br /><small>{i.descricao}</small></span>
                     <span className="setor">{i.setor}</span>
                   </a>
                 ))}
-                {termo.trim() && achados.length === 0 && (
+                {!modoChamado && termo.trim() && achados.length === 0 && (
                   <div className="res-none">Nada encontrado para "{termo.trim()}".</div>
                 )}
               </div>

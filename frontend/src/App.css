@@ -155,3 +155,24 @@
   inset: 0;
   z-index: 44;
 }
+
+/* ── AVISO DA CAIXA DE COMANDO ─────────────────────────────────────── */
+.aviso {
+  margin-top: 10px;
+  padding: 10px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  font-size: 12.5px;
+}
+
+.aviso.ok {
+  color: var(--brand);
+  border-color: var(--brand-dim);
+  background: rgba(0, 196, 140, .06);
+}
+
+.aviso.erro {
+  color: var(--danger);
+  border-color: rgba(229, 72, 77, .4);
+  background: rgba(229, 72, 77, .06);
+}

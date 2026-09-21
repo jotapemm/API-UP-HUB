@@ -38,6 +38,9 @@ function App() {
   const [setores, setSetores] = useState<Setor[]>([])
   const [abertos, setAbertos] = useState<Set<number>>(new Set())
   const [sel, setSel] = useState(0)
+  type Aviso = { tipo: "ok" | "erro"; texto: string }
+  const [enviando, setEnviando] = useState(false)
+  const [aviso, setAviso] = useState<Aviso | null>(null)
 
   const alternarSetor = (id: number) => {
     setAbertos((antigos) => {
@@ -49,11 +52,61 @@ function App() {
   }
 
   const abrir = (item: (typeof TODAS)[number]) => {
-    if (item.url) window.open(item.url, '_blank','noopener,noreferrer')
+    if (item.url) window.open(item.url, '_blank', 'noopener,noreferrer')
+  }
+
+  const abrirChamado = async () => {
+    if (enviando) return              // dedo nervoso: o segundo Enter não abre outro chamado
+    setEnviando(true)
+    setAviso(null)
+
+    try {
+      const r = await fetch('/api/chamados', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ descricao: termo.trim().slice(1) }),   // sem o @
+      })
+
+      if (r.status === 401) { location.href = '/entrar.html'; return }
+
+      if (r.status === 422) {
+        const corpo = await r.json().catch(() => ({}))
+        const tipo = corpo.detail?.[0]?.type
+        setAviso({
+          tipo: 'erro',
+          texto: tipo === 'string_too_long'
+            ? 'O texto passou do limite de 4000 caracteres.'
+            : 'Descreva o problema com um pouco mais de detalhe.',
+        })
+        return
+      }
+
+      if (!r.ok) {
+        setAviso({ tipo: 'erro', texto: 'Não foi possível abrir o chamado. Tente de novo.' })
+        return
+      }
+
+      const chamado = await r.json()
+      setTermo('')
+      setAviso({
+        tipo: 'ok',
+        texto: `Chamado #${chamado.id} aberto. Use esse número se precisar falar com a equipe sobre ele.`,
+      })
+    } catch {
+      setAviso({ tipo: 'erro', texto: 'Sem conexão com o servidor. Seu texto continua aí — tente de novo.' })
+    } finally {
+      setEnviando(false)
+    }
   }
 
   const aoTeclarNaCaixa = (e: ReactKeyboardEvent<HTMLTextAreaElement>) => {
-    if (modoChamado) return          // chamado ainda não tem envio: Enter segue quebrando linha
+    if (modoChamado) {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault()             // Enter envia; Shift+Enter continua quebrando linha
+        abrirChamado()
+      }
+      return
+    }
 
     if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
       if (!achados.length) return
@@ -293,15 +346,20 @@ function App() {
                   id="q"
                   rows={3}
                   value={termo}
-                  onChange={(e) => { setTermo(e.target.value); setSel(0)}}
+                  onChange={(e) => { setTermo(e.target.value); setSel(0); setAviso(null) }}
+                  readOnly={enviando}
                   onKeyDown={aoTeclarNaCaixa}
                   placeholder="Buscar automação | Digite @ para solicitar um chamado | Buscar solução | O que você precisa hoje?"
                 />
+                
+                <div role="status">
+                  {aviso && <div className={`aviso ${aviso.tipo}`}>{aviso.texto}</div>}
+                </div>
 
                 <div className="cmd-foot">
                   <span className="cmd-mode">{modoChamado ? 'Chamado' : 'Busca'}</span>
-                  <span style={{ fontSize: 11, color: 'var(-text-3)' }}>
-                    {modoChamado ? 'Descreva o problema e aperte Enter para abrir o chamado' : 'Enter abre o primeiro resultado'}
+                  <span style={{ fontSize: 11, color: 'var(--text-3)' }}>
+                    {enviando ? 'Enviando…' : modoChamado ? 'Descreva o problema e aperte Enter para abrir o chamado' : '↑↓ para escolher · Enter para abrir'}
                   </span>
                 </div>
               </div>
@@ -309,7 +367,7 @@ function App() {
               <div className="results">
                 {achados.map((i, n) => (
                   <a
-                    className={ n === sel ? 'res sel' : 'res' }
+                    className={n === sel ? 'res sel' : 'res'}
                     href={i.url ?? '#'}
                     target={i.url ? '_blank' : undefined}
                     rel="noopener noreferrer"

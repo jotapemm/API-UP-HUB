@@ -176,3 +176,21 @@
   border-color: rgba(229, 72, 77, .4);
   background: rgba(229, 72, 77, .06);
 }
+
+/* ── SERVIDOR FORA ─────────────────────────────────────────────────── */
+.faixa-offline {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 10px 18px;
+  font-size: 13px;
+  color: var(--text);
+  background: rgba(229, 162, 61, .08);
+  border-bottom: 1px solid rgba(229, 162, 61, .35);
+}
+
+.faixa-offline .btn {
+  padding: 5px 12px;
+  font-size: 12px;
+}

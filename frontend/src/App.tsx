@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from 'react'
+import { useDigitacao } from './useDigitacao'
 import './App.css'
 
 type Usuario = {
@@ -24,6 +25,14 @@ type Setor = {
   automacoes: Automacao[]
 }
 
+const FRASES = [
+  'Buscar automação',
+  'Tente "questor" ou "icms"',
+  'Digite @ para solicitar um chamado',
+  'Buscar solução',
+  'O que você precisa hoje?',
+]
+
 const normalizar = (s: string) =>
   s.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase()
 
@@ -41,6 +50,7 @@ function App() {
   type Aviso = { tipo: "ok" | "erro"; texto: string }
   const [enviando, setEnviando] = useState(false)
   const [aviso, setAviso] = useState<Aviso | null>(null)
+  const [semServidor, setSemServidor] = useState(false)
 
   const alternarSetor = (id: number) => {
     setAbertos((antigos) => {
@@ -140,6 +150,7 @@ function App() {
 
   const [termo, setTermo] = useState('')
   const modoChamado = ehChamado(termo)
+  const dica = useDigitacao(FRASES, termo === '')
 
   const achados = useMemo(() => {
     if (ehChamado(termo)) return []
@@ -190,7 +201,7 @@ function App() {
         return r.json()
       })
       .then((dados) => { if (vivo && dados) setUsuario(dados) })
-      .catch(() => {/* rede caiu: fica sem nome, mas não quebra a tela */ })
+      .catch(() => { if (vivo) setSemServidor(true) })
     return () => { vivo = false }
   }, [])
 
@@ -206,10 +217,13 @@ function App() {
     let vivo = true
 
     fetch("/api/automacoes")
-      .then((r) => (r.ok ? r.json() : []))
-      .then((dados) => { if (vivo) setSetores(dados) }).catch(() => {
-        /* sem catálogo a sidebar fica vazia, o resto funciona */
+      .then((r) => {
+        if (r.status === 401) return []          // o efeito do /api/eu já te manda pro login
+        if (!r.ok) throw new Error('catalogo')   // 500 não é "catálogo vazio", é problema
+        return r.json()
       })
+      .then((dados) => { if (vivo) setSetores(dados) })
+      .catch(() => { if (vivo) setSemServidor(true) })
 
     return () => { vivo = false }
   }, [])
@@ -331,6 +345,15 @@ function App() {
             >{inicial}</button>
           </header>
 
+          {semServidor && (
+            <div className="faixa-offline" role="alert" >
+              Sem conexão com o servidor do hub. Suas automações e seu nome não carregaram.
+              <button type="button" className="btn" onClick={() => location.reload()}>
+                Tentar de novo
+              </button>
+            </div>
+          )}
+
           <main className="stage">
             <div className="stage-in">
               <p className="saudacao">
@@ -341,7 +364,7 @@ function App() {
               <h1 className="wordmark"><span className="b">UP</span> API <span className="b">HUB</span></h1>
 
               <div className={modoChamado ? 'cmd is-chamado' : 'cmd'}>
-                <label className="sr-only" htmlFor="q">Buscar ou abrir chamado</label>
+                <label className="sr-only" htmlFor="q">Buscar automação ou digitar @ para abrir um chamado</label>
                 <textarea
                   id="q"
                   rows={3}
@@ -349,9 +372,9 @@ function App() {
                   onChange={(e) => { setTermo(e.target.value); setSel(0); setAviso(null) }}
                   readOnly={enviando}
                   onKeyDown={aoTeclarNaCaixa}
-                  placeholder="Buscar automação | Digite @ para solicitar um chamado | Buscar solução | O que você precisa hoje?"
+                  placeholder={dica}
                 />
-                
+
                 <div role="status">
                   {aviso && <div className={`aviso ${aviso.tipo}`}>{aviso.texto}</div>}
                 </div>

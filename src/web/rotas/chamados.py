@@ -25,3 +25,20 @@ def abrir_chamado(dados: ChamadoEntrada, usuario=Depends(usuario_atual)):
         ).fetchone()
     
     return chamado
+
+
+@router.get("/chamados")
+def meus_chamados(usuario=Depends(usuario_atual)):
+    with conexao() as con:
+        linhas = con.execute(
+            """SELECT c.id, c.descricao, c.status, c.criado_em,
+                      a.nome AS automacao
+               FROM chamados c
+               LEFT JOIN automacoes a ON a.id = c.automacao_id
+               WHERE c.usuario_id = %s
+               ORDER BY c.criado_em DESC, c.id DESC
+               LIMIT 50""",
+            (usuario["id"],),
+        ).fetchall()
+        
+    return linhas

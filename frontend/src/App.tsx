@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from 'react'
 import { useDigitacao } from './useDigitacao'
+import { lerRecentes, registrarRecente } from './recentes'
 import './App.css'
 
 type Usuario = {
@@ -51,6 +52,7 @@ function App() {
   const [enviando, setEnviando] = useState(false)
   const [aviso, setAviso] = useState<Aviso | null>(null)
   const [semServidor, setSemServidor] = useState(false)
+  const [recentes, setRecentes] = useState<string[]>([])
 
   const alternarSetor = (id: number) => {
     setAbertos((antigos) => {
@@ -61,7 +63,13 @@ function App() {
     })
   }
 
+  const registrar = (slug: string) => {
+    if (!usuario) return
+    setRecentes(registrarRecente(usuario.id, slug))
+  }
+
   const abrir = (item: (typeof TODAS)[number]) => {
+    registrar(item.slug)
     if (item.url) window.open(item.url, '_blank', 'noopener,noreferrer')
   }
 
@@ -160,6 +168,10 @@ function App() {
     return TODAS.filter((i) => partes.every((p) => i.chave.includes(p))).slice(0, 6)
   }, [termo, TODAS])
 
+  const itensRecentes = useMemo(
+    () => recentes.flatMap((slug) => TODAS.filter((a) => a.slug === slug)), [recentes, TODAS],
+  )
+
   useEffect(() => {
     if (!menuAberto) return          // gaveta fechada: nada pra escutar
 
@@ -228,6 +240,10 @@ function App() {
     return () => { vivo = false }
   }, [])
 
+  useEffect(() => {
+    if (usuario) setRecentes(lerRecentes(usuario.id))
+  }, [usuario])
+
   return (
     <>
       <div className="grain"></div>
@@ -260,6 +276,7 @@ function App() {
                             rel="noopener noreferrer"
                             title={a.descricao}
                             key={a.slug}
+                            onClick={() => registrar(a.slug)}
                           >
                             <span className="dot"></span>
                             {a.nome}
@@ -396,6 +413,7 @@ function App() {
                     rel="noopener noreferrer"
                     key={i.slug}
                     onMouseEnter={() => setSel(n)}
+                    onClick={() => registrar(i.slug)}
                   >
                     <span><b>{i.nome}</b><br /><small>{i.descricao}</small></span>
                     <span className="setor">{i.setor}</span>
@@ -409,7 +427,23 @@ function App() {
               <section className="recentes">
                 <h3>Recentes</h3>
                 <div className="recentes-box">
-                  <div className="recentes-vazio">O que você abrir aparece aqui.</div>
+                  {itensRecentes.length > 0 ? (
+                    itensRecentes.map((a) => (
+                    <a 
+                      className={a.url ? 'chip on' : 'chip'}
+                      href={a.url ?? '#'}
+                      target={a.url ? '_blank' : undefined}
+                      rel="noopener noreferrer"
+                      title={a.descricao}
+                      key={a.slug}
+                      onClick={() => registrar(a.slug)}
+                    >
+                      <span className="dot"></span>{a.nome}  
+                    </a>
+                    )) 
+                  ) : (
+                    <div className="recentes-vazio">O que você abrir aparece aqui.</div>
+                  )}
                 </div>
               </section>
             </div>

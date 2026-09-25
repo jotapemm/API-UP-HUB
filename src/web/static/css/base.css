@@ -697,6 +697,39 @@ button {
   pointer-events: none;
 }
 
+/* ── BRILHO DO VERDE ────────────────────────────────────────────────
+   Uma luz varre o texto. O período de 6,5s é um harmônico da onda do
+   canvas do entrar.html, que leva ~52s pra dar uma volta completa —
+   as duas telas ficam no mesmo compasso.                            */
+.brilho {
+  color: var(--brand);
+  /* se o recorte não pegar, fica verde chapado */
+  background: linear-gradient(100deg,
+      var(--brand) 42%, #7BFFD4 50%, var(--brand) 58%);
+  background-size: 250% 100%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: varrer 6.5s linear infinite;
+}
+
+@keyframes varrer {
+  from {
+    background-position: 150% 0;
+  }
+
+  to {
+    background-position: -50% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .brilho {
+    animation: none;
+    -webkit-text-fill-color: var(--brand);
+  }
+}
+
 /* ── 7. RESPONSIVO ────────────────────────────────────────────────── */
 @media (max-width: 900px) {
   .auth {

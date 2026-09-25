@@ -463,7 +463,7 @@ function App() {
               <div className="stage-in">
                 <p className="saudacao">
                   {usuario
-                    ? <>Olá <span className="nome">{tratamento}</span>, bem-vindo ao</>
+                    ? <>Olá <span className="nome brilho">{tratamento}</span>, bem-vindo ao</>
                     : <>&nbsp;</>}
                 </p>
                 <h1 className="wordmark"><span className="b">UP</span> API <span className="b">HUB</span></h1>

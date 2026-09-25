@@ -32,7 +32,7 @@ def criar_sessao(con, usuario_id: int, ip: str | None, user_agent: str | None) -
 
 def usuario_da_sessao(con, token: str) -> dict | None:
     return con.execute(
-        """SELECT u.id, u.nome, u.apelido, u.email, u.setor_id
+        """SELECT u.id, u.nome, u.apelido, u.email, u.setor_id, u.papel
            FROM sessoes s JOIN usuarios u ON u.id = s.usuario_id
            WHERE s.token = %s AND s.expira_em > now() AND u.ativo""",
            (token,),

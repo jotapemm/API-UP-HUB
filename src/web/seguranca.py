@@ -1,4 +1,4 @@
-from fastapi import Cookie, HTTPException
+from fastapi import Cookie, Depends, HTTPException
 
 from src.auth import usuario_da_sessao
 from src.db import conexao
@@ -16,4 +16,10 @@ def usuario_atual(sessao: str | None = Cookie(default=None, alias=NOME_COOKIE)):
     if not usuario:
         raise HTTPException(401, "Sessão inválida ou expirada.")
     
+    return usuario
+
+
+def usuario_suporte(usuario=Depends(usuario_atual)):
+    if usuario["papel"] != "suporte":
+        raise HTTPException(403, "Esta área é de responsabilidade única do suporte")
     return usuario

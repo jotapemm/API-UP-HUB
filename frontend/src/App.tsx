@@ -26,6 +26,21 @@ type Setor = {
   automacoes: Automacao[]
 }
 
+type Chamado = {
+  id: number
+  descricao: string
+  status: string
+  criado_em: string
+  automacao: string | null
+}
+
+const ROTULO: Record<string, string> = {
+  aberto: 'Aberto',
+  em_andamento: 'Em andamento',
+  resolvido: 'Resolvido',
+  cancelado: 'Cancelado',
+}
+
 const FRASES = [
   'Buscar automação',
   'Tente "questor" ou "icms"',
@@ -40,6 +55,9 @@ const normalizar = (s: string) =>
 const ehChamado = (v: string) =>
   v.trim().startsWith('@')
 
+const quando = (iso: string) =>
+  new Date(iso).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })
+
 function App() {
 
   const [menuAberto, setMenuAberto] = useState(false)
@@ -53,6 +71,9 @@ function App() {
   const [aviso, setAviso] = useState<Aviso | null>(null)
   const [semServidor, setSemServidor] = useState(false)
   const [recentes, setRecentes] = useState<string[]>([])
+  const [vista, setVista] = useState<'inicio' | 'entrada'>('inicio')
+  const [chamados, setChamados] = useState<Chamado[] | null>(null)
+  const [erroChamados, setErroChamados] = useState(false)
 
   const alternarSetor = (id: number) => {
     setAbertos((antigos) => {
@@ -244,6 +265,24 @@ function App() {
     if (usuario) setRecentes(lerRecentes(usuario.id))
   }, [usuario])
 
+  useEffect(() => {
+    if (vista !== 'entrada') return
+
+    let vivo = true
+    setChamados(null)
+    setErroChamados(false)
+
+    fetch('/api/chamados')
+      .then((r) => {
+        if (!r.ok) throw new Error('chamados')
+        return r.json()
+      })
+      .then((dados) => { if (vivo) setChamados(dados) })
+      .catch(() => { if (vivo) setErroChamados(true) })
+
+    return () => { vivo = false }
+  }, [vista])
+
   return (
     <>
       <div className="grain"></div>
@@ -315,7 +354,11 @@ function App() {
         <a href="#" role="menuitem">Personalizar</a>
         <hr />
         <a href="#" role="menuitem">Perfil</a>
-        <a href="#" role="menuitem">Caixa de entrada</a>
+        <a
+          href="#"
+          role="menuitem"
+          onClick={(e) => { e.preventDefault(); setVista('entrada'); setPainelAberto(false) }}
+        >Caixa de entrada</a>
         <a href="#" role="menuitem">Automações</a>
         <a href="#" role="menuitem">Setor</a>
         <a href="#" role="menuitem">Configurações</a>
@@ -372,81 +415,127 @@ function App() {
           )}
 
           <main className="stage">
-            <div className="stage-in">
-              <p className="saudacao">
-                {usuario
-                  ? <>Olá <span className="nome">{tratamento}</span>, bem-vindo ao</>
-                  : <>&nbsp;</>}
-              </p>
-              <h1 className="wordmark"><span className="b">UP</span> API <span className="b">HUB</span></h1>
+            {vista === 'entrada' ? (
 
-              <div className={modoChamado ? 'cmd is-chamado' : 'cmd'}>
-                <label className="sr-only" htmlFor="q">Buscar automação ou digitar @ para abrir um chamado</label>
-                <textarea
-                  id="q"
-                  rows={3}
-                  value={termo}
-                  onChange={(e) => { setTermo(e.target.value); setSel(0); setAviso(null) }}
-                  readOnly={enviando}
-                  onKeyDown={aoTeclarNaCaixa}
-                  placeholder={dica}
-                />
-
-                <div role="status">
-                  {aviso && <div className={`aviso ${aviso.tipo}`}>{aviso.texto}</div>}
+              <section className="entrada">
+                <div className="entrada-topo">
+                  <h2>Caixa de entrada</h2>
+                  <button
+                    type="button"
+                    className="btn"
+                    onClick={() => setVista('inicio')}
+                  >Voltar</button>
                 </div>
-
-                <div className="cmd-foot">
-                  <span className="cmd-mode">{modoChamado ? 'Chamado' : 'Busca'}</span>
-                  <span style={{ fontSize: 11, color: 'var(--text-3)' }}>
-                    {enviando ? 'Enviando…' : modoChamado ? 'Descreva o problema e aperte Enter para abrir o chamado' : '↑↓ para escolher · Enter para abrir'}
-                  </span>
-                </div>
-              </div>
-
-              <div className="results">
-                {achados.map((i, n) => (
-                  <a
-                    className={n === sel ? 'res sel' : 'res'}
-                    href={i.url ?? '#'}
-                    target={i.url ? '_blank' : undefined}
-                    rel="noopener noreferrer"
-                    key={i.slug}
-                    onMouseEnter={() => setSel(n)}
-                    onClick={() => registrar(i.slug)}
-                  >
-                    <span><b>{i.nome}</b><br /><small>{i.descricao}</small></span>
-                    <span className="setor">{i.setor}</span>
-                  </a>
-                ))}
-                {!modoChamado && termo.trim() && achados.length === 0 && (
-                  <div className="res-none">Nada encontrado para "{termo.trim()}".</div>
+                {erroChamados && (
+                  <div className="aviso erro">Não foi possível carregar seus chamados.</div>
                 )}
-              </div>
 
-              <section className="recentes">
-                <h3>Recentes</h3>
-                <div className="recentes-box">
-                  {itensRecentes.length > 0 ? (
-                    itensRecentes.map((a) => (
-                    <a 
-                      className={a.url ? 'chip on' : 'chip'}
-                      href={a.url ?? '#'}
-                      target={a.url ? '_blank' : undefined}
+                {!erroChamados && chamados === null && (
+                  <p className="recentes-vazio">Carregando...</p>
+                )}
+
+                {chamados?.length === 0 && (
+                  <p className="recentes-vazio">
+                    Você ainda não abriu nenhum chamado. Digite <b>@</b> na caixa de busca para abrir o primeiro.
+                  </p>
+                )}
+
+                {chamados && chamados.length > 0 && (
+                  <div className="chamados">
+                    {chamados.map((c) => (
+                      <article className="chamado" key={c.id}>
+                        <div className="chamado-topo">
+                          <span className="chamado-num">#{c.id}</span>
+                          <span className={`estado ${c.status}`}>{ROTULO[c.status] ?? c.status}</span>
+
+                          {c.automacao && <span className="chamado-num">{c.automacao}</span>}
+                          <span className="chamado-quando">{quando(c.criado_em)}</span>
+                        </div>
+                        <p>{c.descricao}</p>
+                      </article>
+                    ))}
+                  </div>
+                )}
+              </section>
+
+            ) : (
+              
+              <div className="stage-in">
+                <p className="saudacao">
+                  {usuario
+                    ? <>Olá <span className="nome">{tratamento}</span>, bem-vindo ao</>
+                    : <>&nbsp;</>}
+                </p>
+                <h1 className="wordmark"><span className="b">UP</span> API <span className="b">HUB</span></h1>
+
+                <div className={modoChamado ? 'cmd is-chamado' : 'cmd'}>
+                  <label className="sr-only" htmlFor="q">Buscar automação ou digitar @ para abrir um chamado</label>
+                  <textarea
+                    id="q"
+                    rows={3}
+                    value={termo}
+                    onChange={(e) => { setTermo(e.target.value); setSel(0); setAviso(null) }}
+                    readOnly={enviando}
+                    onKeyDown={aoTeclarNaCaixa}
+                    placeholder={dica}
+                  />
+
+                  <div role="status">
+                    {aviso && <div className={`aviso ${aviso.tipo}`}>{aviso.texto}</div>}
+                  </div>
+
+                  <div className="cmd-foot">
+                    <span className="cmd-mode">{modoChamado ? 'Chamado' : 'Busca'}</span>
+                    <span style={{ fontSize: 11, color: 'var(--text-3)' }}>
+                      {enviando ? 'Enviando…' : modoChamado ? 'Descreva o problema e aperte Enter para abrir o chamado' : '↑↓ para escolher · Enter para abrir'}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="results">
+                  {achados.map((i, n) => (
+                    <a
+                      className={n === sel ? 'res sel' : 'res'}
+                      href={i.url ?? '#'}
+                      target={i.url ? '_blank' : undefined}
                       rel="noopener noreferrer"
-                      title={a.descricao}
-                      key={a.slug}
-                      onClick={() => registrar(a.slug)}
+                      key={i.slug}
+                      onMouseEnter={() => setSel(n)}
+                      onClick={() => registrar(i.slug)}
                     >
-                      <span className="dot"></span>{a.nome}  
+                      <span><b>{i.nome}</b><br /><small>{i.descricao}</small></span>
+                      <span className="setor">{i.setor}</span>
                     </a>
-                    )) 
-                  ) : (
-                    <div className="recentes-vazio">O que você abrir aparece aqui.</div>
+                  ))}
+                  {!modoChamado && termo.trim() && achados.length === 0 && (
+                    <div className="res-none">Nada encontrado para "{termo.trim()}".</div>
                   )}
                 </div>
-              </section>
-            </div>
+
+                <section className="recentes">
+                  <h3>Recentes</h3>
+                  <div className="recentes-box">
+                    {itensRecentes.length > 0 ? (
+                      itensRecentes.map((a) => (
+                        <a
+                          className={a.url ? 'chip on' : 'chip'}
+                          href={a.url ?? '#'}
+                          target={a.url ? '_blank' : undefined}
+                          rel="noopener noreferrer"
+                          title={a.descricao}
+                          key={a.slug}
+                          onClick={() => registrar(a.slug)}
+                        >
+                          <span className="dot"></span>{a.nome}
+                        </a>
+                      ))
+                    ) : (
+                      <div className="recentes-vazio">O que você abrir aparece aqui.</div>
+                    )}
+                  </div>
+                </section>
+              </div>
+            )}
           </main>
         </div>
       </div>

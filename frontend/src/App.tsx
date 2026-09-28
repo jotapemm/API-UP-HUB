@@ -421,11 +421,13 @@ function App() {
         <a href="#" role="menuitem">Automações</a>
         <a href="#" role="menuitem">Setor</a>
         <a href="#" role="menuitem">Configurações</a>
-        <a
-          href="#"
-          role="menuitem"
-          onClick={(e) => { e.preventDefault(); setVista('triagem'); setPainelAberto(false) }}
-        >Triagem</a>
+        {usuario?.papel === 'suporte' && (
+          <a
+            href="#"
+            role="menuitem"
+            onClick={(e) => { e.preventDefault(); setVista('triagem'); setPainelAberto(false) }}
+          >Triagem</a>
+        )}
         <hr />
         <a
           href="/entrar.html"

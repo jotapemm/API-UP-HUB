@@ -10,21 +10,26 @@ router = APIRouter(prefix="/api/triagem", tags=["triagem"])
 
 
 @router.get("/chamados")
-def listar_todos(usuario=Depends(usuario_suporte)):
+def listar_todos(
+    ordem: Literal["antigos", "recentes"] = "antigos",
+    usuario=Depends(usuario_suporte),
+):
+    direcao = {"antigos": "ASC", "recentes": "DESC"}[ordem]
+    
     with conexao() as con:
         return con.execute(
-            """SELECT c.id, c.descricao, c.status, c.criado_em, c.atualizado_em,
-                      a.nome         AS automacao,
-                      quem.nome      AS aberto_por,
-                      quem.email     AS email_de_quem_abriu,
-                      atendente.nome AS atendido_por
-               FROM chamados c
-               JOIN usuarios quem ON quem.id = c.usuario_id
-               LEFT JOIN automacoes a ON a.id = c.automacao_id
-               LEFT JOIN usuarios atendente ON atendente.id = c.atendido_por
-               ORDER BY (c.status IN ('resolvido', 'cancelado')),
-                        c.criado_em DESC, c.id DESC 
-               LIMIT 100"""
+            f"""SELECT c.id, c.descricao, c.status, c.criado_em, c.atualizado_em,
+                       a.nome         AS automacao,
+                       quem.nome      AS aberto_por,
+                       quem.email     AS email_de_quem_abriu,
+                       atendente.nome AS atendido_por
+                FROM chamados c
+                JOIN usuarios quem ON quem.id = c.usuario_id
+                LEFT JOIN automacoes a ON a.id = c.automacao_id
+                LEFT JOIN usuarios atendente ON atendente.id = c.atendido_por
+                ORDER BY (c.status IN ('resolvido', 'cancelado')),
+                         c.criado_em {direcao}, c.id {direcao}
+                LIMIT 100"""
         ).fetchall()
         
         

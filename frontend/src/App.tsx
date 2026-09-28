@@ -9,6 +9,7 @@ type Usuario = {
   apelido: string | null
   email: string
   setor_id: number | null
+  papel: string
 }
 
 type Automacao = {
@@ -32,6 +33,13 @@ type Chamado = {
   status: string
   criado_em: string
   automacao: string | null
+}
+
+type ChamadoFila = Chamado & {
+  atualizado_em: string
+  aberto_por: string
+  email_de_quem_abriu: string
+  atendido_por: string | null
 }
 
 const ROTULO: Record<string, string> = {
@@ -58,6 +66,16 @@ const ehChamado = (v: string) =>
 const quando = (iso: string) =>
   new Date(iso).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })
 
+const PROXIMOS: Record<string, { status: string; rotulo: string }[]> = {
+  aberto: [{ status: 'em_andamento', rotulo: 'Assumir' },
+  { status: 'resolvido', rotulo: 'Resolver' },
+  { status: 'cancelado', rotulo: 'Cancelar' }],
+  em_andamento: [{ status: 'resolvido', rotulo: 'Resolver' },
+  { status: 'cancelado', rotulo: 'Cancelar' }],
+  resolvido: [{ status: 'aberto', rotulo: 'Reabrir' }],
+  cancelado: [{ status: 'aberto', rotulo: 'Reabrir' }],
+}
+
 function App() {
 
   const [menuAberto, setMenuAberto] = useState(false)
@@ -71,9 +89,15 @@ function App() {
   const [aviso, setAviso] = useState<Aviso | null>(null)
   const [semServidor, setSemServidor] = useState(false)
   const [recentes, setRecentes] = useState<string[]>([])
-  const [vista, setVista] = useState<'inicio' | 'entrada'>('inicio')
+  const [vista, setVista] = useState<'inicio' | 'entrada' | 'triagem'>('inicio')
   const [chamados, setChamados] = useState<Chamado[] | null>(null)
   const [erroChamados, setErroChamados] = useState(false)
+  const [fila, setFila] = useState<ChamadoFila[] | null>(null)
+  const [erroFila, setErroFila] = useState(false)
+  const [ordem, setOrdem] = useState<'antigos' | 'recentes'>('antigos')
+  const [recarga, setRecarga] = useState(0)
+  const [mudando, setMudando] = useState<number | null>(null)
+
 
   const alternarSetor = (id: number) => {
     setAbertos((antigos) => {
@@ -193,6 +217,23 @@ function App() {
     () => recentes.flatMap((slug) => TODAS.filter((a) => a.slug === slug)), [recentes, TODAS],
   )
 
+  const mudarStatus = async (id: number, status: string) => {
+    setMudando(id)
+    try {
+      const r = await fetch(`/api/triagem/chamados/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status }),
+      })
+      if (!r.ok) throw new Error('patch')
+      setRecarga((n) => n + 1)
+    } catch {
+      setErroFila(true)
+    } finally {
+      setMudando(null)
+    }
+  }
+
   useEffect(() => {
     if (!menuAberto) return          // gaveta fechada: nada pra escutar
 
@@ -283,6 +324,24 @@ function App() {
     return () => { vivo = false }
   }, [vista])
 
+  useEffect(() => {
+    if (vista !== 'triagem') return
+
+    let vivo = true
+    setFila(null)
+    setErroFila(false)
+
+    fetch(`/api/triagem/chamados?ordem=${ordem}`)
+      .then((r) => {
+        if (!r.ok) throw new Error('fila')
+        return r.json()
+      })
+      .then((dados) => { if (vivo) setFila(dados) })
+      .catch(() => { if (vivo) setErroFila(true) })
+
+    return () => { vivo = false }
+  }, [vista, ordem, recarga])
+
   return (
     <>
       <div className="grain"></div>
@@ -362,6 +421,11 @@ function App() {
         <a href="#" role="menuitem">Automações</a>
         <a href="#" role="menuitem">Setor</a>
         <a href="#" role="menuitem">Configurações</a>
+        <a
+          href="#"
+          role="menuitem"
+          onClick={(e) => { e.preventDefault(); setVista('triagem'); setPainelAberto(false) }}
+        >Triagem</a>
         <hr />
         <a
           href="/entrar.html"
@@ -415,8 +479,55 @@ function App() {
           )}
 
           <main className="stage">
-            {vista === 'entrada' ? (
+            {vista === 'triagem' ? (
+              <section className="entrada">
+                <div className="entrada-topo">
+                  <h2>Triagem</h2>
+                  <button
+                    type="button"
+                    className="btn"
+                    onClick={() => setOrdem(ordem === 'antigos' ? 'recentes' : 'antigos')}
+                  >
+                    {ordem === 'antigos' ? 'Mais antigos primeiro ↑' : 'Mais recentes primeiro ↓'}
+                  </button>
+                  <button type="button" className="btn" onClick={() => setVista('inicio')}>Voltar</button>
+                </div>
 
+                {erroFila && <div className="aviso erro">Não foi possível carregar a fila.</div>}
+                {!erroFila && fila === null && <p className="recentes-vazio">Carregando…</p>}
+                {fila?.length === 0 && <p className="recentes-vazio">Nenhum chamado na fila.</p>}
+
+                {fila && fila.length > 0 && (
+                  <div className="chamados">
+                    {fila.map((c) => (
+                      <article className="chamado" key={c.id}>
+                        <div className="chamado-topo">
+                          <span className="chamado-num">#{c.id}</span>
+                          <span className={`estado ${c.status}`}>{ROTULO[c.status] ?? c.status}</span>
+                          <span className="chamado-num">{c.aberto_por}</span>
+                          <span className="chamado-quando">{quando(c.criado_em)}</span>
+                        </div>
+                        <p>{c.descricao}</p>
+                        <div className="fila-acoes">
+                          {(PROXIMOS[c.status] ?? []).map((acao) => (
+                            <button
+                              type="button"
+                              className="btn"
+                              key={acao.status}
+                              disabled={mudando === c.id}
+                              onClick={() => mudarStatus(c.id, acao.status)}
+                            >{acao.rotulo}</button>
+                          ))}
+                          {c.atendido_por && (
+                            <span className="chamado-quando">por {c.atendido_por}</span>
+                          )}
+                        </div>
+                      </article>
+                    ))}
+                  </div>
+                )}
+              </section>
+            ) : vista === 'entrada' ? (
               <section className="entrada">
                 <div className="entrada-topo">
                   <h2>Caixa de entrada</h2>
@@ -459,7 +570,7 @@ function App() {
               </section>
 
             ) : (
-              
+
               <div className="stage-in">
                 <p className="saudacao">
                   {usuario

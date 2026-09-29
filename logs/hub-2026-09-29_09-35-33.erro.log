@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "\\192.168.0.50\dados\UP-API\UP API HUB\main.py", line 8, in <module>
+    @app.get("/")
+     ^^^
+NameError: name 'app' is not defined

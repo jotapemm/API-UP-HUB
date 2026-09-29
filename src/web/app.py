@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from fastapi.responses import RedirectResponse
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -16,6 +17,10 @@ from src.web.rotas.auth import router as rotas_auth
 
 STATIC = Path(__file__).parent / "static"
 app = FastAPI(title="UP API HUB")
+
+@app.get("/")
+def raiz():
+    return RedirectResponse("/app/")
 
 
 @app.get("/api/saude")

@@ -25,6 +25,21 @@ $logs      = Join-Path $raiz 'logs'
 $historico = Join-Path $logs 'historico.log'
 $python    = 'C:\Python314\python.exe'
 
+# Escada de espera entre uma queda e a próxima tentativa. O último
+# degrau é onde ele fica: 5 minutos pra sempre, sem desistir.
+#
+# Não desistir é deliberado. As quedas que este hub já teve foram o
+# disco do servidor encher e a máquina reiniciar — as duas se resolvem
+# sozinhas. Um supervisor que desiste deixaria o hub no chão DEPOIS da
+# causa ter passado, esperando alguém perceber.
+$esperas = @(5, 10, 30, 60, 120, 300)
+
+# Quantas quedas nos últimos JANELA minutos definem em que degrau da
+# escada estamos. Contar por janela, e não por quedas seguidas, evita
+# o furo de uma tentativa demorada zerar o contador: uma subida que
+# falha em 37s (disco de rede lento) não significa que o hub ficou de pé.
+$JANELA_MIN = 10
+
 New-Item -ItemType Directory -Force -Path $logs | Out-Null
 
 function Anotar($texto) {
@@ -32,25 +47,30 @@ function Anotar($texto) {
         Add-Content -Encoding utf8 $historico
 }
 
-# Faxina: logs com mais de 14 dias não ajudam ninguém e enchem o disco
-# do servidor (que já encheu uma vez).
-Get-ChildItem -Path $logs -Filter 'hub-*.log' -ErrorAction SilentlyContinue |
-    Where-Object { $_.LastWriteTime -lt (Get-Date).AddDays(-14) } |
-    Remove-Item -Force -ErrorAction SilentlyContinue
-
-# Quantas quedas rápidas seguidas. Queda rápida = o hub nem chegou a
-# ficar de pé, então insistir na mesma velocidade só enche o disco.
-$quedasRapidas = 0
-$esperas = @(5, 10, 30, 60, 120)
+$quedas = @()
 
 while ($true) {
-    # Um par de arquivos por subida: cada queda fica isolada no seu
-    # próprio log, e o mais recente é sempre o que interessa.
-    $carimbo = Get-Date -Format 'yyyy-MM-dd_HH-mm-ss'
-    $saida   = Join-Path $logs "hub-$carimbo.log"
-    $erro    = Join-Path $logs "hub-$carimbo.erro.log"
+    # Faxina a cada volta, não só na primeira: num laço que nunca
+    # termina, limpar só na entrada é limpar uma vez na vida.
+    Get-ChildItem -Path $logs -Filter 'hub-*' -ErrorAction SilentlyContinue |
+        Where-Object { $_.LastWriteTime -lt (Get-Date).AddDays(-14) } |
+        Remove-Item -Force -ErrorAction SilentlyContinue
 
-    Anotar "subindo ($carimbo)"
+    # Em operação normal, um par de arquivos por subida: cada queda
+    # fica isolada no seu próprio log. Mas numa falha que se repete,
+    # isso viraria centenas de arquivos — então, a partir do momento
+    # em que a escada chega no último degrau, passa a reusar um par
+    # fixo, sempre com a falha mais recente.
+    $sustentada = $quedas.Count -ge $esperas.Count
+    if ($sustentada) {
+        $etiqueta = 'falha-continua'
+    } else {
+        $etiqueta = Get-Date -Format 'yyyy-MM-dd_HH-mm-ss'
+    }
+    $saida = Join-Path $logs "hub-$etiqueta.log"
+    $erro  = Join-Path $logs "hub-$etiqueta.erro.log"
+
+    Anotar "subindo ($etiqueta)"
     $inicio = Get-Date
 
     # O -u desliga o buffer da saída do Python. Sem ele, o texto fica
@@ -60,21 +80,21 @@ while ($true) {
         -WorkingDirectory $raiz -NoNewWindow -Wait -PassThru `
         -RedirectStandardOutput $saida -RedirectStandardError $erro
 
-    $codigo  = $processo.ExitCode
+    $codigo   = $processo.ExitCode
     $segundos = [int]((Get-Date) - $inicio).TotalSeconds
-    Anotar "encerrou com codigo $codigo depois de ${segundos}s ($carimbo)"
+    Anotar "encerrou com codigo $codigo depois de ${segundos}s ($etiqueta)"
 
-    if ($segundos -lt 30) { $quedasRapidas++ } else { $quedasRapidas = 0 }
+    # Descarta as quedas que já saíram da janela e registra esta.
+    $quedas = @($quedas | Where-Object { $_ -ge (Get-Date).AddMinutes(-$JANELA_MIN) }) + (Get-Date)
 
-    # Cinco quedas seguidas sem nem conseguir ficar de pé não é
-    # instabilidade, é defeito. Insistir esconde o problema; parar
-    # deixa o último .erro.log como a resposta.
-    if ($quedasRapidas -ge 5) {
-        Anotar "DESISTINDO: 5 quedas em menos de 30s seguidas. Leia hub-$carimbo.erro.log"
-        exit 1
+    $degrau = [Math]::Min($quedas.Count - 1, $esperas.Count - 1)
+    $espera = $esperas[$degrau]
+
+    if ($quedas.Count -ge $esperas.Count) {
+        Anotar "$($quedas.Count) quedas em $JANELA_MIN min - religando em ${espera}s (leia hub-$etiqueta.erro.log)"
+    } else {
+        Anotar "religando em ${espera}s"
     }
 
-    $espera = $esperas[[Math]::Min($quedasRapidas, $esperas.Count - 1)]
-    Anotar "religando em ${espera}s"
     Start-Sleep -Seconds $espera
 }

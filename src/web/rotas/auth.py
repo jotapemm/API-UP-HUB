@@ -76,6 +76,63 @@ def sair(response: Response, sessao: str | None = Cookie(default=None, alias=NOM
     return {"ok": True}
 
 
+class PerfilEntrada(BaseModel):
+    apelido: str | None = None
+    setor_id: int | None = None
+    
+    
+@router.put("/eu/perfil")
+def salvar_perfil(dados: PerfilEntrada, usuario=Depends(usuario_atual)):
+    apelido = (dados.apelido or "").strip() or None
+    
+    with conexao() as con:
+        if dados.setor_id is not None:
+            existe = con.execute(
+                "SELECT 1 FROM setores WHERE id = %s", (dados.setor_id,)
+            ).fetchone()
+            if not existe:
+                raise HTTPException(422, "Setor não encontrado.")
+            
+        atualizado = con.execute(
+            """UPDATE usuarios
+               SET apelido = %s, setor_id = %s
+               WHERE id = %s
+               RETURNING id, nome, apelido, email, setor_id, papel""",
+            (apelido, dados.setor_id, usuario["id"]),
+        ).fetchone()
+        
+    return atualizado    
+        
+
+class SenhaEntrada(BaseModel):
+    atual: str
+    nova: str = Field(min_length=8)
+    
+    
+@router.post("/eu/senha")
+def trocar_senha(dados: SenhaEntrada, request: Request, response: Response,
+                 sessao: str | None = Cookie(default=None, alias=NOME_COOKIE),
+                 usuario=Depends(usuario_atual)):
+    with conexao() as con:
+        atual = con.execute(
+            "SELECT senha_hash FROM usuarios WHERE id = %s", (usuario["id"],)
+        ).fetchone()
+        
+        if not conferir(atual["senha_hash"], dados.atual):
+            raise HTTPException(401, "Senha atual incorreta.")
+        
+        con.execute(
+            "UPDATE usuarios SET senha_hash = %s WHERE id = %s",(gerar_hash(dados.nova), usuario["id"]),
+        )
+        
+        # derruba todas as outras sessões desta pessoa, menos a daqui
+        con.execute(
+            "DELETE FROM sessoes WHERE usuario_id = %s AND token <> %s",
+            (usuario["id"], sessao),
+        )
+        
+    return {"ok": True}
+
 @router.get("/eu")
 def eu(usuario=Depends(usuario_atual)):
     return usuario

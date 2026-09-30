@@ -289,7 +289,7 @@ function App() {
           nova: senhaNova
         }),
       })
-      if (r.status === 401) { location.href = '/entrar.html'; return}
+      if (r.status === 401) { location.href = '/entrar.html'; return }
 
       if (r.status === 422) {
         const corpo = await r.json().catch(() => ({}))
@@ -571,7 +571,66 @@ function App() {
           )}
 
           <main className="stage">
-            {vista === 'triagem' ? (
+            {vista === 'perfil' ? (
+
+              <section className="entrada">
+                <div className="entrada-topo">
+                  <h2>Perfil</h2>
+                  <button type="button" className="btn" onClick={() => setVista('inicio')}>Voltar</button>
+                </div>
+
+                <form onSubmit={(e) => { e.preventDefault(); salvarPerfil() }}>
+                  <div className="field">
+                    <label htmlFor="p-apelido">Como o hub te chama</label>
+                    <input
+                      id="p-apelido"
+                      value={apelidoForm}
+                      onChange={(e) => setApelidoForm(e.target.value)}
+                      placeholder={usuario?.nome.split('')[0] ?? ''}
+                    />
+                  </div>
+                  <div className="field">
+                    <label htmlFor="p-setor">Setor</label>
+                    <select
+                      id="p-setor"
+                      value={setorForm}
+                      onChange={(e) => setSetorForm(e.target.value === '' ? '' : Number(e.target.value))}>
+                      <option value="">- Não informado -</option>
+                      {setores.map((s) => (
+                        <option value={s.id} key={s.id}>{s.nome}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <button type='submit' className="btn btn-solid" disabled={salvandoPerfil}>
+                    {salvandoPerfil ? 'Salvando…' : 'Salvar'}
+                  </button>
+                </form>
+
+                <div role="status">
+                  {avisoPerfil && <div className={`aviso ${avisoPerfil.tipo}`}>{avisoPerfil.texto}</div>}
+                </div>
+
+                <hr className="perfil-divisor" />
+
+                <h3>Trocar senha</h3>
+                <form onSubmit={(e) => { e.preventDefault(); trocarSenha() }}>
+                  <div className="field">
+                    <label htmlFor="p-atual">Nova senha</label>
+                    <input id="p-nova" type="password" autoComplete="current-password"
+                      value={senhaNova} onChange={(e) => setSenhaNova(e.target.value)} />
+                  </div>
+                  <button type="submit" className="btn btn-solid" disabled={salvandoSenha}>
+                    {salvandoPerfil ? 'Trocando…' : 'Trocar senha'}
+                  </button>
+                </form>
+
+                <div role="status">
+                  {avisoSenha && <div className={`aviso ${avisoSenha.tipo}`}>{avisoSenha.texto}</div>}
+                </div>
+              </section>
+              
+            ) : vista === 'triagem' ? (
               <section className="entrada">
                 <div className="entrada-topo">
                   <h2>Triagem</h2>

@@ -265,6 +265,23 @@
 .estado.resolvido     { color: var(--text-3); }
 .estado.cancelado     { color: var(--text-3); text-decoration: line-through; }
 
+.field select {
+  width: 100%;
+  padding: 9px 12px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--line-hi);
+  background: var(--panel-2);
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+}
+
+.perfil-divisor {
+  border: 0;
+  border-top: 1px solid var(--line);
+  margin: 26px 0 18px;
+}
+
 /* ── BRILHO DO VERDE ────────────────────────────────────────────────
    Uma luz varre o texto. O período de 6,5s é um harmônico da onda do
    canvas do entrar.html, que leva ~52s pra dar uma volta completa —

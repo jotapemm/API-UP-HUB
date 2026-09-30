@@ -91,7 +91,7 @@ function App() {
   const [aviso, setAviso] = useState<Aviso | null>(null)
   const [semServidor, setSemServidor] = useState(false)
   const [recentes, setRecentes] = useState<string[]>([])
-  const [vista, setVista] = useState<'inicio' | 'entrada' | 'triagem' | 'perfil'>('inicio')
+  const [vista, setVista] = useState<Vista>('inicio')
   const [chamados, setChamados] = useState<Chamado[] | null>(null)
   const [erroChamados, setErroChamados] = useState(false)
   const [fila, setFila] = useState<ChamadoFila[] | null>(null)
@@ -271,7 +271,9 @@ function App() {
       const atualizado = await r.json()
       setUsuario(atualizado)                       // a saudação muda na hora
       setApelidoForm(atualizado.apelido ?? '')     // mostra o que o servidor guardou
-      setAvisoPerfil({ tipo: 'erro', texto: 'Não foi possível salvar. Tente de novo' })
+      setAvisoPerfil({ tipo: 'ok', texto: 'Perfil salvo.' })
+    } catch {
+      setAvisoPerfil({ tipo: 'erro', texto: 'Não foi possível salvar. Tente de novo.' })
     } finally {
       setSalvandoPerfil(false)
     }
@@ -296,7 +298,7 @@ function App() {
         const d = corpo.detail
         setAvisoSenha({
           tipo: 'erro',
-          texto: typeof d === 'string' ? d : 'A npva senha precisa ter pelo menos 8 caracteres.',
+          texto: typeof d === 'string' ? d : 'A nova senha precisa ter pelo menos 8 caracteres.',
         })
         return
       }
@@ -586,7 +588,7 @@ function App() {
                       id="p-apelido"
                       value={apelidoForm}
                       onChange={(e) => setApelidoForm(e.target.value)}
-                      placeholder={usuario?.nome.split('')[0] ?? ''}
+                      placeholder={usuario?.nome.split(' ')[0] ?? ''}
                     />
                   </div>
                   <div className="field">
@@ -616,7 +618,12 @@ function App() {
                 <h3>Trocar senha</h3>
                 <form onSubmit={(e) => { e.preventDefault(); trocarSenha() }}>
                   <div className="field">
-                    <label htmlFor="p-atual">Nova senha</label>
+                    <label htmlFor="p-atual">Senha atual</label>
+                    <input id="p-atual" type="password" autoComplete="current-password"
+                           value={senhaAtual} onChange={(e) => setSenhaAtual(e.target.value)} />
+                  </div>
+                  <div className="field">
+                    <label htmlFor="p-nova">Nova senha</label>
                     <input id="p-nova" type="password" autoComplete="current-password"
                       value={senhaNova} onChange={(e) => setSenhaNova(e.target.value)} />
                   </div>
@@ -629,7 +636,7 @@ function App() {
                   {avisoSenha && <div className={`aviso ${avisoSenha.tipo}`}>{avisoSenha.texto}</div>}
                 </div>
               </section>
-              
+
             ) : vista === 'triagem' ? (
               <section className="entrada">
                 <div className="entrada-topo">

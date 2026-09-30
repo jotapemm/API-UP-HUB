@@ -17,3 +17,6 @@ __pycache__/
 #frontend (React/Vite) — node_modules nunca vai pro git; o build vive em src/web/static/app
 frontend/node_modules
 frontend/dist
+
+#logs do servidor — mudam a cada subida e são desta máquina, não do projeto
+logs/

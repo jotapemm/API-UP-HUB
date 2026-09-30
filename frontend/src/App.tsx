@@ -277,6 +277,40 @@ function App() {
     }
   }
 
+  const trocarSenha = async () => {
+    setSalvandoSenha(true)
+    setAvisoSenha(null)
+    try {
+      const r = await fetch('/api/eu/senha', {
+        method: 'POST',
+        headers: { 'Content-type': 'application/json' },
+        body: JSON.stringify({
+          atual: senhaAtual,
+          nova: senhaNova
+        }),
+      })
+      if (r.status === 401) { location.href = '/entrar.html'; return}
+
+      if (r.status === 422) {
+        const corpo = await r.json().catch(() => ({}))
+        const d = corpo.detail
+        setAvisoSenha({
+          tipo: 'erro',
+          texto: typeof d === 'string' ? d : 'A npva senha precisa ter pelo menos 8 caracteres.',
+        })
+        return
+      }
+      if (!r.ok) throw new Error('senha')
+
+      setSenhaAtual(''); setSenhaNova('')
+      setAvisoSenha({ tipo: 'ok', texto: 'Senha trocada. As outras sessões foram encerradas.' })
+    } catch {
+      setAvisoSenha({ tipo: 'erro', texto: 'Não foi possível trocar a senha. Tente de novo' })
+    } finally {
+      setSalvandoSenha(false)
+    }
+  }
+
   useEffect(() => {
     if (!menuAberto) return          // gaveta fechada: nada pra escutar
 

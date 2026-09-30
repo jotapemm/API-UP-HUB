@@ -119,7 +119,7 @@ def trocar_senha(dados: SenhaEntrada, request: Request, response: Response,
         ).fetchone()
         
         if not conferir(atual["senha_hash"], dados.atual):
-            raise HTTPException(401, "Senha atual incorreta.")
+            raise HTTPException(422, "Senha atual incorreta.")
         
         con.execute(
             "UPDATE usuarios SET senha_hash = %s WHERE id = %s",(gerar_hash(dados.nova), usuario["id"]),

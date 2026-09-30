@@ -42,6 +42,8 @@ type ChamadoFila = Chamado & {
   atendido_por: string | null
 }
 
+type Vista = 'inicio' | 'entrada' | 'triagem' | 'perfil'
+
 const ROTULO: Record<string, string> = {
   aberto: 'Aberto',
   em_andamento: 'Em andamento',
@@ -89,7 +91,7 @@ function App() {
   const [aviso, setAviso] = useState<Aviso | null>(null)
   const [semServidor, setSemServidor] = useState(false)
   const [recentes, setRecentes] = useState<string[]>([])
-  const [vista, setVista] = useState<'inicio' | 'entrada' | 'triagem'>('inicio')
+  const [vista, setVista] = useState<'inicio' | 'entrada' | 'triagem' | 'perfil'>('inicio')
   const [chamados, setChamados] = useState<Chamado[] | null>(null)
   const [erroChamados, setErroChamados] = useState(false)
   const [fila, setFila] = useState<ChamadoFila[] | null>(null)
@@ -97,6 +99,14 @@ function App() {
   const [ordem, setOrdem] = useState<'antigos' | 'recentes'>('antigos')
   const [recarga, setRecarga] = useState(0)
   const [mudando, setMudando] = useState<number | null>(null)
+  const [apelidoForm, setApelidoForm] = useState('')
+  const [setorForm, setSetorForm] = useState<number | ''>('')
+  const [salvandoPerfil, setSalvandoPerfil] = useState(false)
+  const [avisoPerfil, setAvisoPerfil] = useState<Aviso | null>(null)
+  const [senhaAtual, setSenhaAtual] = useState('')
+  const [senhaNova, setSenhaNova] = useState('')
+  const [salvandoSenha, setSalvandoSenha] = useState(false)
+  const [avisoSenha, setAvisoSenha] = useState<Aviso | null>(null)
 
 
   const alternarSetor = (id: number) => {
@@ -231,6 +241,39 @@ function App() {
       setErroFila(true)
     } finally {
       setMudando(null)
+    }
+  }
+
+  const abrirPerfil = () => {
+    setApelidoForm(usuario?.apelido ?? '')
+    setSetorForm(usuario?.setor_id ?? '')
+    setSenhaAtual(''); setSenhaNova('')
+    setAvisoPerfil(null); setAvisoSenha(null)
+    setVista('perfil')
+    setPainelAberto(false)
+  }
+
+  const salvarPerfil = async () => {
+    setSalvandoPerfil(true)
+    setAvisoPerfil(null)
+    try {
+      const r = await fetch('/api/eu/perfil', {
+        method: 'PUT',
+        headers: { 'Content-type': 'application/json' },
+        body: JSON.stringify({
+          apelido: apelidoForm,
+          setor_id: setorForm === '' ? null : Number(setorForm)
+        }),
+      })
+      if (r.status === 401) { location.href = '/entrar.html'; return }
+      if (!r.ok) throw new Error('perfil')
+
+      const atualizado = await r.json()
+      setUsuario(atualizado)                       // a saudação muda na hora
+      setApelidoForm(atualizado.apelido ?? '')     // mostra o que o servidor guardou
+      setAvisoPerfil({ tipo: 'erro', texto: 'Não foi possível salvar. Tente de novo' })
+    } finally {
+      setSalvandoPerfil(false)
     }
   }
 
@@ -412,12 +455,25 @@ function App() {
         </div>
         <a href="#" role="menuitem">Personalizar</a>
         <hr />
-        <a href="#" role="menuitem">Perfil</a>
+        <a href="#"
+          role="menuitem"
+          onClick={(e) => {
+            e.preventDefault(); abrirPerfil()
+          }}
+        >Perfil</a>
         <a
           href="#"
           role="menuitem"
-          onClick={(e) => { e.preventDefault(); setVista('entrada'); setPainelAberto(false) }}
+          onClick={(e) => {
+            e.preventDefault(); setVista('entrada'); setPainelAberto(false)
+          }}
         >Caixa de entrada</a>
+        {usuario?.papel === 'suporte' && (
+          <a href="#" role='menuitem' onClick={(e) => {
+            e.preventDefault(); setVista('triagem'); setPainelAberto(false)
+          }}
+          >Triagem</a>
+        )}
         <a href="#" role="menuitem">Automações</a>
         <a href="#" role="menuitem">Setor</a>
         <a href="#" role="menuitem">Configurações</a>

@@ -56,9 +56,9 @@
   min-width: 0;
   max-width: none;
   height: 100dvh;
-  background: rgba(13, 13, 13, .15);
+  background: var(--vidro);
   backdrop-filter: blur(30px) saturate(115%);
-  border: 1px solid rgba(255, 255, 255, .02);
+  border: 1px solid var(--vidro-borda);
   border-radius: 0;
   padding: 34px 30px;
 }

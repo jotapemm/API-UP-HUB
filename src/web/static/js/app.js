@@ -28,9 +28,6 @@ const FAIXAS = [
     { largura: 380, periodo: 21000, fase: 0.75 },
 ];
 const NIVEIS = 16;
-const CINZA = [200, 205, 202];
-const BRANCO = [255, 255, 255];
-const VERDE = [0, 196, 140];
 const TONS = [], TAMANHOS = [];
 const baldes = Array.from({ length: NIVEIS }, () => []);
 
@@ -83,32 +80,49 @@ if (semMovimento) pintar(0);              // um frame só, bonito e parado
 
 const misturar = (a, b, k) => a.map((c, n) => Math.round(c + (b[n] - c) * k));
 
-for (let n = 0; n < NIVEIS; n++) {
-    const v = n / (NIVEIS - 1);
+/* "rgb(10, 107, 81)" -> [10, 107, 81] */
+const emNumeros = (s) => s.match(/\d+/g).slice(0, 3).map(Number);
 
-    const cor = v < 0.5
-        ? misturar(CINZA, BRANCO, v * 2)           //cinza -> branco
-        : misturar(BRANCO, VERDE, (v - 0.5) * 2);  // branco -> verde
+/* Os nomes antigos passaram a mentir: no tema claro o degrau do meio é
+   PRETO, não branco. Agora cada um se chama pelo LUGAR que ocupa na
+   rampa, não pela cor que tinha num tema só.                         */
 
-    TONS[n] = `rgba(${cor},${(0.12 + v * 0.45).toFixed(3)})`;
-    TAMANHOS[n] = v < 0.34 ? 1 : (v < 0.70 ? 2 : 3);
+function montarPaleta() {
+    const BAIXO = emNumeros(UPTema.cor('--trama-baixo'));
+    const MEIO  = emNumeros(UPTema.cor('--trama-meio'));
+    const ALTO  = emNumeros(UPTema.cor('--trama-alto'));
+    
+    for (let n = 0; n < NIVEIS; n++) {
+        const v = n / (NIVEIS - 1);
+    
+        const cor = v < 0.5
+            ? misturar(BAIXO, MEIO, v * 2)
+            : misturar(MEIO, ALTO, (v - 0.5) * 2);
+    
+        TONS[n] = `rgba(${cor},${(0.12 + v * 0.45).toFixed(3)})`;
+        TAMANHOS[n] = v < 0.34 ? 1 : (v < 0.70 ? 2 : 3);
+    
+        /* O sprite é um carimbo com a cor JÁ ASSADA dentro dele. É por
+           isso que trocar de tema tem que refazer os 16: repintar o
+           canvas com os carimbos velhos não muda cor nenhuma.         */
+        
+        const s = TAMANHOS[n];
+        const off = document.createElement("canvas");
+        off.width = off.height = Math.ceil(2 * s * dpr);
+
+        const o = off.getContext("2d");
+        o.scale(dpr, dpr);
+        o.fillStyle = TONS[n];
+        o.beginPath();
+        o.arc(s, s, s, 0, Math.PI * 2);
+        o.fill();
+
+        SPRITES[n] = off;
+    }
 }
 
-const SPRITES = [];
-for (let n = 0; n < NIVEIS; n++) {
-    const s = TAMANHOS[n];
-    const off = document.createElement("canvas")
-    off.width = off.height = Math.ceil(2 * s * dpr);
-
-    const o = off.getContext("2d");
-    o.scale(dpr, dpr);
-    o.fillStyle = TONS[n];
-    o.beginPath();
-    o.arc(s, s, s, 0, Math.PI * 2);
-    o.fill();
-
-    SPRITES[n] = off;
-}
+montarPaleta();
+addEventListener('up:tema', montarPaleta);
 
 function loop(tempo) {
     pintar(tempo);

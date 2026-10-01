@@ -65,6 +65,25 @@ const normalizar = (s: string) =>
 const ehChamado = (v: string) =>
   v.trim().startsWith('@')
 
+/* Ícones: um traço só, 24x24, herdando a cor do texto. Ficam num mapa
+   porque desenho é dado, não marcação — e assim a sidebar não vira um
+   paredão de <svg> no meio do JSX. */
+const TRACOS: Record<string, string[]> = {
+  grupo: ['M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8', 'M2 21v-1a6 6 0 0 1 6-6h2', 'M17 14v6', 'M14 17h6'],
+  chamados: ['M8 6h13', 'M8 12h13', 'M8 18h13', 'M3 6h.01', 'M3 12h.01', 'M3 18h.01'],
+  entrada: ['M22 12h-6l-2 3h-4l-2-3H2', 'M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z'],
+  automacoes: ['M13 2 3 14h9l-1 8 10-12h-9l1-8z'],
+}
+
+function Icone({ nome }: { nome: keyof typeof TRACOS }) {
+  return (
+    <svg className="icone" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+         strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      {TRACOS[nome].map((d) => <path d={d} key={d} />)}
+    </svg>
+  )
+}
+
 const quando = (iso: string) =>
   new Date(iso).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })
 
@@ -430,8 +449,46 @@ function App() {
           <div className="logo"><img src="/assets/logo-up.png" alt="" /></div>
         </div>
 
+        <nav className="side-acoes">
+          <button
+            className="side-acao"
+            type="button"
+            disabled
+            title="Conversas por setor — ainda não existe"
+          >
+            <Icone nome="grupo" />
+            Criar grupo
+            <span className="side-breve">em breve</span>
+          </button>
+
+          {usuario?.papel === 'suporte' && (
+            <button
+              className="side-acao"
+              type="button"
+              onClick={() => { setVista('triagem'); setMenuAberto(false) }}
+            >
+              <Icone nome="chamados" />
+              Chamados
+            </button>
+          )}
+
+          <button
+            className="side-acao"
+            type="button"
+            onClick={() => { setVista('entrada'); setMenuAberto(false) }}
+          >
+            <Icone nome="entrada" />
+            Caixa de entrada
+          </button>
+        </nav>
+
+        <hr className="side-divisor" />
+
         <div className="side-group open">
-          <button className="side-head" type="button">Automações</button>
+          <button className="side-head" type="button">
+            <Icone nome="automacoes" />
+            Automações
+          </button>
           <div className="side-body">
             <div>
               {setores.map((setor) => (
@@ -620,7 +677,7 @@ function App() {
                       value={senhaNova} onChange={(e) => setSenhaNova(e.target.value)} />
                   </div>
                   <button type="submit" className="btn btn-solid" disabled={salvandoSenha}>
-                    {salvandoPerfil ? 'Trocando…' : 'Trocar senha'}
+                    {salvandoSenha ? 'Trocando…' : 'Trocar senha'}
                   </button>
                 </form>
 

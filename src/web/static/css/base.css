@@ -8,21 +8,49 @@
    Tudo que é decisão de marca mora aqui. Trocar o verde da UP é trocar
    uma linha, não caçar hex espalhado por 3 arquivos.                  */
 :root {
-  --bg: #000000;
-  --panel: #0D0D0D;
-  --panel-2: #141414;
-  --panel-3: #1B1B1B;
-  --line: #232323;
-  --line-hi: #333333;
+  /* "light dark" quer dizer: aceito os dois, e por padrão sigo o sistema.
+     O seletor de tema troca esta UMA linha para "light" ou "dark", e todo
+     o resto muda junto, porque light-dark() lê daqui.
+     Isso também acerta o que o CSS não alcança: barra de rolagem, cursor
+     de texto e controles nativos do navegador.                           */
+  color-scheme: light dark;
 
-  --text: #FFFFFF;
-  --text-2: #B4B4B4;
-  --text-3: #7A7A7A;
+  /*                      claro      escuro  */
+  --bg:        light-dark(#F7F8F7, #000000);
+  --panel:     light-dark(#FFFFFF, #0D0D0D);
+  --panel-2:   light-dark(#F1F3F1, #141414);
+  --panel-3:   light-dark(#E8EAE8, #1B1B1B);
+  --line:      light-dark(#E3E5E3, #232323);
+  --line-hi:   light-dark(#C7CAC7, #333333);
 
-  --brand: #00C48C;
-  --brand-dim: #0A6B51;
-  --danger: #E5484D;
-  --warn: #E5A23D;
+  --text:      light-dark(#111111, #FFFFFF);
+  --text-2:    light-dark(#44494A, #B4B4B4);
+  --text-3:    light-dark(#6B706D, #7A7A7A);
+
+  /* Os dois verdes TROCAM DE PAPEL entre os temas, não de cor.
+     Medido: #00C48C dá 9.27 de contraste no escuro e 2.13 no claro;
+     #0A6B51 dá 6.10 no claro e 3.23 no escuro. Cada um já era afinado
+     para um fundo — aqui eles só assumem a vez certa.                   */
+  --brand:     light-dark(#0A6B51, #00C48C);
+  --brand-dim: light-dark(#00C48C, #0A6B51);
+
+  --danger:    light-dark(#C0272C, #E5484D);
+  --warn:      light-dark(#8A5A0F, #E5A23D);
+
+  /* Cores que estavam cravadas no meio do CSS e não obedeciam a tema */
+  --grao:        light-dark(#E3E5E3, #1A1A1A);
+  --brilho:      light-dark(#4FE3B0, #7BFFD4);
+  --vidro:       light-dark(rgba(255, 255, 255, .55), rgba(13, 13, 13, .15));
+  --vidro-borda: light-dark(rgba(0, 0, 0, .06), rgba(255, 255, 255, .02));
+  --cortina:     light-dark(rgba(0, 0, 0, .35), rgba(0, 0, 0, .55));
+  --sombra:      light-dark(rgba(0, 0, 0, .14), rgba(0, 0, 0, .60));
+
+  /* A trama do fundo é desenhada em <canvas>, e canvas não lê CSS.
+     Os três degraus da rampa moram aqui de propósito: assim existe UM
+     lugar com a cor, e o JS vem buscar em vez de ter a dele.          */
+  --trama-baixo: light-dark(#9AA09C, #C8CDCA);
+  --trama-meio:  light-dark(#111111, #FFFFFF);
+  --trama-alto:  light-dark(#0A6B51, #00C48C);
 
   --r-sm: 6px;
   --r-md: 10px;
@@ -83,7 +111,7 @@ button {
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  background-image: radial-gradient(circle, #1A1A1A 1px, transparent 1px);
+  background-image: radial-gradient(circle, var(--grao) 1px, transparent 1px);
   background-size: 22px 22px;
   opacity: .55;
 }
@@ -155,7 +183,7 @@ button {
 
 .btn-solid {
   background: var(--text);
-  color: #000;
+  color: var(--bg);
   border-color: var(--text);
   font-weight: 600;
 }
@@ -163,7 +191,7 @@ button {
 .btn-solid:hover {
   background: var(--brand);
   border-color: var(--brand);
-  color: #000;
+  color: var(--bg);
 }
 
 .btn-ghost {
@@ -705,7 +733,7 @@ button {
   color: var(--brand);
   /* se o recorte não pegar, fica verde chapado */
   background: linear-gradient(100deg,
-      var(--brand) 42%, #7BFFD4 50%, var(--brand) 58%);
+      var(--brand) 42%, var(--brilho) 50%, var(--brand) 58%);
   background-size: 250% 100%;
   background-clip: text;
   -webkit-background-clip: text;

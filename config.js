@@ -5,15 +5,19 @@
    cadastro. Troque AQUI (um lugar só) conforme onde tudo está rodando:
 
    • Mesma máquina:        "https://localhost:8000"
-   • Rede local (LAN):     "https://192.168.0.117:8000"
+   • Rede local (LAN):     "https://desktop-jfn7els:8000"
    • Internet (tunnel):    "https://upapi.suaempresa.com.br"
+
+   Na LAN, use o NOME da máquina (desktop-jfn7els), não o IP: o IP muda
+   sozinho (DHCP) e o certificado https da API-UP vale para o nome — por IP
+   o navegador acusa certificado inválido. Vale para todos os endereços abaixo.
 
    IMPORTANTE: como o login reaproveita o backend da API-UP (sessão por
    cookie), o ideal é que o HUB e a API-UP estejam no MESMO domínio/origem
    (ex.: ambos atrás do mesmo Cloudflare Tunnel, ou ambos na LAN). Em
    origens diferentes o navegador não compartilha o cookie de sessão.
    ════════════════════════════════════════════════════════════════ */
-window.API_UP_URL = "https://192.168.0.117:8000";
+window.API_UP_URL = "https://desktop-jfn7els:8000";
 
 /* ────────────────────────────────────────────────────────────────
    Endereço da API-UP-CONF (conferência fiscal) — usado pelo card
@@ -21,7 +25,7 @@ window.API_UP_URL = "https://192.168.0.117:8000";
    A CONF roda LOCAL (precisa dos arquivos no drive da UP) e é
    exposta via Cloudflare Tunnel — NÃO vai pro Vercel.
 
-   • Rede local (LAN):     "http://192.168.0.117:8010"
+   • Rede local (LAN):     "http://desktop-jfn7els:8010"
    • Internet (tunnel):    "https://conf.suaempresa.com.br"
 
    Obs.: o "status online" pinga essa URL. Se o HUB estiver em HTTPS
@@ -30,7 +34,7 @@ window.API_UP_URL = "https://192.168.0.117:8000";
    (nova aba) funciona mesmo assim. Em produção, use a URL https do
    tunnel dos dois lados e o status volta a funcionar.
    ──────────────────────────────────────────────────────────────── */
-window.API_CONF_URL = "http://192.168.0.117:8010";
+window.API_CONF_URL = "http://desktop-jfn7els:8010";
 
 /* ────────────────────────────────────────────────────────────────
    Endereço da API-UP-CTRL-CRED (controle de crédito do SPED) — usado
@@ -38,10 +42,10 @@ window.API_CONF_URL = "http://192.168.0.117:8010";
    Cloudflare Tunnel — NÃO vai pro Vercel. Mesmo detalhe de mixed-content
    do status que a CONF (ver acima).
 
-   • Rede local (LAN):     "http://192.168.0.117:8100"
+   • Rede local (LAN):     "http://desktop-jfn7els:8100"
    • Internet (tunnel):    "https://ctrl.suaempresa.com.br"
    ──────────────────────────────────────────────────────────────── */
-window.API_CTRL_URL = "http://192.168.0.117:8100";
+window.API_CTRL_URL = "http://desktop-jfn7els:8100";
 
 /* ────────────────────────────────────────────────────────────────
    Outras automações com interface web (LAN por ora — trocar pelos
@@ -53,9 +57,9 @@ window.API_CTRL_URL = "http://192.168.0.117:8100";
      • API STATUS  (painel de status) .............. porta 8010 (⚠ mesma da CONF)
      • API EVENTOS (Importação DP → QUESTOR) ....... sem servidor ainda
    ──────────────────────────────────────────────────────────────── */
-window.API_FISCAL_URL = "http://192.168.0.117:8030";
-window.API_ICMS_URL = "http://192.168.0.117:8040";
-window.API_STATUS_URL = "http://192.168.0.117:8010";
+window.API_FISCAL_URL = "http://desktop-jfn7els:8030";
+window.API_ICMS_URL = "http://desktop-jfn7els:8040";
+window.API_STATUS_URL = "http://desktop-jfn7els:8010";
 // API EVENTOS: frontend já publicado no Vercel (o backend é que ainda depende
 // do tunnel pra funcionar 100%, mas o "Saiba mais" já abre a interface).
 window.API_EVENTOS_URL = "https://apieventos-gules.vercel.app/";

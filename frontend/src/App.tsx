@@ -505,21 +505,13 @@ function App() {
           }}
         >Caixa de entrada</a>
         {usuario?.papel === 'suporte' && (
-          <a href="#" role='menuitem' onClick={(e) => {
-            e.preventDefault(); setVista('triagem'); setPainelAberto(false)
-          }}
-          >Triagem</a>
-        )}
-        <a href="#" role="menuitem">Automações</a>
-        <a href="#" role="menuitem">Setor</a>
-        <a href="#" role="menuitem">Configurações</a>
-        {usuario?.papel === 'suporte' && (
           <a
-            href="#"
-            role="menuitem"
-            onClick={(e) => { e.preventDefault(); setVista('triagem'); setPainelAberto(false) }}
+          href="#"
+          role="menuitem"
+          onClick={(e) => { e.preventDefault(); setVista('triagem'); setPainelAberto(false) }}
           >Triagem</a>
         )}
+        <a href="#" role="menuitem">Configurações</a>
         <hr />
         <a
           href="/entrar.html"

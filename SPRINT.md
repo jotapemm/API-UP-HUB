@@ -14,9 +14,25 @@ começa quando o anterior estiver medido e commitado.
 
 ---
 
-## 1. Aparência — claro e escuro
+## 1. Aparência — claro e escuro ✅ 01/10/2026
 
-**Juntos.** Primeiro tema do projeto.
+**Feito juntos.** Primeiro tema do projeto.
+
+Entregue: `color-scheme: light dark` + `light-dark()` em todos os tokens do
+`:root`, os sete valores fixos viraram token, seletor de três estados em
+`tema.js` (`window.UPTema`) carregado sem `defer` no `<head>` das duas
+casas, controle de rádios na tela de Perfil, e `data-tema` no `<html>` para
+o que não é cor.
+
+Medido: os dois verdes trocam de papel sem mudar de valor; a rampa da trama
+no claro foi recalculada para igualar o delta de luminância do escuro
+(ruído 0.1606 → 0.0796, pior contraste 3.43 → 6.34); a logo prateada ganhou
+`brightness(.28)` no claro (contraste 1.12 → 8.86).
+
+Três consertos de tabela: `base.css` saiu do bundle do Vite (o Lightning CSS
+reescrevia `light-dark()` com gatilho em `prefers-color-scheme`), o botão de
+senha lia `salvandoPerfil`, e o movimento reduzido no `app.js` era medido e
+ignorado.
 
 - Novo: tema por tokens (`[data-tema]` na raiz), persistir a escolha, e o
   terceiro estado que todo mundo esquece — "seguir o sistema"

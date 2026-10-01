@@ -23,6 +23,18 @@ export default defineConfig({
       '/entrar.html': 'http://localhost:8090',
       '/css': 'http://localhost:8090',
       '/js': 'http://localhost:8090',
+
+      // Em DEV o Vite prefixa o base nos caminhos absolutos do index.html:
+      // /js/tema.js vira /app/js/tema.js. No build ele não mexe. Estas duas
+      // regras desfazem o prefixo, para o mesmo HTML servir as duas pontas.
+      '/app/js': {
+        target: 'http://localhost:8090',
+        rewrite: (caminho) => caminho.replace(/^\/app/, ''),
+      },
+      '/app/css': {
+        target: 'http://localhost:8090',
+        rewrite: (caminho) => caminho.replace(/^\/app/, ''),
+      },
     },
   },
 })

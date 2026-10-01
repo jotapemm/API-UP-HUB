@@ -48,9 +48,9 @@
   /* A trama do fundo é desenhada em <canvas>, e canvas não lê CSS.
      Os três degraus da rampa moram aqui de propósito: assim existe UM
      lugar com a cor, e o JS vem buscar em vez de ter a dele.          */
-  --trama-baixo: light-dark(#9AA09C, #C8CDCA);
-  --trama-meio:  light-dark(#111111, #FFFFFF);
-  --trama-alto:  light-dark(#0A6B51, #00C48C);
+  --trama-baixo: light-dark(#EEEFEE, #C8CDCA);
+  --trama-meio:  light-dark(#D5D6D5, #FFFFFF);
+  --trama-alto:  light-dark(#4FB393, #00C48C);
 
   --r-sm: 6px;
   --r-md: 10px;
@@ -129,6 +129,10 @@ button {
   width: 30px;
   height: 30px;
   flex: none;
+}
+
+[data-tema="claro"] .logo img {
+  filter: brightness(.10);
 }
 
 .logo-txt b {

@@ -20,11 +20,32 @@
         }
     }
 
+    /* ── O QUE O color-scheme NÃO RESOLVE ──────────────────────────────
+   light-dark() só serve <color>. Filtro, troca de imagem, estilo de
+   borda — nada disso enxerga o tema. Então o CSS ganha uma etiqueta
+   pra se pendurar. Repare que este é o ÚNICO matchMedia do arquivo:
+   as cores não precisam dele, a etiqueta precisa.                   */
+
     /* Aplicar é trocar UMA linha. O color-scheme inline vence o do
     :root; apagar o inline devolve o comando pro :root.             */
+    const SISTEMA = matchMedia('(prefers-color-scheme: dark)');
+
+    function etiquetar(tema) {
+        document.documentElement.dataset.tema =
+            tema === 'sistema' ? (SISTEMA.matches ? 'escuro' : 'claro') : tema;
+    }
+
+    /* com "sistema" escolhido, o Windows virando claro às 18h tem que
+       reescrever a etiqueta — as cores já viram sozinhas                */
+    SISTEMA.addEventListener('change', () => {
+        if (ler() === 'sistema') etiquetar('sistema');
+    })
+
     function aplicar(tema) {
         document.documentElement.style.colorScheme =
             tema === 'claro' ? 'light' : tema === 'escuro' ? 'dark' : '';
+
+        etiquetar(tema);
     }
 
     function salvar(tema) {
@@ -48,16 +69,16 @@
    A sonda abaixo faz uma propriedade DE VERDADE consumir o token, e
    só então o navegador resolve. Aí sai "rgb(0, 196, 140)".          */
 
-   function cor(token) {
-    const s = document.createElement('span');
-    s.style.color = `var(${token})`;
-    document.documentElement.appendChild(s);
-    const v = getComputedStyle(s).color;
-    s.remove();
-    return v;
-   }
+    function cor(token) {
+        const s = document.createElement('span');
+        s.style.color = `var(${token})`;
+        document.documentElement.appendChild(s);
+        const v = getComputedStyle(s).color;
+        s.remove();
+        return v;
+    }
 
-   aplicar(ler());              // antes de qualquer pintura
+    aplicar(ler());              // antes de qualquer pintura
 
-   window.UPTema = { ler, salvar, aplicar, cor };
+    window.UPTema = { ler, salvar, aplicar, cor };
 })();

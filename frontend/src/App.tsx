@@ -44,6 +44,24 @@ type ChamadoFila = Chamado & {
 
 type Vista = 'inicio' | 'entrada' | 'triagem' | 'perfil'
 
+type Tema = 'claro' | 'escuro' | 'sistema'
+
+/* O tema.js é script clássico, não módulo = ele não tem import.
+   Isso aqui só conta pro TS que window.UPTema existe e qual a forma dele. */
+declare global {
+  interface Window {
+    /* O tema.js vive FORA do bundle. Se ele não carregar, isto é
+       undefined — e o "?" obriga todo uso a tratar esse caso, em vez de
+       o hub inteiro sumir numa tela branca.                            */
+    UPTema?: {
+      ler(): Tema
+      salvar(t: Tema): void
+      aplicar(t: Tema): void
+      cor(token: string): string
+    }
+  }
+}
+
 const ROTULO: Record<string, string> = {
   aberto: 'Aberto',
   em_andamento: 'Em andamento',
@@ -57,6 +75,12 @@ const FRASES = [
   'Digite @ para solicitar um chamado',
   'Buscar solução',
   'O que você precisa hoje?',
+]
+
+const TEMAS: [Tema, string][] = [
+  ['claro', 'Claro'],
+  ['escuro', 'Escuro'],
+  ['sistema', 'Seguir o sistema'],
 ]
 
 const normalizar = (s: string) =>
@@ -78,7 +102,7 @@ const TRACOS: Record<string, string[]> = {
 function Icone({ nome }: { nome: keyof typeof TRACOS }) {
   return (
     <svg className="icone" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-         strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       {TRACOS[nome].map((d) => <path d={d} key={d} />)}
     </svg>
   )
@@ -126,7 +150,10 @@ function App() {
   const [senhaNova, setSenhaNova] = useState('')
   const [salvandoSenha, setSalvandoSenha] = useState(false)
   const [avisoSenha, setAvisoSenha] = useState<Aviso | null>(null)
-
+  /* useState com FUNÇÃO em vez de valor: assim o localStorage é lido uma
+     vez, na montagem. Passando window.UPTema.ler() direto, a leitura
+     aconteceria a cada render e o valor seria jogado fora.              */
+  const [tema, setTema] = useState<Tema>(() => window.UPTema?.ler() ?? 'sistema')
 
   const alternarSetor = (id: number) => {
     setAbertos((antigos) => {
@@ -296,6 +323,11 @@ function App() {
     } finally {
       setSalvandoPerfil(false)
     }
+  }
+
+  const trocarTema = (novo: Tema) => {
+    window.UPTema?.salvar(novo)   // muda a tela e lembra a escolha
+    setTema(novo)                // muda qual botão aparece marcado
   }
 
   const trocarSenha = async () => {
@@ -563,9 +595,9 @@ function App() {
         >Caixa de entrada</a>
         {usuario?.papel === 'suporte' && (
           <a
-          href="#"
-          role="menuitem"
-          onClick={(e) => { e.preventDefault(); setVista('triagem'); setPainelAberto(false) }}
+            href="#"
+            role="menuitem"
+            onClick={(e) => { e.preventDefault(); setVista('triagem'); setPainelAberto(false) }}
           >Triagem</a>
         )}
         <a href="#" role="menuitem">Configurações</a>
@@ -664,12 +696,33 @@ function App() {
 
                 <hr className="perfil-divisor" />
 
+                <fieldset className="tema-campo">
+                  <legend>Aparência</legend>
+                  <p className="perfil-dica">
+                    "Seguir o sistema" acompanha o Windows ao vivo: se ele mudar, o hub muda.
+                  </p>
+                  <div className="tema-opcoes">
+                      {TEMAS.map(([valor, rotulo]) => (
+                        <label key={valor} className={'tema-opcao' + (tema === valor ? ' ativa' : '')}>
+                          <input 
+                            type="radio"
+                            name="tema"
+                            value={valor}
+                            checked={tema === valor}
+                            onChange={() => trocarTema(valor)}
+                          />
+                          {rotulo}
+                        </label>
+                      ))}
+                  </div>
+                </fieldset>
+
                 <h3>Trocar senha</h3>
                 <form onSubmit={(e) => { e.preventDefault(); trocarSenha() }}>
                   <div className="field">
                     <label htmlFor="p-atual">Senha atual</label>
                     <input id="p-atual" type="password" autoComplete="current-password"
-                           value={senhaAtual} onChange={(e) => setSenhaAtual(e.target.value)} />
+                      value={senhaAtual} onChange={(e) => setSenhaAtual(e.target.value)} />
                   </div>
                   <div className="field">
                     <label htmlFor="p-nova">Nova senha</label>

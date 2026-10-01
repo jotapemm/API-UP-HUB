@@ -28,7 +28,7 @@ const FAIXAS = [
     { largura: 380, periodo: 21000, fase: 0.75 },
 ];
 const NIVEIS = 16;
-const TONS = [], TAMANHOS = [];
+const TONS = [], TAMANHOS = [], SPRITES = [];
 const baldes = Array.from({ length: NIVEIS }, () => []);
 
 function construir() {
@@ -75,7 +75,8 @@ function pintar(tempo) {
 
 const semMovimento = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-if (semMovimento) pintar(0);              // um frame só, bonito e parado
+/* a decisão de animar ou não mora no fim do arquivo, depois que a
+   trama existe de verdade */
 
 
 const misturar = (a, b, k) => a.map((c, n) => Math.round(c + (b[n] - c) * k));
@@ -122,21 +123,38 @@ function montarPaleta() {
 }
 
 montarPaleta();
-addEventListener('up:tema', montarPaleta);
+
+/* A ordem aqui importa: nada pode pintar antes de dimensionar() e
+   construir(), senão o primeiro quadro sai vazio — era o que acontecia
+   com o pintar(0) do movimento reduzido, lá em cima.                 */
+dimensionar();
+construir();
 
 function loop(tempo) {
     pintar(tempo);
     requestAnimationFrame(loop);
 }
-requestAnimationFrame(loop);
+
+/* Quem pediu movimento reduzido recebe UM quadro parado, e nenhum
+   requestAnimationFrame fica vivo. Antes o loop subia de qualquer
+   jeito e a checagem não desligava coisa nenhuma.                    */
+if (semMovimento) pintar(0);
+else requestAnimationFrame(loop);
+
+/* Trocar de tema refaz os carimbos. Sem loop rodando não há quem
+   redesenhe, então o quadro parado é repintado na mão.               */
+addEventListener('up:tema', () => {
+    montarPaleta();
+    if (semMovimento) pintar(0);
+});
 
 let remontar;
 addEventListener("resize", () => {
     dimensionar();
-    
-    clearTimeout(remontar);
-    remontar = setTimeout(construir, 150);
-});
 
-dimensionar();
-construir();
+    clearTimeout(remontar);
+    remontar = setTimeout(() => {
+        construir();
+        if (semMovimento) pintar(0);
+    }, 150);
+});

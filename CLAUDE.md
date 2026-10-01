@@ -99,6 +99,35 @@ que o uso seria registrado. Não crie sem retomar essa conversa.
 3. **Cache do `app/index.html`.** O hash protege os bundles, mas o HTML que
    aponta para eles tem nome fixo e também cacheia.
 
+
+**O `base.css` é LINKADO, nunca importado.** Ele já foi `import` dentro do
+`main.tsx`, e isso criava duas cópias: o arquivo servido em `/css/base.css`
+e outra assada dentro do bundle — mudar o arquivo não refletia no hub sem
+build. Pior: o minificador do Vite (Lightning CSS) **reescrevia**
+`light-dark()` num polyfill de `var()` cujo gatilho é
+`@media (prefers-color-scheme)`, ou seja, a preferência do **sistema**. O
+seletor de tema mexe em `color-scheme`, que o polyfill ignora — o login
+funcionava e o hub não. As duas telas agora linkam o mesmo arquivo cru.
+Medido em 01/10/2026.
+
+**Caminho absoluto no `index.html` não se comporta igual nas duas pontas.**
+Em DEV o Vite prefixa o `base` neles: `/js/tema.js` vira `/app/js/tema.js` e
+dá 404. No build ele deixa como está. O `vite.config.ts` tem duas regras de
+proxy (`/app/js` e `/app/css`) só para desfazer esse prefixo em dev.
+
+**O hub não pode morrer por causa de script fora do bundle.** O `tema.js`
+não é módulo e não entra no bundle; um 404 nele derrubava a aplicação
+inteira em tela branca, porque `window.UPTema.ler()` estourava dentro de um
+`useState`. Por isso `UPTema` é declarado **opcional** no `Window` e todo
+uso leva `?.` — com o arquivo ausente o hub sobe sem seletor de tema, em vez
+de não subir. Testado removendo o arquivo.
+
+**`color-scheme` só resolve COR.** `light-dark()` serve `<color>` e mais
+nada. Filtro, troca de imagem, estilo de borda — nada disso enxerga o tema.
+Para esses casos o `tema.js` escreve um `data-tema` no `<html>`, e o CSS
+se pendura nele. Esse atributo é a única razão de o `tema.js` precisar de
+um listener de `matchMedia` — as cores não precisam.
+
 **O projeto mora num disco de rede** (`\\192.168.0.50\dados`, mapeado em
 `Z:`). Consequências medidas: build de 15s virou 2min, o hub leva ~2min
 para subir (imports pela rede), travas órfãs do git aparecem, e o disco

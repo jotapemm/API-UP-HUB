@@ -42,7 +42,19 @@ type ChamadoFila = Chamado & {
   atendido_por: string | null
 }
 
-type Vista = 'inicio' | 'entrada' | 'triagem' | 'perfil'
+type Vista = 'inicio' | 'entrada' | 'triagem' | 'config'
+
+/* As Configurações são UMA vista com cinco cômodos. A seção é estado
+   próprio: trocar de cômodo não recarrega nada nem mexe na vista.      */
+type Secao = 'perfil' | 'conta' | 'aparencia' | 'favoritos' | 'ajuda'
+
+const SECOES: [Secao, string][] = [
+  ['perfil', 'Perfil'],
+  ['conta', 'Conta'],
+  ['aparencia', 'Aparência'],
+  ['favoritos', 'Favoritos'],
+  ['ajuda', 'Ajuda'],
+]
 
 type Tema = 'claro' | 'escuro' | 'sistema'
 
@@ -97,6 +109,12 @@ const TRACOS: Record<string, string[]> = {
   chamados: ['M8 6h13', 'M8 12h13', 'M8 18h13', 'M3 6h.01', 'M3 12h.01', 'M3 18h.01'],
   entrada: ['M22 12h-6l-2 3h-4l-2-3H2', 'M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z'],
   automacoes: ['M13 2 3 14h9l-1 8 10-12h-9l1-8z'],
+
+  perfil: ['M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2', 'M12 3a4 4 0 1 0 0 8 4 4 0 0 0 0-8'],
+  conta: ['M12 3 4 6v5c0 4.5 3.2 8.6 8 10 4.8-1.4 8-5.5 8-10V6l-8-3z', 'M9.5 12l1.8 1.8 3.5-3.6'],
+  aparencia: ['M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18', 'M12 3v18a9 9 0 0 0 0-18'],
+  favoritos: ['M12 3l2.7 5.5 6.1.9-4.4 4.3 1 6.1-5.4-2.9-5.4 2.9 1-6.1-4.4-4.3 6.1-.9L12 3z'],
+  ajuda: ['M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18', 'M9.6 9.4a2.5 2.5 0 0 1 4.8.8c0 1.7-2.4 2.3-2.4 3.8', 'M12 17h.01'],
 }
 
 function Icone({ nome }: { nome: keyof typeof TRACOS }) {
@@ -135,6 +153,7 @@ function App() {
   const [semServidor, setSemServidor] = useState(false)
   const [recentes, setRecentes] = useState<string[]>([])
   const [vista, setVista] = useState<Vista>('inicio')
+  const [secao, setSecao] = useState<Secao>('perfil')
   const [chamados, setChamados] = useState<Chamado[] | null>(null)
   const [erroChamados, setErroChamados] = useState(false)
   const [fila, setFila] = useState<ChamadoFila[] | null>(null)
@@ -244,6 +263,7 @@ function App() {
 
   const botaoMenu = useRef<HTMLButtonElement>(null)
   const botaoAvatar = useRef<HTMLButtonElement>(null)
+  const caixaRef = useRef<HTMLTextAreaElement>(null)
 
   const TODAS = useMemo(
     () =>
@@ -290,13 +310,26 @@ function App() {
     }
   }
 
-  const abrirPerfil = () => {
+  /* Cada porta do menu entra numa seção diferente, e o formulário é
+     recarregado do usuário atual a cada abertura — assim um Salvar que
+     falhou não deixa texto velho na tela da próxima vez.               */
+  const abrirConfig = (alvo: Secao) => {
     setApelidoForm(usuario?.apelido ?? '')
     setSetorForm(usuario?.setor_id ?? '')
     setSenhaAtual(''); setSenhaNova('')
     setAvisoPerfil(null); setAvisoSenha(null)
-    setVista('perfil')
+    setSecao(alvo)
+    setVista('config')
     setPainelAberto(false)
+  }
+
+  /* A Ajuda não inventa canal novo: ela leva para o chamado que já
+     existe. O textarea só nasce depois que a vista troca, então o foco
+     espera o próximo quadro.                                           */
+  const pedirAjuda = () => {
+    setTermo('@ ')
+    setVista('inicio')
+    requestAnimationFrame(() => caixaRef.current?.focus())
   }
 
   const salvarPerfil = async () => {
@@ -578,12 +611,15 @@ function App() {
           <span className="avatar">{inicial}</span>
           <span><b>{tratamento}</b><span>{usuario?.nome ?? ''}</span></span>
         </div>
-        <a href="#" role="menuitem">Personalizar</a>
+        <a href="#"
+          role="menuitem"
+          onClick={(e) => { e.preventDefault(); abrirConfig('aparencia') }}
+        >Personalizar</a>
         <hr />
         <a href="#"
           role="menuitem"
           onClick={(e) => {
-            e.preventDefault(); abrirPerfil()
+            e.preventDefault(); abrirConfig('perfil')
           }}
         >Perfil</a>
         <a
@@ -600,7 +636,10 @@ function App() {
             onClick={(e) => { e.preventDefault(); setVista('triagem'); setPainelAberto(false) }}
           >Triagem</a>
         )}
-        <a href="#" role="menuitem">Configurações</a>
+        <a href="#"
+          role="menuitem"
+          onClick={(e) => { e.preventDefault(); abrirConfig('conta') }}
+        >Configurações</a>
         <hr />
         <a
           href="/entrar.html"
@@ -654,92 +693,187 @@ function App() {
           )}
 
           <main className="stage">
-            {vista === 'perfil' ? (
+            {vista === 'config' ? (
 
-              <section className="entrada">
+              <section className="config">
                 <div className="entrada-topo">
-                  <h2>Perfil</h2>
+                  <h2>Configurações</h2>
                   <button type="button" className="btn" onClick={() => setVista('inicio')}>Voltar</button>
                 </div>
 
-                <form onSubmit={(e) => { e.preventDefault(); salvarPerfil() }}>
-                  <div className="field">
-                    <label htmlFor="p-apelido">Como o hub te chama</label>
-                    <input
-                      id="p-apelido"
-                      value={apelidoForm}
-                      onChange={(e) => setApelidoForm(e.target.value)}
-                      placeholder={usuario?.nome.split(' ')[0] ?? ''}
-                    />
+                <div className="config-corpo">
+                  {/* Lista à esquerda. São <button> de verdade: o Tab passa por
+                      todos e o Enter entra, sem nenhum JS de teclado. */}
+                  <nav className="config-nav" aria-label="Seções das configurações">
+                    {SECOES.map(([id, rotulo]) => (
+                      <button
+                        key={id}
+                        type="button"
+                        className={'config-item' + (secao === id ? ' ativa' : '')}
+                        aria-current={secao === id ? 'true' : undefined}
+                        onClick={() => setSecao(id)}
+                      >
+                        <Icone nome={id} />
+                        {rotulo}
+                      </button>
+                    ))}
+                  </nav>
+
+                  {/* Só o cômodo atual é montado. É por isso que aqui NÃO
+                      precisa de inert: o que não está na tela também não está
+                      no DOM, então não tem como receber foco. */}
+                  <div className="config-painel">
+
+                    {secao === 'perfil' && (
+                      <>
+                        <h3>Perfil</h3>
+                        <p className="config-dica">Como você aparece para o resto do time.</p>
+
+                        <div className="config-identidade">
+                          <span className="avatar avatar-g" aria-hidden="true">{inicial}</span>
+                          <div>
+                            <b>{usuario?.nome ?? ''}</b>
+                            <span>{tratamento}</span>
+                          </div>
+                        </div>
+
+                        <p className="config-vazio">
+                          Foto e bio ainda não existem — por enquanto o avatar é a
+                          inicial do seu nome. Apelido e setor ficam em <b>Conta</b>.
+                        </p>
+                      </>
+                    )}
+
+                    {secao === 'conta' && (
+                      <>
+                        <h3>Conta</h3>
+
+                        <div className="field">
+                          <label htmlFor="c-email">Email</label>
+                          <input id="c-email" value={usuario?.email ?? ''} readOnly />
+                        </div>
+                        <p className="config-nota">
+                          É por ele que você entra. Trocar ainda não dá por aqui — fale com o suporte.
+                        </p>
+
+                        <form onSubmit={(e) => { e.preventDefault(); salvarPerfil() }}>
+                          <div className="field">
+                            <label htmlFor="c-apelido">Como o hub te chama</label>
+                            <input
+                              id="c-apelido"
+                              value={apelidoForm}
+                              onChange={(e) => setApelidoForm(e.target.value)}
+                              placeholder={usuario?.nome.split(' ')[0] ?? ''}
+                            />
+                          </div>
+                          <div className="field">
+                            <label htmlFor="c-setor">Setor</label>
+                            <select
+                              id="c-setor"
+                              value={setorForm}
+                              onChange={(e) => setSetorForm(e.target.value === '' ? '' : Number(e.target.value))}>
+                              <option value="">- Não informado -</option>
+                              {setores.map((s) => (
+                                <option value={s.id} key={s.id}>{s.nome}</option>
+                              ))}
+                            </select>
+                          </div>
+
+                          <button type="submit" className="btn btn-solid" disabled={salvandoPerfil}>
+                            {salvandoPerfil ? 'Salvando…' : 'Salvar'}
+                          </button>
+                        </form>
+
+                        <div role="status">
+                          {avisoPerfil && <div className={`aviso ${avisoPerfil.tipo}`}>{avisoPerfil.texto}</div>}
+                        </div>
+
+                        <hr className="perfil-divisor" />
+
+                        <h3>Trocar senha</h3>
+                        <form onSubmit={(e) => { e.preventDefault(); trocarSenha() }}>
+                          <div className="field">
+                            <label htmlFor="c-atual">Senha atual</label>
+                            <input id="c-atual" type="password" autoComplete="current-password"
+                              value={senhaAtual} onChange={(e) => setSenhaAtual(e.target.value)} />
+                          </div>
+                          <div className="field">
+                            <label htmlFor="c-nova">Nova senha</label>
+                            <input id="c-nova" type="password" autoComplete="new-password"
+                              value={senhaNova} onChange={(e) => setSenhaNova(e.target.value)} />
+                          </div>
+                          <button type="submit" className="btn btn-solid" disabled={salvandoSenha}>
+                            {salvandoSenha ? 'Trocando…' : 'Trocar senha'}
+                          </button>
+                        </form>
+
+                        <div role="status">
+                          {avisoSenha && <div className={`aviso ${avisoSenha.tipo}`}>{avisoSenha.texto}</div>}
+                        </div>
+
+                        <p className="config-vazio">
+                          Adicionar colegas depende do chat, que ainda não existe.
+                        </p>
+                      </>
+                    )}
+
+                    {secao === 'aparencia' && (
+                      <>
+                        <h3>Aparência</h3>
+                        <fieldset className="tema-campo">
+                          <legend>Tema do hub</legend>
+                          <p className="config-dica">
+                            "Seguir o sistema" acompanha o Windows ao vivo: se ele mudar, o hub
+                            muda. A escolha também vale para a tela de entrar.
+                          </p>
+                          <div className="tema-opcoes">
+                            {TEMAS.map(([valor, rotulo]) => (
+                              <label key={valor} className={'tema-opcao' + (tema === valor ? ' ativa' : '')}>
+                                <input
+                                  type="radio"
+                                  name="tema"
+                                  value={valor}
+                                  checked={tema === valor}
+                                  onChange={() => trocarTema(valor)}
+                                />
+                                {rotulo}
+                              </label>
+                            ))}
+                          </div>
+                        </fieldset>
+                      </>
+                    )}
+
+                    {secao === 'favoritos' && (
+                      <>
+                        <h3>Favoritos</h3>
+                        <p className="config-vazio">
+                          Ainda não dá para favoritar uma automação. Quando der, as
+                          suas ficam listadas aqui.
+                        </p>
+                      </>
+                    )}
+
+                    {secao === 'ajuda' && (
+                      <>
+                        <h3>Ajuda</h3>
+                        <p className="config-dica">
+                          Travou em alguma coisa? Abra um chamado que o suporte responde.
+                        </p>
+                        <button type="button" className="btn btn-solid" onClick={pedirAjuda}>
+                          Abrir um chamado
+                        </button>
+                        <p className="config-nota">
+                          O andamento fica em <b>Caixa de entrada</b>.
+                        </p>
+                      </>
+                    )}
+
                   </div>
-                  <div className="field">
-                    <label htmlFor="p-setor">Setor</label>
-                    <select
-                      id="p-setor"
-                      value={setorForm}
-                      onChange={(e) => setSetorForm(e.target.value === '' ? '' : Number(e.target.value))}>
-                      <option value="">- Não informado -</option>
-                      {setores.map((s) => (
-                        <option value={s.id} key={s.id}>{s.nome}</option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <button type='submit' className="btn btn-solid" disabled={salvandoPerfil}>
-                    {salvandoPerfil ? 'Salvando…' : 'Salvar'}
-                  </button>
-                </form>
-
-                <div role="status">
-                  {avisoPerfil && <div className={`aviso ${avisoPerfil.tipo}`}>{avisoPerfil.texto}</div>}
-                </div>
-
-                <hr className="perfil-divisor" />
-
-                <fieldset className="tema-campo">
-                  <legend>Aparência</legend>
-                  <p className="perfil-dica">
-                    "Seguir o sistema" acompanha o Windows ao vivo: se ele mudar, o hub muda.
-                  </p>
-                  <div className="tema-opcoes">
-                      {TEMAS.map(([valor, rotulo]) => (
-                        <label key={valor} className={'tema-opcao' + (tema === valor ? ' ativa' : '')}>
-                          <input 
-                            type="radio"
-                            name="tema"
-                            value={valor}
-                            checked={tema === valor}
-                            onChange={() => trocarTema(valor)}
-                          />
-                          {rotulo}
-                        </label>
-                      ))}
-                  </div>
-                </fieldset>
-
-                <h3>Trocar senha</h3>
-                <form onSubmit={(e) => { e.preventDefault(); trocarSenha() }}>
-                  <div className="field">
-                    <label htmlFor="p-atual">Senha atual</label>
-                    <input id="p-atual" type="password" autoComplete="current-password"
-                      value={senhaAtual} onChange={(e) => setSenhaAtual(e.target.value)} />
-                  </div>
-                  <div className="field">
-                    <label htmlFor="p-nova">Nova senha</label>
-                    <input id="p-nova" type="password" autoComplete="current-password"
-                      value={senhaNova} onChange={(e) => setSenhaNova(e.target.value)} />
-                  </div>
-                  <button type="submit" className="btn btn-solid" disabled={salvandoSenha}>
-                    {salvandoSenha ? 'Trocando…' : 'Trocar senha'}
-                  </button>
-                </form>
-
-                <div role="status">
-                  {avisoSenha && <div className={`aviso ${avisoSenha.tipo}`}>{avisoSenha.texto}</div>}
                 </div>
               </section>
 
-            ) : vista === 'triagem' ? (
+) : vista === 'triagem' ? (
               <section className="entrada">
                 <div className="entrada-topo">
                   <h2>Triagem</h2>
@@ -843,6 +977,7 @@ function App() {
                   <label className="sr-only" htmlFor="q">Buscar automação ou digitar @ para abrir um chamado</label>
                   <textarea
                     id="q"
+                    ref={caixaRef}
                     rows={3}
                     value={termo}
                     onChange={(e) => { setTermo(e.target.value); setSel(0); setAviso(null) }}

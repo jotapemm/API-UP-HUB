@@ -49,9 +49,24 @@ nenhum verde da marca muda de cor.
 
 ---
 
-## 2. Configurações — o esqueleto das cinco seções
+## 2. Configurações — o esqueleto das cinco seções ✅ 02/10/2026
 
-**Eu faço.** É repetição: vista por estado, ícones, `inert`.
+**Feito sozinho.** Era repetição: vista por estado, ícones, cômodo por
+condicional.
+
+A vista `perfil` virou `config`, com `secao` como estado próprio. Cinco
+seções com ícone, lista à esquerda e painel à direita (`<button>` comuns:
+Tab e Enter já funcionam sem JS de teclado). Só o cômodo atual é montado,
+então `inert` não foi preciso — o que não está no DOM não recebe foco.
+
+As três portas do card do usuário passaram a levar a lugares diferentes:
+Personalizar → Aparência, Perfil → Perfil, Configurações → Conta. Antes
+Personalizar e Configurações eram `href="#"` mortos.
+
+Funcionando hoje: **Conta** (email somente leitura, apelido, setor, troca de
+senha) e **Aparência** (o item 1). **Ajuda** leva ao chamado que já existe,
+com a caixa em modo Chamado e foco pronto. **Perfil** e **Favoritos** são
+estados honestos: dizem o que ainda não dá.
 
 Seções: Perfil · Conta · Aparência · Favoritos · Ajuda, com lista à
 esquerda e painel à direita. Nasce com Aparência (item 1) e Conta (o que

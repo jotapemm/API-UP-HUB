@@ -14,7 +14,8 @@ def listar_automacoes(usuario=Depends(usuario_atual)):
                    s.nome AS setor, a.id, 
                    a.slug, a.nome, a.descricao, 
                    a.url, a.palavras_chave,
-                   (f.usuario_id IS NOT NULL) AS favorita
+                   (f.usuario_id IS NOT NULL) AS favorita,
+                   f.criado_em AS favorita_em
                    
             FROM setores s
             LEFT JOIN automacoes a ON a.setor_id = s.id AND a.ativa
@@ -41,6 +42,7 @@ def listar_automacoes(usuario=Depends(usuario_atual)):
                 "url": l["url"],
                 "palavras_chave": l["palavras_chave"],
                 "favorita": l["favorita"],
+                "favorita_em": l["favorita_em"].isoformat() if l["favorita_em"] else None,
             })
             
     return setores

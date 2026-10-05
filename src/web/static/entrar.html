@@ -12,6 +12,15 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <script src="js/entrar.js" defer></script>
     <script src="js/app.js" defer></script>
+    <!-- Script inline roda NA HORA; o app.js acima tem defer e só roda
+         depois da análise. Esperar o DOMContentLoaded resolve os dois de
+         uma vez: a essa altura os defer já rodaram e o <canvas> já existe.
+         O login nunca desmonta, então ele liga e esquece o `parar`.      -->
+    <script>
+      addEventListener('DOMContentLoaded', () => {
+        UPTrama.iniciar(document.getElementById('trama'));
+      });
+    </script>
 </head>
 
 <body>

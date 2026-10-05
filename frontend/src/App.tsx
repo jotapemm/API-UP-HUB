@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from 'react'
+import Trama from './Trama'
 import { useDigitacao } from './useDigitacao'
 import { lerRecentes, registrarRecente } from './recentes'
 import './App.css'
@@ -25,6 +26,7 @@ type Automacao = {
   url: string | null
   palavras_chave: string | null
   favorita: boolean
+  favorita_em: string | null
 }
 
 type Setor = {
@@ -48,7 +50,7 @@ type ChamadoFila = Chamado & {
   atendido_por: string | null
 }
 
-type Vista = 'inicio' | 'entrada' | 'triagem' | 'config'
+type Vista = 'inicio' | 'entrada' | 'triagem' | 'config' | 'perfil'
 
 /* As Configurações são UMA vista com cinco cômodos. A seção é estado
    próprio: trocar de cômodo não recarrega nada nem mexe na vista.      */
@@ -334,7 +336,19 @@ function App() {
     return TODAS.filter((i) => partes.every((p) => i.chave.includes(p))).slice(0, 6)
   }, [termo, TODAS])
 
-  const favoritas = useMemo(() => TODAS.filter((a) => a.favorita), [TODAS])
+  /* Ordem: a favoritada mais recentemente primeiro. É a regra que decide
+     quais vão para os cards do Perfil, sem precisar de uma coluna
+     "principal" que alguém teria que manter.                            */
+  const favoritas = useMemo(
+    () => TODAS.filter((a) => a.favorita)
+               .sort((x, y) => (y.favorita_em ?? '').localeCompare(x.favorita_em ?? '')),
+    [TODAS],
+  )
+
+  const nomeSetor = useMemo(
+    () => setores.find((s) => s.id === usuario?.setor_id)?.nome ?? null,
+    [setores, usuario],
+  )
 
   const itensRecentes = useMemo(
     () => recentes.flatMap((slug) => TODAS.filter((a) => a.slug === slug)), [recentes, TODAS],
@@ -753,7 +767,7 @@ function App() {
         <a href="#"
           role="menuitem"
           onClick={(e) => {
-            e.preventDefault(); abrirConfig('perfil')
+            e.preventDefault(); setVista('perfil'); setPainelAberto(false)
           }}
         >Perfil</a>
         <a
@@ -829,8 +843,103 @@ function App() {
             </div>
           )}
 
-          <main className="stage">
-            {vista === 'config' ? (
+          <main className={vista === 'perfil' ? 'stage com-trama' : 'stage'}>
+            {vista === 'perfil' ? (
+
+              <>
+                {/* A trama só existe enquanto esta vista existe. Sair daqui
+                    desmonta o componente, e o cleanup do useEffect chama o
+                    parar() que o app.js devolveu. */}
+                <Trama />
+
+                <section className="perfil-pagina">
+                  <aside className="perfil-lado">
+                    <div className="perfil-bloco">
+                      <span className="avatar perfil-foto" aria-hidden="true">
+                        <Foto de={usuario} inicial={inicial} />
+                      </span>
+
+                      <h2 className="perfil-nome">{usuario?.nome ?? ''}</h2>
+                      <p className="perfil-apelido">{tratamento}</p>
+
+                      {usuario?.bio
+                        ? <p className="perfil-bio">{usuario.bio}</p>
+                        : <p className="perfil-bio vazia">Sem bio ainda.</p>}
+
+                      <dl className="perfil-dados">
+                        <div>
+                          <dt>Setor</dt>
+                          <dd>{nomeSetor ?? 'Não informado'}</dd>
+                        </div>
+                        <div>
+                          <dt>Email</dt>
+                          <dd>{usuario?.email ?? ''}</dd>
+                        </div>
+                      </dl>
+
+                      <button
+                        type="button"
+                        className="btn"
+                        onClick={() => abrirConfig('perfil')}
+                      >Editar perfil</button>
+                    </div>
+                  </aside>
+
+                  <div className="perfil-corpo">
+                    <section className="perfil-bloco">
+                      <div className="perfil-topo">
+                        <h3>Favoritos</h3>
+                        {favoritas.length > 3 && (
+                          <button
+                            type="button"
+                            className="botao-texto"
+                            onClick={() => abrirConfig('favoritos')}
+                          >ver os {favoritas.length}</button>
+                        )}
+                      </div>
+
+                      {favoritas.length > 0 ? (
+                        <div className="cards">
+                          {favoritas.slice(0, 3).map((a) => (
+                            <a
+                              className="card"
+                              key={a.slug}
+                              href={a.url ?? '#'}
+                              target={a.url ? '_blank' : undefined}
+                              rel="noopener noreferrer"
+                              onClick={() => registrar(a.slug)}
+                            >
+                              <span className="card-topo">
+                                <img className="card-logo" src="/assets/logo-up.png" alt="" />
+                                <b>{a.nome}</b>
+                              </span>
+                              <small>{a.descricao}</small>
+                              <span className="card-setor">{a.setor}</span>
+                            </a>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="config-vazio">
+                          Marque uma automação com a estrela, na gaveta ou na
+                          busca, e as três mais recentes aparecem aqui.
+                        </p>
+                      )}
+                    </section>
+
+                    <section className="perfil-bloco">
+                      <h3>Uso no ano</h3>
+                      <p className="config-vazio">
+                        O hub ainda não registra quem rodou o quê. Isso depende de
+                        uma conversa com o time, porque passa a ser medição de
+                        trabalho — e ela ainda não aconteceu. Quando acontecer, o
+                        ano inteiro aparece aqui, agrupado por competência.
+                      </p>
+                    </section>
+                  </div>
+                </section>
+              </>
+
+            ) : vista === 'config' ? (
 
               <section className="config">
                 <div className="entrada-topo">

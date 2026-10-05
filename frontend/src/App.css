@@ -802,3 +802,200 @@
 .fav-item .estrela {
   opacity: 1;
 }
+
+/* ── PÁGINA DE PERFIL ───────────────────────────────────────────────
+   A trama fica atrás de tudo, e os blocos flutuam sobre ela em vidro.
+   É a mesma linguagem do login, e é por isso que o palco precisa ficar
+   transparente aqui: o fundo dele taparia o canvas.                   */
+#trama {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.stage.com-trama {
+  background: transparent;
+  position: relative;
+  z-index: 1;
+}
+
+.perfil-pagina {
+  display: grid;
+  grid-template-columns: 300px minmax(0, 1fr);
+  gap: 28px;
+  align-items: start;
+  max-width: 1040px;
+  margin: 0 auto;
+}
+
+.perfil-lado {
+  position: sticky;
+  top: 0;
+}
+
+/* o vidro: os mesmos tokens do cartão do login, sem inventar cor nova */
+.perfil-bloco {
+  padding: 22px;
+  border: 1px solid var(--vidro-borda);
+  border-radius: var(--r-lg);
+  background: var(--vidro);
+  backdrop-filter: blur(22px) saturate(130%);
+  -webkit-backdrop-filter: blur(22px) saturate(130%);
+}
+
+.perfil-corpo {
+  display: grid;
+  gap: 20px;
+}
+
+.perfil-foto {
+  width: 132px;
+  height: 132px;
+  font-size: 44px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.perfil-nome {
+  margin: 0;
+  font-size: 19px;
+  line-height: 1.25;
+}
+
+.perfil-apelido {
+  margin: 2px 0 0;
+  font-size: 13px;
+  color: var(--text-3);
+}
+
+.perfil-bio {
+  margin: 14px 0 0;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text-2);
+  white-space: pre-wrap;
+}
+
+.perfil-bio.vazia {
+  color: var(--text-3);
+  font-style: italic;
+}
+
+.perfil-dados {
+  display: grid;
+  gap: 10px;
+  margin: 18px 0;
+  padding: 16px 0 0;
+  border-top: 1px solid var(--line);
+}
+
+.perfil-dados dt {
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: var(--text-3);
+}
+
+.perfil-dados dd {
+  margin: 2px 0 0;
+  font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.perfil-lado .btn {
+  width: 100%;
+  justify-content: center;
+}
+
+.perfil-topo {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.perfil-bloco h3 {
+  margin: 0 0 14px;
+  font-size: 14px;
+}
+
+.perfil-topo h3 {
+  margin-bottom: 0;
+}
+
+.perfil-topo .botao-texto {
+  margin: 0 0 0 auto;
+}
+
+/* ── CARDS DA AUTOMAÇÃO FAVORITA ─────────────────────────────────── */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.card {
+  display: grid;
+  gap: 6px;
+  align-content: start;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--panel-2);
+  color: var(--text);
+  text-decoration: none;
+  transition: border-color .12s, transform .12s;
+}
+
+.card:hover {
+  border-color: var(--brand-dim);
+  transform: translateY(-1px);
+}
+
+.card-topo {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 13px;
+}
+
+/* a logo é pequena de propósito: ela marca, não anuncia */
+.card-logo {
+  width: 20px;
+  height: 20px;
+  flex: none;
+}
+
+[data-tema="claro"] .card-logo {
+  filter: brightness(.10);
+}
+
+.card small {
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--text-3);
+}
+
+.card-setor {
+  justify-self: start;
+  margin-top: 4px;
+  font-size: 9.5px;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  border: 1px solid var(--line);
+  border-radius: var(--r-xl);
+  padding: 2px 8px;
+}
+
+@media (max-width: 860px) {
+  .perfil-pagina {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .perfil-lado {
+    position: static;
+  }
+}

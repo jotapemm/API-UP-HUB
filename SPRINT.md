@@ -147,9 +147,31 @@ seção Favoritos listar o que foi marcado.
 
 ---
 
-## 5. Perfil — layout novo, trama e blur
+## 5. Perfil — layout novo, trama e blur ✅ 05/10/2026
 
-**Juntos** no canvas, eu faço o layout.
+**Canvas juntos, layout sozinho.**
+
+O `app.js` deixou de rodar solto: virou `window.UPTrama.iniciar(canvas)`,
+que devolve a própria função de parar. É o mesmo contrato do cleanup do
+`useEffect`, então o `Trama.tsx` só liga ao montar e chama o `parar` ao
+sair — sem saber nada de canvas. Um arquivo serve as duas casas.
+
+O conceito: numa página única, "a página limpa depois" deixa de valer. A
+tela monta e desmonta enquanto a página continua viva, e sem parada
+explícita cada visita sobe mais um laço.
+
+Medido com 10 idas e vindas: 10 tramas ligadas, 10 desligadas, 0 canvas e
+**0 quadros pendentes**. Com 6 ciclos a mais, os ouvintes de `resize` e
+`up:tema` fecharam em 0 cada.
+
+Layout: coluna de identidade à esquerda (foto, nome, bio, setor, email),
+favoritos e calendário à direita, tudo em blocos de vidro com
+`backdrop-filter` sobre a trama — os mesmos tokens `--vidro` do cartão do
+login, sem cor nova. Os cards mostram as **três favoritadas mais
+recentemente**, com a logo da UP pequena.
+
+O calendário é estado honesto: diz que o registro de uso não existe e por
+quê. Ele destrava no item 6.
 
 - Novo: trazer a trama de pontos (hoje `app.js` vanilla no `entrar.html`)
   para dentro do React. Vira hook ou componente, e aí entra ciclo de vida:

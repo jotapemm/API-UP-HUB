@@ -167,14 +167,16 @@ button {
   color: var(--brand);
 }
 
-/* botões */
+/* botões — canto reto, de propósito. É a única forma dura da interface,
+   e isso dá a ela um papel: o que é clicável e decide alguma coisa tem
+   quina; o resto (avatar, card, selo) continua arredondado.           */
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 7px;
   padding: 9px 18px;
-  border-radius: var(--r-sm);
+  border-radius: 0;
   border: 1px solid var(--line-hi);
   background: transparent;
   font-size: 13px;
@@ -192,13 +194,11 @@ button {
 .btn-solid {
   background: var(--text);
   color: var(--bg);
-  border-color: var(--text);
   font-weight: 600;
 }
 
 .btn-solid:hover {
   background: var(--brand);
-  border-color: var(--brand);
   color: var(--bg);
 }
 
@@ -214,7 +214,7 @@ button {
   width: 34px;
   height: 34px;
   padding: 0;
-  border-radius: var(--r-sm);
+  border-radius: 0;
   border: 1px solid var(--line);
   background: var(--panel-2);
   display: inline-flex;

@@ -27,6 +27,17 @@
   border-bottom: 1px solid var(--line);
   border-radius: 0;
   padding: 0 18px;
+
+  /* O canvas da trama é POSICIONADO (fixed, z-index 0), e posicionado
+     pinta acima de não posicionado. Sem isto a topbar ficava embaixo dos
+     pontos. Posicionar e dar z-index maior resolve a ordem.            */
+  position: relative;
+  z-index: 2;
+
+  /* o mesmo vidro do cartão do login, com os mesmos tokens */
+  background: var(--vidro);
+  -webkit-backdrop-filter: blur(5px) saturate(130%);
+  backdrop-filter: blur(5px) saturate(130%);
 }
 
 .stage {
@@ -37,6 +48,9 @@
      manda: os das pontas so entram em telas extremas. Subindo o meio
      de 7vh para 18vh o conteudo desce e o palco respira. */
   padding: clamp(30px, 18vh, 160px) clamp(20px, 5vw, 48px);
+  background: color-mix(in srgb, var(--bg) 45%, transparent);
+  -webkit-backdrop-filter: blur(10px) saturate(130%);
+  backdrop-filter: blur(10px) saturate(130%);
 }
 
 /* ── SAUDAÇÃO ───────────────────────────────────────────────────
@@ -77,7 +91,7 @@
   width: 100%;
   padding: 9px 10px;
   border: 0;
-  border-radius: var(--r-sm);
+  border-radius: 0;
   background: none;
   color: var(--text-2);
   font-size: 13px;
@@ -120,7 +134,7 @@
   margin: 12px 18px;
 }
 
-.side-group > .side-head {
+.side-group>.side-head {
   gap: 10px;
 }
 
@@ -197,7 +211,7 @@
 
   /* ↓ O CORAÇÃO DO EFEITO. O card cresce a partir do canto que
      encosta no avatar, então parece sair do botão. Trocando por
-     "center" isto vira um modal genérico. */  
+     "center" isto vira um modal genérico. */
   transform-origin: top right;
 
   opacity: 0;
@@ -315,7 +329,8 @@
 .chamado p {
   margin: 0;
   font-size: 13px;
-  white-space: pre-wrap;     /* preserva as quebras do Shift+Enter */
+  white-space: pre-wrap;
+  /* preserva as quebras do Shift+Enter */
 }
 
 .estado {
@@ -328,10 +343,24 @@
   color: var(--text-2);
 }
 
-.estado.aberto        { color: var(--brand); border-color: var(--brand-dim); }
-.estado.em_andamento  { color: var(--warn); border-color: rgba(229, 162, 61, .45); }
-.estado.resolvido     { color: var(--text-3); }
-.estado.cancelado     { color: var(--text-3); text-decoration: line-through; }
+.estado.aberto {
+  color: var(--brand);
+  border-color: var(--brand-dim);
+}
+
+.estado.em_andamento {
+  color: var(--warn);
+  border-color: rgba(229, 162, 61, .45);
+}
+
+.estado.resolvido {
+  color: var(--text-3);
+}
+
+.estado.cancelado {
+  color: var(--text-3);
+  text-decoration: line-through;
+}
 
 .field select {
   width: 100%;
@@ -355,9 +384,10 @@
    canvas do entrar.html, que leva ~52s pra dar uma volta completa —
    as duas telas ficam no mesmo compasso.                            */
 .brilho {
-  color: var(--brand);                               /* se o recorte não pegar, fica verde chapado */
+  color: var(--brand);
+  /* se o recorte não pegar, fica verde chapado */
   background: linear-gradient(100deg,
-              var(--brand) 42%, var(--brilho) 50%, var(--brand) 58%);
+      var(--brand) 42%, var(--brilho) 50%, var(--brand) 58%);
   background-size: 250% 100%;
   background-clip: text;
   -webkit-background-clip: text;
@@ -382,8 +412,13 @@
 }
 
 @keyframes varrer {
-  from { background-position: 150% 0; }
-  to   { background-position: -50% 0; }
+  from {
+    background-position: 150% 0;
+  }
+
+  to {
+    background-position: -50% 0;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -392,6 +427,7 @@
     -webkit-text-fill-color: var(--brand);
   }
 }
+
 /* ── TEMA: um controle de três estados ──────────────────────────────
    Por baixo são radios de verdade. Imitar isso com <button> custaria o
    teclado inteiro: as setas que andam entre as opções e o "2 de 3,
@@ -402,7 +438,7 @@
   padding: 0;
 }
 
-.tema-campo > legend {
+.tema-campo>legend {
   padding: 0;
   margin-bottom: 8px;
   font-size: 12px;
@@ -414,14 +450,14 @@
   gap: 2px;
   padding: 2px;
   border: 1px solid var(--line);
-  border-radius: var(--r-sm);
+  border-radius: 0;
   background: var(--panel-2);
 }
 
 .tema-opcao {
   position: relative;
   padding: 7px 14px;
-  border-radius: 4px;
+  border-radius: 0;
   font-size: 12.5px;
   color: var(--text-2);
   cursor: pointer;
@@ -481,7 +517,7 @@
   width: 100%;
   padding: 9px 12px;
   border: 0;
-  border-radius: var(--r-sm);
+  border-radius: 0;
   background: none;
   color: var(--text-2);
   font: inherit;
@@ -513,7 +549,7 @@
   font-size: 15px;
 }
 
-.config-painel .perfil-divisor + h3 {
+.config-painel .perfil-divisor+h3 {
   margin-top: 0;
 }
 
@@ -532,7 +568,7 @@
 
 /* Só a nota que vem logo depois de um campo cola nele. A margem negativa
    solta valia para qualquer vizinho e subia por cima de botão. */
-.field + .config-nota {
+.field+.config-nota {
   margin-top: -6px;
 }
 
@@ -705,7 +741,7 @@
 
 .botao-texto:disabled {
   cursor: progress;
-  opacity: .6;
+  opacity: .9;
 }
 
 /* ── ESTRELA DE FAVORITO ────────────────────────────────────────────
@@ -717,8 +753,8 @@
   align-items: center;
 }
 
-.side-item > a,
-.res-item > .res {
+.side-item>a,
+.res-item>.res {
   flex: 1;
   min-width: 0;
 }
@@ -732,7 +768,7 @@
   margin-right: 6px;
   padding: 0;
   border: 0;
-  border-radius: var(--r-sm);
+  border-radius: 0;
   background: none;
   color: var(--text-3);
   cursor: pointer;
@@ -780,7 +816,7 @@
   background: var(--panel-2);
 }
 
-.fav-item > div {
+.fav-item>div {
   display: grid;
   gap: 2px;
   flex: 1;
@@ -812,12 +848,26 @@
   inset: 0;
   z-index: 0;
   pointer-events: none;
+
+  /* No login a trama compete com um cartão só. Aqui o conteúdo é espalhado
+     e ela briga com texto a página inteira — a mesma opacidade do .grain
+     deixa ela presente sem atrapalhar a leitura.                        */
+  opacity: .6;
 }
 
+/* A tela inteira é UMA superfície de vidro sobre a trama. Antes cada
+   bloco tinha o seu, e o resultado eram cartões boiando soltos — o
+   contorno de cada um competia com a leitura em vez de ajudar.        */
 .stage.com-trama {
-  background: transparent;
   position: relative;
   z-index: 1;
+  /* O véu, não o desfoque, é quem decide se dá para ler. O --vidro tem 15%
+     e foi calibrado para o cartão do login, onde a trama já está quieta
+     atrás. Aqui ele precisa ser mais denso — e sai do próprio --bg, então
+     acompanha o tema sozinho em vez de virar mais um token.             */
+  background: color-mix(in srgb, var(--bg) 50%, transparent);
+  -webkit-backdrop-filter: blur(5px) saturate(130%);
+  backdrop-filter: blur(5px) saturate(130%);
 }
 
 .perfil-pagina {
@@ -832,21 +882,25 @@
 .perfil-lado {
   position: sticky;
   top: 0;
+  padding-right: 28px;
+  border-right: 1px solid var(--line);
 }
 
-/* o vidro: os mesmos tokens do cartão do login, sem inventar cor nova */
+/* Os blocos não são mais cartões: quem segura o vidro é o palco. Aqui
+   só sobra o espaçamento e, na coluna da direita, uma linha fina
+   separando um assunto do outro.                                      */
 .perfil-bloco {
-  padding: 22px;
-  border: 1px solid var(--vidro-borda);
-  border-radius: var(--r-lg);
-  background: var(--vidro);
-  backdrop-filter: blur(22px) saturate(130%);
-  -webkit-backdrop-filter: blur(22px) saturate(130%);
+  padding: 0;
+}
+
+.perfil-corpo>.perfil-bloco+.perfil-bloco {
+  padding-top: 26px;
+  border-top: 1px solid var(--line);
 }
 
 .perfil-corpo {
   display: grid;
-  gap: 20px;
+  gap: 26px;
 }
 
 .perfil-foto {
@@ -997,5 +1051,122 @@
 
   .perfil-lado {
     position: static;
+  }
+}
+/* ── CONFIGURAÇÕES: coluna centrada, começando no alto ───────────────
+   O palco empurra o conteúdo para baixo (18vh) porque a tela inicial é
+   um palco mesmo. Tela de ajuste não é palco: ela começa perto do topo
+   e a coluna é que centraliza.                                        */
+.stage.no-alto {
+  padding-top: clamp(26px, 6vh, 64px);
+}
+
+.config {
+  max-width: 980px;
+  margin: 0 auto;
+}
+
+.config-id {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding-bottom: 20px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid var(--line);
+}
+
+.config-id-foto {
+  width: 52px;
+  height: 52px;
+  font-size: 19px;
+  font-weight: 600;
+  flex: none;
+}
+
+.config-id-txt {
+  display: grid;
+  gap: 1px;
+  min-width: 0;
+}
+
+.config-id-txt b {
+  font-size: 17px;
+  line-height: 1.25;
+}
+
+.config-id-txt span {
+  font-size: 12.5px;
+  color: var(--text-3);
+}
+
+.config-id .btn {
+  margin-left: auto;
+  flex: none;
+}
+
+/* o bloco de identidade da seção Perfil precisava de ar antes do campo */
+.config-identidade {
+  margin-bottom: 22px;
+}
+
+/* ── BOTÃO COM A LUZ QUE SEGUE O PONTEIRO ───────────────────────────
+   O círculo nasce em (--mx, --my), que o componente escreve na entrada
+   do ponteiro, e cresce até cobrir o botão. É a mesma ideia da trama em
+   escala de gesto: luz surgindo sobre um campo escuro.
+
+   O custo é só de compositor — width/height num pseudo-elemento isolado,
+   sem reflow do conteúdo e sem re-render do React.                     */
+.btn-luz {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;      /* prende o z-index negativo do ::before aqui */
+}
+
+.btn-luz::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  left: var(--mx, 50%);
+  top: var(--my, 50%);
+
+  /* CÍRCULO de verdade. Animar largura e altura juntas dava uma elipse,
+     porque 260% da largura e 260% da altura são medidas diferentes num
+     botão que é mais largo que alto. Com aspect-ratio a altura segue a
+     largura, e só uma propriedade anima.                               */
+  width: 0;
+  aspect-ratio: 1;
+  border-radius: 50%;
+
+  background: var(--brand);
+  transform: translate(-50%, -50%);
+  transition: width .42s cubic-bezier(.22, .61, .36, 1);
+}
+
+/* Entrando por um canto, o círculo precisa do DOBRO da diagonal para
+   cobrir tudo. Num botão de 78x40 a diagonal é 88, então 240% da largura
+   (187px) sobra — e em botão largo sobra mais ainda.                   */
+.btn-luz:hover::before,
+.btn-luz:focus-visible::before {
+  width: 240%;
+}
+
+.btn-luz:disabled::before {
+  width: 0;
+}
+
+.btn-luz-txt {
+  position: relative;
+}
+
+/* o .btn-solid pintava o fundo inteiro no hover; agora quem pinta é o
+   círculo, e aqui fica só a borda acompanhando */
+.btn-luz:hover:not(:disabled) {
+  background: var(--text);
+  border-color: var(--brand);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn-luz::before {
+    transition: none;
   }
 }

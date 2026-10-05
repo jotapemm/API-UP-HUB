@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from 'react'
 import Trama from './Trama'
+import BotaoLuz from './BotaoLuz'
 import { useDigitacao } from './useDigitacao'
 import { lerRecentes, registrarRecente } from './recentes'
 import './App.css'
@@ -797,6 +798,15 @@ function App() {
         >Sair</a>
       </div>
 
+      {/* A trama fica FORA do .app, irmã dele. Ela já esteve dentro do
+          palco, e aí o backdrop-filter do palco nunca a alcançava: um filho
+          é pintado na FRENTE do fundo do pai, e backdrop-filter só enxerga
+          o que está atrás. Como irmã, ela fica atrás e o vidro pega.
+
+          A condição mantém o ciclo de vida: sair do Perfil desmonta o
+          componente e o cleanup chama o parar() que o app.js devolveu.   */}
+      {vista === 'perfil' && <Trama />}
+
       <div className="app" inert={menuAberto || painelAberto}>
         <div className="main">
           <header className="topbar">
@@ -843,15 +853,10 @@ function App() {
             </div>
           )}
 
-          <main className={vista === 'perfil' ? 'stage com-trama' : 'stage'}>
+          <main className={'stage' + (vista === 'perfil' ? ' com-trama' : '') + (vista === 'config' ? ' no-alto' : '')}>
             {vista === 'perfil' ? (
 
               <>
-                {/* A trama só existe enquanto esta vista existe. Sair daqui
-                    desmonta o componente, e o cleanup do useEffect chama o
-                    parar() que o app.js devolveu. */}
-                <Trama />
-
                 <section className="perfil-pagina">
                   <aside className="perfil-lado">
                     <div className="perfil-bloco">
@@ -942,10 +947,19 @@ function App() {
             ) : vista === 'config' ? (
 
               <section className="config">
-                <div className="entrada-topo">
-                  <h2>Configurações</h2>
+                {/* Quem está sendo configurado vem antes do que se configura:
+                    a foto e o nome respondem "de quem é esta conta" sem o
+                    usuário precisar perguntar.                             */}
+                <header className="config-id">
+                  <span className="avatar config-id-foto" aria-hidden="true">
+                    <Foto de={usuario} inicial={inicial} />
+                  </span>
+                  <div className="config-id-txt">
+                    <b>{usuario?.nome ?? ''}</b>
+                    {usuario?.apelido && <span>{usuario.apelido}</span>}
+                  </div>
                   <button type="button" className="btn" onClick={() => setVista('inicio')}>Voltar</button>
-                </div>
+                </header>
 
                 <div className="config-corpo">
                   {/* Lista à esquerda. São <button> de verdade: o Tab passa por
@@ -975,6 +989,7 @@ function App() {
                         <h3>Perfil</h3>
                         <p className="config-dica">Como você aparece para o resto do time.</p>
 
+
                         <div className="config-identidade">
                           {/* O avatar É o botão. O input de arquivo fica escondido
                               com `hidden`, que o tira do Tab mas deixa o .click()
@@ -1001,9 +1016,12 @@ function App() {
                             }}
                           />
 
+                          {/* O nome já está no cabeçalho da tela. Aqui o bloco
+                              responde outra pergunta: o que esta foto é e o que
+                              dá para fazer com ela.                            */}
                           <div>
-                            <b>{usuario?.nome ?? ''}</b>
-                            <span>{tratamento}</span>
+                            <b>Foto de perfil</b>
+                            <span>Clique na imagem para trocar.</span>
                             {usuario?.foto_em && (
                               <button
                                 type="button"
@@ -1032,9 +1050,9 @@ function App() {
                             <p className="config-contador">{bioForm.length}/280</p>
                           </div>
 
-                          <button type="submit" className="btn btn-solid" disabled={salvandoPerfil}>
+                          <BotaoLuz type="submit" disabled={salvandoPerfil}>
                             {salvandoPerfil ? 'Salvando…' : 'Salvar'}
-                          </button>
+                          </BotaoLuz>
                         </form>
 
                         <div role="status">
@@ -1084,9 +1102,9 @@ function App() {
                             </select>
                           </div>
 
-                          <button type="submit" className="btn btn-solid" disabled={salvandoPerfil}>
+                          <BotaoLuz type="submit" disabled={salvandoPerfil}>
                             {salvandoPerfil ? 'Salvando…' : 'Salvar'}
-                          </button>
+                          </BotaoLuz>
                         </form>
 
                         <div role="status">
@@ -1107,9 +1125,9 @@ function App() {
                             <input id="c-nova" type="password" autoComplete="new-password"
                               value={senhaNova} onChange={(e) => setSenhaNova(e.target.value)} />
                           </div>
-                          <button type="submit" className="btn btn-solid" disabled={salvandoSenha}>
+                          <BotaoLuz type="submit" disabled={salvandoSenha}>
                             {salvandoSenha ? 'Trocando…' : 'Trocar senha'}
-                          </button>
+                          </BotaoLuz>
                         </form>
 
                         <div role="status">
@@ -1184,9 +1202,9 @@ function App() {
                         <p className="config-dica">
                           Travou em alguma coisa? Abra um chamado que o suporte responde.
                         </p>
-                        <button type="button" className="btn btn-solid" onClick={pedirAjuda}>
+                        <BotaoLuz type="button" onClick={pedirAjuda}>
                           Abrir um chamado
-                        </button>
+                        </BotaoLuz>
                         <p className="config-nota">
                           O andamento fica em <b>Caixa de entrada</b>.
                         </p>

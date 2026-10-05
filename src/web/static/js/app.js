@@ -36,7 +36,7 @@ window.UPTrama = {
             { largura: 380, periodo: 21000, fase: 0.75 },
         ];
         const NIVEIS = 16;
-        const TONS = [], TAMANHOS = [], SPRITES = [];
+        const TONS = [], TAMANHOS = [], SPRITES = [], RAIOS = [];
         const baldes = Array.from({ length: NIVEIS }, () => []);
 
         function construir() {
@@ -73,10 +73,10 @@ window.UPTrama = {
                 if (b.length === 0) continue;
 
                 const sp = SPRITES[n];
-                const s = TAMANHOS[n];
+                const R = RAIOS[n];      // inclui o halo, senão ele sai cortado
 
                 for (let k = 0; k < b.length; k += 2) {
-                    ctx.drawImage(sp, b[k] - s, b[k + 1] - s, s * 2, s * 2);
+                    ctx.drawImage(sp, b[k] - R, b[k + 1] - R, R * 2, R * 2);
                 }
             }
         }
@@ -100,31 +100,52 @@ window.UPTrama = {
             const BAIXO = emNumeros(UPTema.cor('--trama-baixo'));
             const MEIO = emNumeros(UPTema.cor('--trama-meio'));
             const ALTO = emNumeros(UPTema.cor('--trama-alto'));
+            const PICO = emNumeros(UPTema.cor('--brilho'));
 
             for (let n = 0; n < NIVEIS; n++) {
                 const v = n / (NIVEIS - 1);
 
-                const cor = v < 0.5
-                    ? misturar(BAIXO, MEIO, v * 2)
-                    : misturar(MEIO, ALTO, (v - 0.5) * 2);
+                /* QUATRO degraus, não três. O antigo ia cinza -> branco -> verde
+                   e o branco e o verde acabavam se misturando num borrão. Agora
+                   o último quarto sobe do verde da marca para o --brilho, que é
+                   justamente a crista da onda.                                 */
+                const cor =
+                    v < 0.45 ? misturar(BAIXO, MEIO, v / 0.45) :
+                    v < 0.75 ? misturar(MEIO, ALTO, (v - 0.45) / 0.30) :
+                               misturar(ALTO, PICO, (v - 0.75) / 0.25);
 
-                TONS[n] = `rgba(${cor},${(0.12 + v * 0.45).toFixed(3)})`;
-                TAMANHOS[n] = v < 0.34 ? 1 : (v < 0.70 ? 2 : 3);
+                /* A opacidade sobe reto até 0.75 e então ganha um empurrão: é o
+                   que faz a crista SALTAR em vez de só continuar a rampa.      */
+                const alfa = 0.12 + 0.45 * v + 0.24 * Math.max(0, (v - 0.75) / 0.25);
+
+                TONS[n] = `rgba(${cor},${alfa.toFixed(3)})`;
+                TAMANHOS[n] = v < 0.34 ? 1 : (v < 0.70 ? 2 : (v < 0.88 ? 3 : 4));
+
+                /* O brilho é do canvas, não do CSS: shadowBlur assa um halo
+                   dentro do carimbo, e ele sai de graça depois porque cada
+                   ponto é só um drawImage do mesmo sprite.                    */
+                const s = TAMANHOS[n];
+                const halo = v < 0.70 ? 0 : s * (1.4 + 1.8 * (v - 0.70) / 0.30);
+                const R = s + halo;
+                RAIOS[n] = R;
 
                 /* O sprite é um carimbo com a cor JÁ ASSADA dentro dele. É por
                    isso que trocar de tema tem que refazer os 16: repintar o
                    canvas com os carimbos velhos não muda cor nenhuma.         */
-
-                const s = TAMANHOS[n];
                 const off = document.createElement("canvas");
-                off.width = off.height = Math.ceil(2 * s * dpr);
+                off.width = off.height = Math.ceil(2 * R * dpr);
 
                 const o = off.getContext("2d");
                 o.scale(dpr, dpr);
+                if (halo > 0) {
+                    o.shadowColor = TONS[n];
+                    o.shadowBlur = halo;
+                }
                 o.fillStyle = TONS[n];
                 o.beginPath();
-                o.arc(s, s, s, 0, Math.PI * 2);
+                o.arc(R, R, s, 0, Math.PI * 2);
                 o.fill();
+                if (halo > 0) o.fill();   // segunda passada adensa o halo
 
                 SPRITES[n] = off;
             }

@@ -1000,12 +1000,12 @@
   background: var(--panel-2);
   color: var(--text);
   text-decoration: none;
-  transition: border-color .12s, transform .12s;
+  transition: border-color .1s, transform .12s;
 }
 
 .card:hover {
   border-color: var(--brand-dim);
-  transform: translateY(-1px);
+  transform: translateY(-2px);
 }
 
 .card-topo {

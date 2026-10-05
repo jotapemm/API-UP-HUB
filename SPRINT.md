@@ -113,9 +113,28 @@ arquivo inválido é recusado com mensagem clara.
 
 ---
 
-## 4. Favoritos
+## 4. Favoritos ✅ 05/10/2026
 
-**Juntos** na modelagem, eu faço o resto.
+**Modelagem juntos, resto sozinho.**
+
+Tabela `favoritos` com **chave primária composta** `(usuario_id,
+automacao_id)` e nenhum `id` próprio — o par já É a identidade, e um `id`
+deixaria duplicar o mesmo fato. A ordem das colunas na chave é a pergunta
+que a tela faz: "o que o JP favoritou" aproveita o índice; a inversa, não.
+É fato, não coisa, então desfavoritar apaga a linha em vez de marcar um
+booleano. As duas estrangeiras com `ON DELETE CASCADE`.
+
+Rotas idempotentes: `PUT` marca (com `ON CONFLICT DO NOTHING`), `DELETE`
+desmarca. Medido: favoritar duas vezes devolve 200 e deixa **uma** linha;
+desfavoritar o que já não existe também é 200.
+
+O `GET /api/automacoes` traz `favorita` por um segundo `LEFT JOIN` com o
+usuário **na condição do join** — no `WHERE` sumiriam todas as não
+favoritadas. Isolamento medido com duas sessões: cada um vê só as suas.
+
+Na tela a estrela é **irmã** do link, nunca filha: `<button>` dentro de
+`<a>` é HTML inválido. Pintura otimista medida em **11,5 ms** contra
+**200 ms** da rede, com desfazer testado forçando 500 no servidor.
 
 - Novo: tabela de relação N-para-N (usuário × automação) e chave primária
   composta — a primeira do projeto que não tem `id` próprio.

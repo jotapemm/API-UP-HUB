@@ -13,12 +13,19 @@ def listar_automacoes(usuario=Depends(usuario_atual)):
             SELECT s.id   AS setor_id, 
                    s.nome AS setor, a.id, 
                    a.slug, a.nome, a.descricao, 
-                   a.url, a.palavras_chave
+                   a.url, a.palavras_chave,
+                   (f.usuario_id IS NOT NULL) AS favorita
                    
             FROM setores s
             LEFT JOIN automacoes a ON a.setor_id = s.id AND a.ativa
+            -- O segundo LEFT JOIN traz "esta automacao e favorita DESTE
+            -- usuario". O usuario entra na CONDICAO do join, nunca no
+            -- WHERE: no WHERE o LEFT vira INNER em silencio e sumiriam
+            -- todas as automacoes que a pessoa ainda nao favoritou.
+            LEFT JOIN favoritos f ON f.automacao_id = a.id
+                                 AND f.usuario_id = %s
             ORDER BY s.ordem, s.nome, a.ordem, a.nome                  
-            """).fetchall()
+            """, (usuario["id"],)).fetchall()
         
     setores = []
     for l in linhas:
@@ -33,6 +40,7 @@ def listar_automacoes(usuario=Depends(usuario_atual)):
                 "descricao": l["descricao"],
                 "url": l["url"],
                 "palavras_chave": l["palavras_chave"],
+                "favorita": l["favorita"],
             })
             
     return setores

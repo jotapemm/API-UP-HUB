@@ -24,6 +24,7 @@ type Automacao = {
   descricao: string
   url: string | null
   palavras_chave: string | null
+  favorita: boolean
 }
 
 type Setor = {
@@ -135,6 +136,26 @@ function Foto({ de, inicial }: { de: Usuario | null; inicial: string }) {
       alt=""
       src={`/api/usuarios/${de.id}/foto?v=${Date.parse(de.foto_em)}`}
     />
+  )
+}
+
+/* Botão de alternar, não link: aria-pressed é o que faz o leitor de tela
+   anunciar "marcado" / "não marcado" em vez de ler duas vezes o nome.   */
+function Estrela({ ligada, aoClicar }: { ligada: boolean; aoClicar: () => void }) {
+  return (
+    <button
+      type="button"
+      className={'estrela' + (ligada ? ' ligada' : '')}
+      aria-pressed={ligada}
+      aria-label={ligada ? 'Desfavoritar' : 'Favoritar'}
+      onClick={aoClicar}
+    >
+      <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"
+           fill={ligada ? 'currentColor' : 'none'} stroke="currentColor"
+           strokeWidth="1.6" strokeLinejoin="round">
+        <path d="M12 3.6l2.5 5.1 5.6.8-4 3.9.9 5.6-5-2.6-5 2.6.9-5.6-4-3.9 5.6-.8z" />
+      </svg>
+    </button>
   )
 }
 
@@ -313,9 +334,38 @@ function App() {
     return TODAS.filter((i) => partes.every((p) => i.chave.includes(p))).slice(0, 6)
   }, [termo, TODAS])
 
+  const favoritas = useMemo(() => TODAS.filter((a) => a.favorita), [TODAS])
+
   const itensRecentes = useMemo(
     () => recentes.flatMap((slug) => TODAS.filter((a) => a.slug === slug)), [recentes, TODAS],
   )
+
+  /* Pinta ANTES da resposta e desfaz se o servidor recusar. A estrela tem
+     que reagir no clique; esperar a rede faria ela parecer emperrada. O
+     preço é a tela poder mentir por um instante — por isso o desfazer
+     devolve exatamente o valor que estava lá.                            */
+  const alternarFavorito = async (id: number, estaFavorita: boolean) => {
+    const alvo = !estaFavorita
+    const pintar = (v: boolean) =>
+      setSetores((antes) =>
+        antes.map((s) => ({
+          ...s,
+          automacoes: s.automacoes.map((a) => (a.id === id ? { ...a, favorita: v } : a)),
+        })),
+      )
+
+    pintar(alvo)
+    try {
+      const r = await fetch(`/api/automacoes/${id}/favorito`, {
+        method: alvo ? 'PUT' : 'DELETE',      // PUT marca, DELETE desmarca
+      })
+      if (r.status === 401) { location.href = '/entrar.html'; return }
+      if (!r.ok) throw new Error('falhou')
+    } catch {
+      pintar(estaFavorita)
+      setAviso({ tipo: 'erro', texto: 'Não deu para salvar o favorito.' })
+    }
+  }
 
   const mudarStatus = async (id: number, status: string) => {
     setMudando(id)
@@ -650,18 +700,20 @@ function App() {
                     <div>
                       {setor.automacoes.length > 0 ? (
                         setor.automacoes.map((a) => (
-                          <a
-                            className={a.url ? 'side-link on' : 'side-link'}
-                            href={a.url ?? '#'}
-                            target={a.url ? '_blank' : undefined}
-                            rel="noopener noreferrer"
-                            title={a.descricao}
-                            key={a.slug}
-                            onClick={() => registrar(a.slug)}
-                          >
-                            <span className="dot"></span>
-                            {a.nome}
-                          </a>
+                          <div className="side-item" key={a.slug}>
+                            <a
+                              className={a.url ? 'side-link on' : 'side-link'}
+                              href={a.url ?? '#'}
+                              target={a.url ? '_blank' : undefined}
+                              rel="noopener noreferrer"
+                              title={a.descricao}
+                              onClick={() => registrar(a.slug)}
+                            >
+                              <span className="dot"></span>
+                              {a.nome}
+                            </a>
+                            <Estrela ligada={a.favorita} aoClicar={() => alternarFavorito(a.id, a.favorita)} />
+                          </div>
                         ))
                       ) : (
                         <span className="side-link"><span className="dot"></span>Em breve</span>
@@ -991,10 +1043,29 @@ function App() {
                     {secao === 'favoritos' && (
                       <>
                         <h3>Favoritos</h3>
-                        <p className="config-vazio">
-                          Ainda não dá para favoritar uma automação. Quando der, as
-                          suas ficam listadas aqui.
-                        </p>
+                        {favoritas.length > 0 ? (
+                          <>
+                            <p className="config-dica">
+                              Marcadas por você. A estrela também fica na gaveta e na busca.
+                            </p>
+                            <div className="fav-lista">
+                              {favoritas.map((a) => (
+                                <div className="fav-item" key={a.slug}>
+                                  <div>
+                                    <b>{a.nome}</b>
+                                    <span>{a.descricao}</span>
+                                  </div>
+                                  <Estrela ligada aoClicar={() => alternarFavorito(a.id, true)} />
+                                </div>
+                              ))}
+                            </div>
+                          </>
+                        ) : (
+                          <p className="config-vazio">
+                            Nenhuma automação favoritada ainda. A estrela fica ao
+                            lado de cada uma, na gaveta e nos resultados da busca.
+                          </p>
+                        )}
                       </>
                     )}
 
@@ -1144,18 +1215,23 @@ function App() {
 
                 <div className="results">
                   {achados.map((i, n) => (
-                    <a
-                      className={n === sel ? 'res sel' : 'res'}
-                      href={i.url ?? '#'}
-                      target={i.url ? '_blank' : undefined}
-                      rel="noopener noreferrer"
+                    <div
+                      className={n === sel ? 'res-item sel' : 'res-item'}
                       key={i.slug}
                       onMouseEnter={() => setSel(n)}
-                      onClick={() => registrar(i.slug)}
                     >
-                      <span><b>{i.nome}</b><br /><small>{i.descricao}</small></span>
-                      <span className="setor">{i.setor}</span>
-                    </a>
+                      <a
+                        className="res"
+                        href={i.url ?? '#'}
+                        target={i.url ? '_blank' : undefined}
+                        rel="noopener noreferrer"
+                        onClick={() => registrar(i.slug)}
+                      >
+                        <span><b>{i.nome}</b><br /><small>{i.descricao}</small></span>
+                        <span className="setor">{i.setor}</span>
+                      </a>
+                      <Estrela ligada={i.favorita} aoClicar={() => alternarFavorito(i.id, i.favorita)} />
+                    </div>
                   ))}
                   {!modoChamado && termo.trim() && achados.length === 0 && (
                     <div className="res-none">Nada encontrado para "{termo.trim()}".</div>

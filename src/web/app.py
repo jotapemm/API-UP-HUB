@@ -13,6 +13,7 @@ load_dotenv()
 # ─────────────────────────────────────────────────────────────────────
 from src.db import conexao
 from src.web.rotas import foto
+from src.web.rotas import favoritos
 from src.web.rotas.catalogo import router as rotas_catalogo
 from src.web.rotas.chamados import router as rotas_chamados
 from src.web.rotas.triagem import router as rotas_triagem
@@ -41,6 +42,7 @@ app.include_router(rotas_catalogo)
 app.include_router(rotas_chamados)
 app.include_router(rotas_triagem)
 app.include_router(foto.router)
+app.include_router(favoritos.router)
 
 # o mount em "/" tem que ser SEMPRE a ÚLTIMA coisa do arquivo
 app.mount("/", StaticFiles(directory=str(STATIC), html=True), name="static")

@@ -78,9 +78,27 @@ nenhuma seção promete o que não faz.
 
 ---
 
-## 3. Foto de perfil e bio
+## 3. Foto de perfil e bio ✅ 05/10/2026
 
-**Juntos.** O item mais novo da lista.
+**Feito juntos.** O item mais novo da lista.
+
+Guardado no banco (`foto` BYTEA, `foto_em` TIMESTAMPTZ, `bio` TEXT), não em
+disco: o `pg_dump` leva tudo junto, não sobra arquivo órfão e mudar o
+projeto de lugar não arrasta pasta nenhuma. Medido: **2.782 bytes por
+foto**, uns 84 KB para os 30 operadores.
+
+A validação é reprocessar com Pillow — abrir, cortar no centro, reduzir a
+256×256 e gravar de novo como WEBP. Isso prova que é imagem (se não for,
+não abre) e descarta o EXIF, que em foto de celular carrega GPS.
+
+Caminho ruim testado: HTML com extensão `.png` → 422; SVG com `<script>`
+dentro → 422; PNG de 94 KB declarando 100 megapixels → 413; arquivo de
+5 MB → 413; sem sessão → 401 nas duas rotas. Os três primeiros chegam na
+tela como aviso, não no console.
+
+Cache resolvido pelo endereço: `?v=<foto_em>` muda quando a foto muda, e aí
+o `Cache-Control` pode ser `immutable`. Medido trocando a foto: endereço
+novo, pixel novo.
 
 - Novo e grande: **upload de arquivo**. `multipart/form-data`, validar tipo
   e tamanho de verdade (não confiar na extensão), decidir onde o arquivo

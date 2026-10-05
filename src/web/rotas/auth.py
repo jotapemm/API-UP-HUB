@@ -79,11 +79,15 @@ def sair(response: Response, sessao: str | None = Cookie(default=None, alias=NOM
 class PerfilEntrada(BaseModel):
     apelido: str | None = None
     setor_id: int | None = None
+    # 280 e um limite de tela, nao de banco: a coluna e TEXT e aceitaria
+    # qualquer coisa. Quem corta e a borda, nao o armazenamento.
+    bio: str | None = Field(default=None, max_length=280)
     
     
 @router.put("/eu/perfil")
 def salvar_perfil(dados: PerfilEntrada, usuario=Depends(usuario_atual)):
     apelido = (dados.apelido or "").strip() or None
+    bio = (dados.bio or "").strip() or None
     
     with conexao() as con:
         if dados.setor_id is not None:
@@ -95,10 +99,10 @@ def salvar_perfil(dados: PerfilEntrada, usuario=Depends(usuario_atual)):
             
         atualizado = con.execute(
             """UPDATE usuarios
-               SET apelido = %s, setor_id = %s
+               SET apelido = %s, setor_id = %s, bio = %s
                WHERE id = %s
-               RETURNING id, nome, apelido, email, setor_id, papel""",
-            (apelido, dados.setor_id, usuario["id"]),
+               RETURNING id, nome, apelido, email, setor_id, papel, bio, foto_em""",
+            (apelido, dados.setor_id, bio, usuario["id"]),
         ).fetchone()
         
     return atualizado    

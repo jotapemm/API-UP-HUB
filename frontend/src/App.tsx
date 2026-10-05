@@ -10,6 +10,11 @@ type Usuario = {
   email: string
   setor_id: number | null
   papel: string
+  bio: string | null
+  /* Quando a foto mudou. É null quando não existe foto, e é a chave de
+     cache da imagem — por isso vem do servidor em vez de ser inventado
+     aqui. Os BYTES da foto nunca trafegam neste objeto.                */
+  foto_em: string | null
 }
 
 type Automacao = {
@@ -117,6 +122,22 @@ const TRACOS: Record<string, string[]> = {
   ajuda: ['M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18', 'M9.6 9.4a2.5 2.5 0 0 1 4.8.8c0 1.7-2.4 2.3-2.4 3.8', 'M12 17h.01'],
 }
 
+/* O endereço da foto não muda quando a foto muda: /api/usuarios/7/foto
+   continua /api/usuarios/7/foto, e o navegador serviria a antiga para
+   sempre. O ?v= carimba a hora da última troca — endereço novo, imagem
+   nova. É o mesmo truque do hash que o Vite põe no nome dos bundles.  */
+function Foto({ de, inicial }: { de: Usuario | null; inicial: string }) {
+  if (!de?.foto_em) return <>{inicial}</>
+
+  return (
+    <img
+      className="avatar-img"
+      alt=""
+      src={`/api/usuarios/${de.id}/foto?v=${Date.parse(de.foto_em)}`}
+    />
+  )
+}
+
 function Icone({ nome }: { nome: keyof typeof TRACOS }) {
   return (
     <svg className="icone" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -162,6 +183,8 @@ function App() {
   const [recarga, setRecarga] = useState(0)
   const [mudando, setMudando] = useState<number | null>(null)
   const [apelidoForm, setApelidoForm] = useState('')
+  const [bioForm, setBioForm] = useState('')
+  const [enviandoFoto, setEnviandoFoto] = useState(false)
   const [setorForm, setSetorForm] = useState<number | ''>('')
   const [salvandoPerfil, setSalvandoPerfil] = useState(false)
   const [avisoPerfil, setAvisoPerfil] = useState<Aviso | null>(null)
@@ -264,6 +287,7 @@ function App() {
   const botaoMenu = useRef<HTMLButtonElement>(null)
   const botaoAvatar = useRef<HTMLButtonElement>(null)
   const caixaRef = useRef<HTMLTextAreaElement>(null)
+  const arquivoRef = useRef<HTMLInputElement>(null)
 
   const TODAS = useMemo(
     () =>
@@ -315,6 +339,7 @@ function App() {
      falhou não deixa texto velho na tela da próxima vez.               */
   const abrirConfig = (alvo: Secao) => {
     setApelidoForm(usuario?.apelido ?? '')
+    setBioForm(usuario?.bio ?? '')
     setSetorForm(usuario?.setor_id ?? '')
     setSenhaAtual(''); setSenhaNova('')
     setAvisoPerfil(null); setAvisoSenha(null)
@@ -341,7 +366,8 @@ function App() {
         headers: { 'Content-type': 'application/json' },
         body: JSON.stringify({
           apelido: apelidoForm,
-          setor_id: setorForm === '' ? null : Number(setorForm)
+          setor_id: setorForm === '' ? null : Number(setorForm),
+          bio: bioForm,
         }),
       })
       if (r.status === 401) { location.href = '/entrar.html'; return }
@@ -350,11 +376,67 @@ function App() {
       const atualizado = await r.json()
       setUsuario(atualizado)                       // a saudação muda na hora
       setApelidoForm(atualizado.apelido ?? '')     // mostra o que o servidor guardou
+      setBioForm(atualizado.bio ?? '')
       setAvisoPerfil({ tipo: 'ok', texto: 'Perfil salvo.' })
     } catch {
       setAvisoPerfil({ tipo: 'erro', texto: 'Não foi possível salvar. Tente de novo.' })
     } finally {
       setSalvandoPerfil(false)
+    }
+  }
+
+  const enviarFoto = async (arquivo: File) => {
+    /* Conforto, não segurança: evita subir 5 MB para ouvir não. Quem
+       decide continua sendo o servidor — isto some com um F12.        */
+    if (arquivo.size > 4 * 1024 * 1024) {
+      setAvisoPerfil({ tipo: 'erro', texto: 'A imagem passa de 4 MB.' })
+      return
+    }
+
+    setEnviandoFoto(true)
+    setAvisoPerfil(null)
+    try {
+      /* FormData é o que vira multipart/form-data. NÃO escreva o header
+         Content-Type aqui: ele precisa levar um "boundary" sorteado na
+         hora, e o navegador só escreve isso se o campo estiver vazio.
+         Pondo 'multipart/form-data' na mão, o corpo sai sem boundary e
+         a rota responde 422 sem explicar o motivo.                     */
+      const corpo = new FormData()
+      corpo.append('arquivo', arquivo)      // 'arquivo' = o nome do parâmetro na rota
+
+      const r = await fetch('/api/eu/foto', { method: 'POST', body: corpo })
+      if (r.status === 401) { location.href = '/entrar.html'; return }
+
+      const resposta = await r.json().catch(() => null)
+      if (!r.ok) throw new Error(resposta?.detail ?? 'Não deu para enviar.')
+
+      // trocar foto_em muda o ?v= da imagem, e só por isso ela aparece
+      setUsuario((antes) => antes && { ...antes, foto_em: resposta.foto_em })
+      setAvisoPerfil({ tipo: 'ok', texto: 'Foto atualizada.' })
+    } catch (e) {
+      setAvisoPerfil({ tipo: 'erro', texto: e instanceof Error ? e.message : 'Não deu para enviar.' })
+    } finally {
+      setEnviandoFoto(false)
+      /* Sem isto, escolher o MESMO arquivo de novo não dispara onChange
+         e parece que o botão quebrou.                                  */
+      if (arquivoRef.current) arquivoRef.current.value = ''
+    }
+  }
+
+  const removerFoto = async () => {
+    setEnviandoFoto(true)
+    setAvisoPerfil(null)
+    try {
+      const r = await fetch('/api/eu/foto', { method: 'DELETE' })
+      if (r.status === 401) { location.href = '/entrar.html'; return }
+      if (!r.ok) throw new Error('falhou')
+
+      setUsuario((antes) => antes && { ...antes, foto_em: null })
+      setAvisoPerfil({ tipo: 'ok', texto: 'Foto removida.' })
+    } catch {
+      setAvisoPerfil({ tipo: 'erro', texto: 'Não deu para remover.' })
+    } finally {
+      setEnviandoFoto(false)
     }
   }
 
@@ -608,7 +690,7 @@ function App() {
         inert={!painelAberto}
       >
         <div className="userpanel-id">
-          <span className="avatar">{inicial}</span>
+          <span className="avatar"><Foto de={usuario} inicial={inicial} /></span>
           <span><b>{tratamento}</b><span>{usuario?.nome ?? ''}</span></span>
         </div>
         <a href="#"
@@ -668,6 +750,9 @@ function App() {
             </a>
 
             <div className="topsearch">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true">
+                <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0" />
+              </svg>
               <label className="sr-only" htmlFor="topq">Pesquisar automações</label>
               <input id="topq" type="search" placeholder="Digite para pesquisar as automações" />
             </div>
@@ -680,7 +765,7 @@ function App() {
               aria-haspopup="menu"
               aria-expanded={painelAberto}
               onClick={() => setPainelAberto(true)}
-            >{inicial}</button>
+            ><Foto de={usuario} inicial={inicial} /></button>
           </header>
 
           {semServidor && (
@@ -730,16 +815,75 @@ function App() {
                         <p className="config-dica">Como você aparece para o resto do time.</p>
 
                         <div className="config-identidade">
-                          <span className="avatar avatar-g" aria-hidden="true">{inicial}</span>
+                          {/* O avatar É o botão. O input de arquivo fica escondido
+                              com `hidden`, que o tira do Tab mas deixa o .click()
+                              funcionar — assim existe um controle só, não dois. */}
+                          <button
+                            type="button"
+                            className="avatar avatar-g foto-troca"
+                            onClick={() => arquivoRef.current?.click()}
+                            disabled={enviandoFoto}
+                            aria-label="Trocar foto de perfil"
+                          >
+                            <Foto de={usuario} inicial={inicial} />
+                            <span className="foto-capa">{enviandoFoto ? '…' : 'Trocar'}</span>
+                          </button>
+
+                          <input
+                            ref={arquivoRef}
+                            type="file"
+                            hidden
+                            accept="image/png,image/jpeg,image/webp"
+                            onChange={(e) => {
+                              const a = e.target.files?.[0]
+                              if (a) enviarFoto(a)
+                            }}
+                          />
+
                           <div>
                             <b>{usuario?.nome ?? ''}</b>
                             <span>{tratamento}</span>
+                            {usuario?.foto_em && (
+                              <button
+                                type="button"
+                                className="botao-texto"
+                                onClick={removerFoto}
+                                disabled={enviandoFoto}
+                              >Remover foto</button>
+                            )}
                           </div>
                         </div>
 
+                        <form onSubmit={(e) => { e.preventDefault(); salvarPerfil() }}>
+                          <div className="field">
+                            <label htmlFor="c-bio">Bio</label>
+                            <textarea
+                              id="c-bio"
+                              rows={3}
+                              maxLength={280}
+                              value={bioForm}
+                              onChange={(e) => setBioForm(e.target.value)}
+                              placeholder="Uma linha sobre o que você faz por aqui."
+                            />
+                            {/* O maxLength é conforto: ele impede de digitar além.
+                                Quem manda de verdade é o servidor, porque o
+                                atributo some com um F12 e o servidor não. */}
+                            <p className="config-contador">{bioForm.length}/280</p>
+                          </div>
+
+                          <button type="submit" className="btn btn-solid" disabled={salvandoPerfil}>
+                            {salvandoPerfil ? 'Salvando…' : 'Salvar'}
+                          </button>
+                        </form>
+
+                        <div role="status">
+                          {avisoPerfil && <div className={`aviso ${avisoPerfil.tipo}`}>{avisoPerfil.texto}</div>}
+                        </div>
+
                         <p className="config-vazio">
-                          Foto e bio ainda não existem — por enquanto o avatar é a
-                          inicial do seu nome. Apelido e setor ficam em <b>Conta</b>.
+                          PNG, JPEG ou WEBP até 4 MB. A imagem é recortada no
+                          centro e reduzida para 256×256.
+                          Apelido e setor ficam em <b>Conta</b>.
                         </p>
                       </>
                     )}
@@ -873,7 +1017,7 @@ function App() {
                 </div>
               </section>
 
-) : vista === 'triagem' ? (
+            ) : vista === 'triagem' ? (
               <section className="entrada">
                 <div className="entrada-topo">
                   <h2>Triagem</h2>

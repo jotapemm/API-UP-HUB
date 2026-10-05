@@ -41,7 +41,11 @@ Antes de afirmar que algo está quebrado, prove: `getComputedStyle`,
 `getBoundingClientRect`, consultas diretas ao Postgres, `performance.now()`,
 contagem de listeners, `netstat`. Mostre o número. Quando o teste der um
 resultado estranho, **desconfie primeiro do teste** — isso aconteceu várias
-vezes e sempre foi o teste.
+vezes e sempre foi o teste. A causa mais frequente, medida em
+01 e 02/10/2026: **painel do navegador escondido não gera quadro**, e sem
+quadro `requestAnimationFrame` congela, transição de CSS não avança e o
+canvas não repinta — o número fica parado e parece bug no código. Tirar um
+screenshot força um quadro e destrava a medição.
 
 **Prova exige antes e depois.** Uma medição só vale se existe comparação.
 

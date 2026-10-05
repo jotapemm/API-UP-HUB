@@ -110,7 +110,7 @@
   text-transform: uppercase;
   color: var(--text-3);
   border: 1px solid var(--line);
-  border-radius: 999px;
+  border-radius: var(--r-xl);
   padding: 1px 6px;
 }
 
@@ -166,7 +166,7 @@
 }
 
 .avatar {
-  border-radius: var(--r-sm);
+  border-radius: var(--r-xl);
   border: 1px solid var(--line);
   background: var(--panel-2);
   width: 34px;
@@ -323,7 +323,7 @@
   text-transform: uppercase;
   letter-spacing: .04em;
   padding: 2px 8px;
-  border-radius: 999px;
+  border-radius: var(--r-xl);
   border: 1px solid var(--line-hi);
   color: var(--text-2);
 }
@@ -578,7 +578,7 @@
 .avatar-g {
   width: 56px;
   height: 56px;
-  border-radius: 50%;
+  border-radius: var(--r-xl);
   font-size: 20px;
   font-weight: 600;
   color: var(--text-2);
@@ -609,4 +609,101 @@
   .config-item.ativa {
     box-shadow: inset 0 -2px 0 var(--brand);
   }
+}
+
+/* ── FOTO DE PERFIL ─────────────────────────────────────────────────
+   A imagem herda o arredondamento do container, então o mesmo <img>
+   serve o quadrado da topbar e o círculo das Configurações sem saber
+   em qual dos dois está.                                             */
+.avatar-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
+}
+
+.field textarea {
+  width: 100%;
+  padding: 9px 12px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--line-hi);
+  background: var(--panel-2);
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.field textarea:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 1px;
+}
+
+.config-contador {
+  margin: 6px 0 0;
+  font-size: 11px;
+  color: var(--text-3);
+  text-align: right;
+}
+
+/* ── TROCAR A FOTO ──────────────────────────────────────────────────
+   A capa só aparece no hover e no foco pelo teclado. Deixá-la sempre
+   visível sujaria o retrato; escondê-la do foco deixaria quem navega
+   por Tab sem saber que o avatar faz alguma coisa.                   */
+.foto-troca {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--line-hi);
+}
+
+.foto-capa {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: var(--cortina);
+  color: #FFFFFF;
+  font-size: 10.5px;
+  letter-spacing: .02em;
+  opacity: 0;
+  transition: opacity .14s ease;
+}
+
+.foto-troca:hover .foto-capa,
+.foto-troca:focus-visible .foto-capa {
+  opacity: 1;
+}
+
+.foto-troca:disabled {
+  cursor: progress;
+}
+
+.foto-troca:disabled .foto-capa {
+  opacity: 1;
+}
+
+/* botão que parece link: ação secundária que não merece uma caixa */
+.botao-texto {
+  margin-top: 4px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text-3);
+  font: inherit;
+  font-size: 11.5px;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+  justify-self: start;
+}
+
+.botao-texto:hover:not(:disabled) {
+  color: var(--danger);
+}
+
+.botao-texto:disabled {
+  cursor: progress;
+  opacity: .6;
 }

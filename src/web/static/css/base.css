@@ -55,6 +55,10 @@
   --r-sm: 6px;
   --r-md: 10px;
   --r-lg: 16px;
+  /* "completamente redondo". Nao e um degrau da escala, e o teto dela: o
+     CSS reduz o raio ate caber, entao isto vira circulo num quadrado e
+     capsula num retangulo, em qualquer tamanho. 50% faria elipse. */
+  --r-xl: 999px;
 
   --sidebar-w: 236px;
   --topbar-h: 60px;
@@ -268,7 +272,7 @@ button {
 .avatar {
   width: 32px;
   height: 32px;
-  border-radius: 50%;
+  border-radius: var(--r-xl);
   background: var(--panel-3);
   border: 1px solid var(--line-hi);
   flex: none;
@@ -386,7 +390,7 @@ button {
 .side-link .dot {
   width: 5px;
   height: 5px;
-  border-radius: 50%;
+  border-radius: var(--r-xl);
   background: var(--text-3);
   flex: none;
 }
@@ -523,7 +527,7 @@ button {
   color: var(--text-3);
   padding: 4px 9px;
   border: 1px solid var(--line);
-  border-radius: 999px;
+  border-radius: var(--r-xl);
 }
 
 .cmd.is-chamado .cmd-mode {
@@ -584,7 +588,7 @@ button {
   font-size: 10px;
   color: var(--text-3);
   border: 1px solid var(--line-hi);
-  border-radius: 999px;
+  border-radius: var(--r-xl);
   padding: 2px 8px;
   white-space: nowrap;
 }
@@ -643,7 +647,7 @@ button {
 .chip .dot {
   width: 5px;
   height: 5px;
-  border-radius: 50%;
+  border-radius: var(--r-xl);
   background: var(--text-3);
 }
 

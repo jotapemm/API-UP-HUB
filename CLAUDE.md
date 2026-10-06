@@ -126,6 +126,14 @@ inteira em tela branca, porque `window.UPTema.ler()` estourava dentro de um
 uso leva `?.` — com o arquivo ausente o hub sobe sem seletor de tema, em vez
 de não subir. Testado removendo o arquivo.
 
+**`light-dark()` só funciona no `base.css`.** O `App.css` passa pelo
+minificador do Vite, que converte `light-dark(a, b)` num polyfill
+`var(--lightningcss-light, a) var(--lightningcss-dark, b)`. Essas variáveis
+seriam definidas num `:root` gerado junto — mas o `base.css`, que as traria,
+saiu do bundle. Resultado: declaração inválida e a propriedade cai no valor
+inicial, **sem erro nenhum** (um `background` vira `transparent`). Dentro do
+`App.css` o caminho é o `[data-tema]`. Medido em 06/10/2026, no calendário.
+
 **`color-scheme` só resolve COR.** `light-dark()` serve `<color>` e mais
 nada. Filtro, troca de imagem, estilo de borda — nada disso enxerga o tema.
 Para esses casos o `tema.js` escreve um `data-tema` no `<html>`, e o CSS

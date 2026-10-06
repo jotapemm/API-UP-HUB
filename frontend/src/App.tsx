@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from 'react'
 import Trama from './Trama'
 import BotaoLuz from './BotaoLuz'
+import Calendario from './Calendario'
 import { useDigitacao } from './useDigitacao'
 import { lerRecentes, registrarRecente } from './recentes'
 import './App.css'
@@ -933,12 +934,11 @@ function App() {
 
                     <section className="perfil-bloco">
                       <h3>Uso no ano</h3>
-                      <p className="config-vazio">
-                        O hub ainda não registra quem rodou o quê. Isso depende de
-                        uma conversa com o time, porque passa a ser medição de
-                        trabalho — e ela ainda não aconteceu. Quando acontecer, o
-                        ano inteiro aparece aqui, agrupado por competência.
+                      <p className="config-dica">
+                        Cada quadrado é um dia. A cor vem de quantas execuções as
+                        automações reportaram naquele dia.
                       </p>
+                      <Calendario ano={new Date().getFullYear()} />
                     </section>
                   </div>
                 </section>

@@ -1054,8 +1054,14 @@
     grid-template-columns: minmax(0, 1fr);
   }
 
+  /* O fio vertical separava duas colunas. Empilhado, ele vira um risco
+     solto na lateral — vira fio horizontal, que é o que separa agora. */
   .perfil-lado {
     position: static;
+    padding-right: 0;
+    border-right: 0;
+    padding-bottom: 22px;
+    border-bottom: 1px solid var(--line);
   }
 }
 /* ── CONFIGURAÇÕES: coluna centrada, começando no alto ───────────────
@@ -1187,11 +1193,23 @@
 .cal-rolagem {
   overflow-x: auto;
   padding-bottom: 6px;
+
+  /* Isto liga a unidade cqw abaixo: 100cqw passa a ser a largura DESTE
+     elemento, não da janela. É o que deixa o quadrado crescer até
+     preencher a faixa em vez de sobrar espaço morto à direita.        */
+  container-type: inline-size;
+
+  /* 53 colunas, 52 vãos de 2px, menos a faixa dos dias (24px) e o vão da
+     grade (4px). O resto se divide igualmente entre os quadrados.
+     O piso de 7px existe para tela estreita: abaixo disso o quadrado
+     vira poeira, e aí a rolagem horizontal volta a ser a saída certa. */
+  --vao: 2px;
+  --lado: max(7px, calc((100cqw - 24px - 4px - 52 * var(--vao)) / 53));
 }
 
 .cal-grade {
   display: grid;
-  grid-template-columns: 26px 1fr;   /* rótulos da semana | semanas */
+  grid-template-columns: 24px 1fr;   /* rótulos da semana | semanas */
   grid-template-rows: auto 1fr;      /* rótulos dos meses | células */
   gap: 4px;
   min-width: max-content;
@@ -1200,8 +1218,8 @@
 .cal-meses {
   grid-column: 2;
   display: grid;
-  grid-template-columns: repeat(var(--colunas), 13px);
-  gap: 3px;
+  grid-template-columns: repeat(var(--colunas), var(--lado));
+  gap: var(--vao);
   font-size: 9.5px;
   color: var(--text-3);
   height: 13px;
@@ -1211,10 +1229,10 @@
   grid-column: 1;
   grid-row: 2;
   display: grid;
-  grid-template-rows: repeat(7, 13px);
-  gap: 3px;
-  font-size: 9px;
-  line-height: 13px;
+  grid-template-rows: repeat(7, var(--lado));
+  gap: var(--vao);
+  font-size: 8.5px;
+  line-height: var(--lado);
   color: var(--text-3);
   text-align: right;
   padding-right: 4px;
@@ -1227,16 +1245,16 @@
   grid-column: 2;
   grid-row: 2;
   display: grid;
-  grid-template-rows: repeat(7, 13px);
+  grid-template-rows: repeat(7, var(--lado));
   grid-auto-flow: column;
-  grid-auto-columns: 13px;
-  gap: 3px;
+  grid-auto-columns: var(--lado);
+  gap: var(--vao);
 }
 
 .cal-dia,
 .cal-vazia {
-  width: 13px;
-  height: 13px;
+  width: var(--lado);
+  height: var(--lado);
   border-radius: 2px;
 }
 
@@ -1284,6 +1302,7 @@
 }
 
 .cal-legenda .cal-dia {
-  width: 11px;
-  height: 11px;
+  width: 9px;
+  height: 9px;
+  border-radius: 2px;
 }

@@ -4,9 +4,10 @@ type Dia = { dia: string; execucoes: number }
 
 const MESES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez']
 
-/* Rótulos alternados: sete nomes empilhados em 7 linhas de 13px viram um
-   paredão ilegível. Domingo, terça, quinta e sábado dão a referência. */
-const SEMANA = ['dom', '', 'ter', '', 'qui', '', 'sáb']
+/* Rótulos alternados: sete nomes empilhados viram um paredão ilegível.
+   As linhas são domingo a sábado; marcamos segunda, quarta e sexta, que
+   são os dias de trabalho e dão a referência sem encher a coluna.     */
+const SEMANA = ['', 'seg', '', 'qua', '', 'sex', '']
 
 const diasDoAno = (ano: number) =>
   (new Date(ano + 1, 0, 1).getTime() - new Date(ano, 0, 1).getTime()) / 86_400_000

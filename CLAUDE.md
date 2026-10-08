@@ -80,13 +80,32 @@ Usuários: ~30 operadores de escritório (fiscal, DP, contabilidade).
 | login/cadastro | `src/web/static/entrar.html` — **vanilla, não migra** |
 | app shell | React + TS + Vite em `frontend/`, build em `src/web/static/app/` |
 | serviço | tarefa agendada chamando `iniciar-hub.ps1` (ver `INSTALAR-SERVICO.md`) |
+| esquema | `src/esquema.sql` — descreve as 8 tabelas, recria o banco do zero |
+| backup | `backup-banco.ps1`, tarefa "UP API HUB - backup do banco", 12:30 e 18:00 |
 | porta | 8090 (dev do Vite: 5173, com proxy no `vite.config.ts`) |
 
 ### Tabelas
 
-`setores`, `usuarios`, `sessoes`, `automacoes`, `chamados`.
-A sexta — `acessos` — **foi adiada por decisão do JP**, até que o time saiba
-que o uso seria registrado. Não crie sem retomar essa conversa.
+Oito: `setores`, `usuarios`, `sessoes`, `automacoes`, `chamados`,
+`favoritos`, `uso`, `uso_eventos`.
+
+**O esquema está em `src/esquema.sql`**, com um comentário por tabela
+explicando por que cada uma é do jeito que é. Não é sistema de migração:
+alterar tabela é `ALTER` na mão, e depois atualizar o arquivo. A
+conferência é mecânica e dá para rodar sempre que mexer — criar um banco
+vazio com o arquivo e comparar o `pg_dump --schema-only` dos dois tem que
+dar diferença zero. Medido assim em 08/10/2026, 151 linhas, zero.
+
+`uso` e `uso_eventos` existem e estão **vazias**. A rota
+`POST /api/uso` já está escrita e testada, mas **nenhuma automação chama
+ela** — ligar a primeira é decisão do JP, depois da conversa com o time.
+O calendário do perfil lê a tabela e mostra o ano em branco, que é o
+estado honesto. Código escrito não é medir ninguém; tabela vazia não mede
+ninguém.
+
+(A antecessora `acessos` foi derrubada em 06/10/2026: tinha nascido com
+`PRIMARY KEY (usuario_id, automacao_id)`, sem o dia, e com essa chave
+cabia uma linha por pessoa/automação na vida.)
 
 ---
 
@@ -143,8 +162,26 @@ um listener de `matchMedia` — as cores não precisam.
 **O projeto mora num disco de rede** (`\\192.168.0.50\dados`, mapeado em
 `Z:`). Consequências medidas: build de 15s virou 2min, o hub leva ~2min
 para subir (imports pela rede), travas órfãs do git aparecem, e o disco
-já encheu uma vez e derrubou tudo. **Mover para `C:` é a pendência de maior
-retorno** — está anotada e ainda não foi feita.
+já encheu uma vez e derrubou tudo.
+
+Este arquivo dizia que **mover para `C:` era a pendência de maior
+retorno**. Estava errado, e a medição de 07/10/2026 é o motivo:
+
+```
+banco:  C:/Program Files/PostgreSQL/17/data   (8,5 MB)
+código: github.com/jotapemm/API-UP-HUB        (em dia)
+```
+
+O banco **nunca esteve no disco de rede** e o código já tem GitHub. No
+`Z:` não mora nada insubstituível — é cópia de trabalho do que existe em
+dois outros lugares. Mover compra velocidade de build e sossego com o
+git; não compra sobrevivência. E tem custo real que a recomendação
+ignorava: as pastas do projeto são visíveis aos colegas de onde estão, e
+tirar de lá transforma o hub em responsabilidade de uma pessoa só.
+
+Fica como **opcional**, decisão do JP, para quando o build incomodar.
+O que a medição revelou de verdade era outra coisa: 8,5 MB de dados
+insubstituíveis sem nenhuma cópia. Daí o `backup-banco.ps1`.
 
 **Rota nova exige reiniciar o servidor.** O uvicorn lê o Python na subida.
 Sintoma característico: **405 Method Not Allowed** (não 404), porque o
@@ -169,7 +206,24 @@ filtro vai na condição do JOIN, não no `WHERE` — no `WHERE` ele transforma
 o LEFT em INNER silenciosamente e some com linhas inteiras.
 
 **Identidade vem da sessão, nunca do corpo.** Nenhuma rota aceita
-`usuario_id`; o que não tem campo não tem como ser forjado.
+`usuario_id`; o que não tem campo não tem como ser forjado. Vale também
+para a única rota chamada por máquina (`POST /api/uso`): ela recebe
+e-mail, não id, e a data sai do `current_date` do servidor.
+
+**Rota chamada por máquina tem três regras próprias** (`POST /api/uso` é
+a única até agora, 08/10/2026):
+
+- a credencial é segredo compartilhado do `.env`, num cabeçalho. Não leva
+  hash: hash protege senha de *pessoa*, porque pessoa reusa senha. O
+  `.env` já é a fronteira de confiança, é onde a senha do banco mora
+- comparação com `hmac.compare_digest`, nunca `==`. O `==` para no
+  primeiro caractere diferente, e o tempo que ele gasta conta quantos
+  você acertou. **E `compare_digest` com `str` só aceita ASCII** — um
+  acento no cabeçalho vira `TypeError`, ou seja, 500. Daí o `.encode()`
+  nos dois lados. Testado: com acento dá 401, não 500
+- falha **fechada**. Sem o segredo no `.env`, a rota devolve 503 para
+  todo mundo, inclusive para quem apresenta chave. Testado escondendo a
+  variável e reiniciando: o hub sobe normal, só a rota recusa
 
 **Códigos HTTP com significado único:**
 - `401` = não sei quem você é → a tela manda pro login
@@ -212,9 +266,24 @@ Regras assumidas:
 
 ## Pendências anotadas
 
-- Mover o repositório para `C:` (maior retorno, ver acima)
-- `acessos` — só depois da conversa com o time
-- Faxina de sessões vencidas (`DELETE FROM sessoes WHERE expira_em < now()`)
+- **Ligar a primeira automação no `POST /api/uso`** — a rota existe e está
+  testada; o que falta é a conversa com o time e o trecho de reporte
+  dentro da automação (dispara e esquece, sem log nenhum dizendo que
+  reportou: o JP pediu explicitamente que fosse por baixo dos panos)
+- Tela de suporte: uso por setor / por automação (lê `uso`, já indexada
+  por `(automacao_id, dia)` para isso)
 - `secure=True` no cookie quando entrar o túnel Cloudflare
 - Teste do serviço sobrevivendo a um reinício real da máquina
 - `config.js` da raiz (site da Vercel) ainda tem a porta errada da API STATUS
+- Mover o repositório para `C:` — **opcional**, não urgente (ver acima)
+
+Fechadas em 07/10/2026:
+
+- ~~Faxina de sessões vencidas~~ — virou parte do `backup-banco.ps1`, que
+  limpa antes de copiar. 12 vencidas de 14 na primeira passada, e `DELETE 0`
+  na segunda, provando que é idempotente
+- ~~Esquema fora do banco~~ — `src/esquema.sql`, conferido com diferença zero
+- ~~Dados sem backup~~ — dois destinos, com restauração testada: contagem
+  igual nas 8 tabelas e os 12.904 bytes da foto sobrevivendo ao `bytea`
+- ~~A rota que grava uso~~ — escrita em 08/10/2026 e testada no caminho
+  ruim inteiro, **mas não ligada a nenhuma automação** (ver acima)

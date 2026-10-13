@@ -96,12 +96,30 @@ conferência é mecânica e dá para rodar sempre que mexer — criar um banco
 vazio com o arquivo e comparar o `pg_dump --schema-only` dos dois tem que
 dar diferença zero. Medido assim em 08/10/2026, 151 linhas, zero.
 
-`uso` e `uso_eventos` existem e estão **vazias**. A rota
-`POST /api/uso` já está escrita e testada, mas **nenhuma automação chama
-ela** — ligar a primeira é decisão do JP, depois da conversa com o time.
-O calendário do perfil lê a tabela e mostra o ano em branco, que é o
-estado honesto. Código escrito não é medir ninguém; tabela vazia não mede
-ninguém.
+`uso` e `uso_eventos` estão **em produção desde 13/10/2026**. O JP obteve
+a concordância do time e mandou ligar; antes disso a rota existia e
+nenhuma automação chamava.
+
+Quem grava hoje: **API-UP** (`POST /api/processar`) e **CONF**
+(`POST /api/conferir`). A **CTRL CRED** tem o código, mas reporta ""
+enquanto `UP_API_SECRET` não existir — sem SSO ela não tem sessão, logo
+não tem e-mail. É o estado esperado, está comentado lá, e não é defeito.
+
+Duas coisas que valem lembrar antes de mexer:
+
+- o reporte sai do **endpoint**, não do worker. Quem roda o ciclo é
+  subprocesso ou thread de fundo, onde não existe requisição nem sessão —
+  o e-mail só existe no ponto de entrada. E **enfileirar já é usar**: o
+  calendário mede uso, não sucesso
+- o `evento_id` nasce **uma vez por execução aceita**, nunca na hora de
+  reportar. Na API-UP é o `job["id"]` que ela já criava; nas outras duas é
+  um `uuid4` gerado depois da trava de concorrência, então duplo clique
+  conta uma vez só
+
+Medido em 13/10/2026, ponta a ponta: o `evento_id` que caiu na tabela era
+exatamente o `job_id` devolvido pela API-UP. E os logs das automações não
+ganharam **uma linha sequer** sobre o hub — o JP pediu explicitamente que
+fosse por baixo dos panos.
 
 (A antecessora `acessos` foi derrubada em 06/10/2026: tinha nascido com
 `PRIMARY KEY (usuario_id, automacao_id)`, sem o dia, e com essa chave
@@ -269,16 +287,15 @@ Regras assumidas:
 **O corpo do hub está pronto.** O que sobra é de fora dele, ou é feature
 nova. Em ordem de retorno:
 
-- **A chamada do `reportar()` dentro da API-UP** — é a única coisa que
-  falta para o calendário sair do zero, e é UMA linha. Tudo em volta já
-  está feito: `clientes/reporte_hub.py` (hub) copiado para
-  `src/utils/reporte_hub.py` (API-UP), as três variáveis no `.env` dela, e
-  o `_email_do_pedido()` que converte o cookie em e-mail. Falta chamar no
-  ponto onde o processamento termina, e reiniciar.
-  **Só depois da conversa com o time** — é a linha que começa a medir
-  gente. E medido em 09/10/2026: dos 9 e-mails cadastrados nas automações,
-  **1** tem conta no hub (o do JP), então hoje pintaria quadradinho só
-  para ele.
+- **Contas do hub para o time.** Medido em 09/10/2026: dos 9 e-mails
+  cadastrados nas automações, **1** tem conta no hub. O reporte está
+  ligado e funcionando desde 13/10, mas só pinta quadradinho de quem tem
+  conta com **o mesmo e-mail** nos dois lados. Hoje isso é só o JP —
+  então o gargalo do calendário deixou de ser técnico e virou cadastro.
+- **Ligar o SSO (`UP_API_SECRET`)** — destrava o reporte da CTRL CRED,
+  que hoje não tem sessão e por isso não reporta. Tem que ser **o mesmo
+  valor nas três**, ele substitui o `session_secret.key` de cada uma, e
+  todo mundo desloga de novo.
 - **Tela de suporte** — uso por setor / por automação. O JP pediu
   explicitamente ("qual setor está menos capacitado"), e não existe. A
   tabela `uso` já tem o índice `(automacao_id, dia)` para essa pergunta.

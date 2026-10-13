@@ -15,20 +15,38 @@ import atexit
 import threading
 import urllib.request
 
-# 127.0.0.1 e NÃO um nome, de propósito. Medido em 09/10/2026:
-#   127.0.0.1        conectar     1,5 ms
-#   DESKTOP-JFN7ELS  conectar   2015 ms
-# Nome que resolve para IPv6 E IPv4 custa 2 segundos: o urllib tenta o
-# IPv6 primeiro, o hub escuta só em 0.0.0.0 (IPv4), e ele espera a
-# conexão falhar antes de cair pro IPv4. O curl tenta os dois em
-# paralelo e por isso não sofre; o urllib tenta em fila.
-# Automação em OUTRA máquina: ponha o IP da sua no UP_HUB_URL do .env
-# dela (hoje 192.168.0.149) — IP, nunca nome.
-_URL = os.environ.get("UP_HUB_URL", "http://127.0.0.1:8090") + "/api/uso"
-_CHAVE = os.environ.get("UP_HUB_CHAVE_USO")
-_AUTOMACAO = os.environ.get("UP_HUB_AUTOMACAO")
-
 _ESPERA = 3  # segundos, conectar e ler
+
+
+def _config():
+    """Lê a configuração NA HORA DA CHAMADA, não na importação.
+
+    Se fosse lida no topo do módulo, a ordem dos imports de cada projeto
+    passaria a importar: importar este arquivo antes do load_dotenv() do
+    projeto deixaria a chave em None e o reporte viraria um no-op
+    SILENCIOSO para sempre. Medido dentro da API-UP em 13/10/2026 — e
+    silêncio é justamente o que este arquivo não pode ter, porque ele
+    engole todos os erros de propósito.
+
+    Um arquivo que se propõe a ser copiado como está para dentro de oito
+    projetos não pode depender da ordem de import de nenhum deles.
+
+    Sobre o endereço: 127.0.0.1 e NÃO um nome, de propósito. Medido em
+    09/10/2026:
+        127.0.0.1        conectar     1,5 ms
+        DESKTOP-JFN7ELS  conectar   2015 ms
+    Nome que resolve para IPv6 E IPv4 custa 2 segundos: o urllib tenta o
+    IPv6 primeiro, o hub escuta só em 0.0.0.0 (IPv4), e ele espera a
+    conexão falhar antes de cair pro IPv4. O curl tenta os dois em
+    paralelo e por isso não sofre; o urllib tenta em fila.
+    Automação em OUTRA máquina: ponha o IP da sua no UP_HUB_URL do .env
+    dela (hoje 192.168.0.149) — IP, nunca nome.
+    """
+    return (
+        os.environ.get("UP_HUB_CHAVE_USO"),
+        os.environ.get("UP_HUB_AUTOMACAO"),
+        os.environ.get("UP_HUB_URL", "http://127.0.0.1:8090") + "/api/uso",
+    )
 
 # Opener SEM proxy. Numa máquina com http_proxy configurado, o urlopen
 # mandaria um pedido de rede local para o proxy e falharia SEMPRE. Como
@@ -65,23 +83,25 @@ def reportar(email: str, evento_id: str, quantidade: int = 1) -> None:
     nunca uma vez por item dentro de um laço, senão viram 500 threads
     para contar uma coisa só.
     """
+    chave, automacao, url = _config()
+
     # Sem segredo ou sem slug configurado, não faz nada. Em silêncio:
     # automação não é lugar de reclamar de configuração do hub.
-    if not (_CHAVE and _AUTOMACAO and email and evento_id):
+    if not (chave and automacao and email and evento_id):
         return
-    
+
     corpo = json.dumps({
-        "automacao": _AUTOMACAO,
+        "automacao": automacao,
         "email": email,
         "evento_id": str(evento_id),
         "quantidade": quantidade,
     }).encode()
-    
+
     pedido = urllib.request.Request(
-        _URL,
+        url,
         data=corpo,
         method="POST",
-        headers={"Content-Type": "application/json", "X-UP-Chave": _CHAVE},
+        headers={"Content-Type": "application/json", "X-UP-Chave": chave},
     )
     
     def _enviar():

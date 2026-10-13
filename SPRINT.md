@@ -184,24 +184,49 @@ deixar `requestAnimationFrame` vivo depois de sair.
 
 ---
 
-## 6. Calendário de uso — bloqueado
+## 6. Calendário de uso ✅ 06/10/2026 — desenhado, ainda sem dados
 
-**Juntos**, quando desbloquear.
+**Feito juntos.** Saiu diferente do planejado aqui, e por escolha do JP.
 
-Depende da tabela `acessos`, adiada até o time saber que o uso seria
-registrado. Não começar sem essa conversa.
+A tabela virou `uso` e não `acessos`: a `acessos` chegou a existir e foi
+derrubada vazia, porque nasceu com `PRIMARY KEY (usuario_id,
+automacao_id)`, sem o dia — com essa chave cabia uma linha por
+pessoa/automação na vida e o calendário era impossível.
 
-- Novo quando vier: agregação por data no SQL (`date_trunc`,
-  `generate_series` para preencher dias sem uso) e desenhar uma grade densa
-  a partir de dados esparsos.
-- O desenho já está decidido: grade por **competência**, não por semana,
-  com a faixa de prazo marcada — porque trabalho fiscal se amontoa perto da
-  entrega, e é isso que o gráfico tem que mostrar.
+O desenho também mudou: o JP pediu **grade do GitHub**, 365 quadrados,
+coluna de 7 por semana, começando no dia da semana em que o ano abriu, com
+a cor por intensidade de uso. Não a grade por competência que estava
+escrita aqui.
+
+Cor por **quartis do próprio histórico da pessoa**, não por números fixos:
+quem roda 3 por dia e quem roda 80 precisam dos dois gráficos legíveis. A
+rampa inverte entre os temas, como a do GitHub.
+
+Medido: 369 células = 4 vazias + 365 dias (2026 abre numa quinta).
+
+**O calendário está vazio, e isso é o estado honesto.** A rota
+`POST /api/uso` existe e está testada, mas nenhuma automação chama ela —
+ligar a primeira é decisão do JP, depois da conversa com o time. Ver as
+pendências do `CLAUDE.md`.
 
 ---
 
-## Fora do sprint
+## O sprint acabou
 
-- Chat e grupos (o "+ Criar grupo" da gaveta está desabilitado esperando)
-- Adicionar amigos (depende do chat para fazer sentido)
-- Mover o projeto para o `C:` — continua sendo a pendência de maior retorno
+Os seis itens estão entregues. O que existe daqui para a frente é feature
+nova ou coisa de fora do hub — a lista mora nas **pendências do
+`CLAUDE.md`**, que é onde ela fica atualizada.
+
+Duas que vieram do próprio JP e ainda não foram construídas:
+
+- **Tela de suporte**: uso por setor e por automação, para enxergar qual
+  setor está menos capacitado nas ferramentas. É a maior coisa ainda não
+  feita do hub.
+- **Chat e grupos** (o "+ Criar grupo" da gaveta segue desabilitado, que é
+  o estado honesto) e **adicionar amigos**, que depende do chat. Parados
+  por decisão dele: merecem conversa com a equipe antes.
+
+Mover o projeto para o `C:` deixou de ser "a pendência de maior retorno" —
+a medição de 07/10/2026 mostrou que o banco nunca esteve no disco de rede
+e o código já tem GitHub. Virou opcional. O motivo completo está no
+`CLAUDE.md`.

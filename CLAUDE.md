@@ -266,16 +266,38 @@ Regras assumidas:
 
 ## Pendências anotadas
 
-- **Ligar a primeira automação no `POST /api/uso`** — a rota existe e está
-  testada; o que falta é a conversa com o time e o trecho de reporte
-  dentro da automação (dispara e esquece, sem log nenhum dizendo que
-  reportou: o JP pediu explicitamente que fosse por baixo dos panos)
-- Tela de suporte: uso por setor / por automação (lê `uso`, já indexada
-  por `(automacao_id, dia)` para isso)
+**O corpo do hub está pronto.** O que sobra é de fora dele, ou é feature
+nova. Em ordem de retorno:
+
+- **A chamada do `reportar()` dentro da API-UP** — é a única coisa que
+  falta para o calendário sair do zero, e é UMA linha. Tudo em volta já
+  está feito: `clientes/reporte_hub.py` (hub) copiado para
+  `src/utils/reporte_hub.py` (API-UP), as três variáveis no `.env` dela, e
+  o `_email_do_pedido()` que converte o cookie em e-mail. Falta chamar no
+  ponto onde o processamento termina, e reiniciar.
+  **Só depois da conversa com o time** — é a linha que começa a medir
+  gente. E medido em 09/10/2026: dos 9 e-mails cadastrados nas automações,
+  **1** tem conta no hub (o do JP), então hoje pintaria quadradinho só
+  para ele.
+- **Tela de suporte** — uso por setor / por automação. O JP pediu
+  explicitamente ("qual setor está menos capacitado"), e não existe. A
+  tabela `uso` já tem o índice `(automacao_id, dia)` para essa pergunta.
+  É a maior feature ainda não construída do hub.
+- **As automações não são serviço.** Medido em 13/10/2026: CONF (8010) e
+  CTRL CRED (8100) estavam FORA DO AR, sem reinício da máquina (194h de
+  uptime) — as janelas de console delas somem e nada as levanta. Só o hub
+  tem tarefa agendada com gatilho de boot. Dar às três o mesmo tratamento
+  do `iniciar-hub.ps1` resolveria.
+- `config.js` da raiz (site da Vercel): `API_STATUS_URL` aponta para a
+  porta **8010**, que é a da CONF. O banco do hub diz `8110`. Confirmado
+  em 13/10/2026 — o comentário dentro do próprio arquivo já marca o
+  conflito com um ⚠.
+- Catálogo com URLs defasadas: `conf`, `ctrl`, `fiscal`, `icms` e `status`
+  apontam para `192.168.0.117`, mas esta máquina é a **192.168.0.149**.
 - `secure=True` no cookie quando entrar o túnel Cloudflare
-- Teste do serviço sobrevivendo a um reinício real da máquina
-- `config.js` da raiz (site da Vercel) ainda tem a porta errada da API STATUS
+- Teste do serviço do hub sobrevivendo a um reinício real da máquina
 - Mover o repositório para `C:` — **opcional**, não urgente (ver acima)
+- Chat e grupos — parado por decisão do JP, espera conversa com a equipe
 
 Fechadas em 07/10/2026:
 
@@ -287,3 +309,15 @@ Fechadas em 07/10/2026:
   igual nas 8 tabelas e os 12.904 bytes da foto sobrevivendo ao `bytea`
 - ~~A rota que grava uso~~ — escrita em 08/10/2026 e testada no caminho
   ruim inteiro, **mas não ligada a nenhuma automação** (ver acima)
+
+Fechadas em 09 e 13/10/2026 (fora deste repositório):
+
+- ~~O token de sessão das automações não dizia QUEM~~ — era
+  `<ts>.<nonce>.<assinatura>` nas três. O nome passou para dentro do
+  payload assinado, em base64url (nome de usuário aceita ponto, e ponto é
+  o separador do token). `_token_valido` virou `_quem`. As três
+  commitadas e reiniciadas em 09/10/2026; todo mundo deslogou uma vez
+- ~~O cliente do reporte~~ — `clientes/reporte_hub.py` neste repositório é
+  a cópia canônica; a API-UP tem a dela em `src/utils/reporte_hub.py` e as
+  três variáveis no `.env`. Importar não faz nada: medido, 0 threads e
+  nenhuma saída

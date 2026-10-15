@@ -86,8 +86,9 @@ Usuários: ~30 operadores de escritório (fiscal, DP, contabilidade).
 
 ### Tabelas
 
-Oito: `setores`, `usuarios`, `sessoes`, `automacoes`, `chamados`,
-`favoritos`, `uso`, `uso_eventos`.
+Onze: `setores`, `usuarios`, `sessoes`, `automacoes`, `chamados`,
+`favoritos`, `uso`, `uso_eventos`, `conversas`, `participantes`,
+`mensagens`.
 
 **O esquema está em `src/esquema.sql`**, com um comentário por tabela
 explicando por que cada uma é do jeito que é. Não é sistema de migração:
@@ -124,6 +125,72 @@ fosse por baixo dos panos.
 (A antecessora `acessos` foi derrubada em 06/10/2026: tinha nascido com
 `PRIMARY KEY (usuario_id, automacao_id)`, sem o dia, e com essa chave
 cabia uma linha por pessoa/automação na vida.)
+
+### Chat — o que está de pé e o que falta (15/10/2026)
+
+`conversas`, `participantes` e `mensagens` existem, e
+`src/web/rotas/conversas.py` tem as rotas de pergunta-e-resposta **e o
+empurrão ao vivo por SSE**. O backend do chat está completo; falta a
+tela.
+
+Decisões que não se leem no código:
+
+- **`lido_ate` no participante**, em vez de uma tabela "fulano leu a
+  mensagem X". Aquela seria uma linha por mensagem POR PESSOA; num grupo
+  de dez, cada mensagem viraria dez linhas. Aqui é uma coluna, e não
+  lidas = contar `id > lido_ate`
+- **ordem pelo `id`, nunca pelo `criada_em`** — duas mensagens no mesmo
+  milissegundo empatam no relógio, o IDENTITY não empata
+- **404 para conversa que não é sua**, e não 403. Desvio consciente da
+  convenção: 403 confirmaria que aquela conversa existe. Testado nas três
+  rotas (ler, escrever, marcar lido)
+- **conversa direta não duplica** graças a `pg_advisory_xact_lock(menor,
+  maior)` do par. Sem ele, os dois lados abrindo ao mesmo tempo criariam
+  duas conversas paralelas que nunca se encontram. Testado com 20
+  chamadas simultâneas dos dois lados: 1 conversa
+- **`LEFT JOIN LATERAL`** é o que dá a última mensagem de cada conversa
+  numa consulta só. LATERAL é a licença para a subconsulta no `FROM`
+  enxergar o `c.id` da linha de fora. Sem ela seriam ~600 idas ao banco
+  por abertura de tela
+- **`executemany` é do CURSOR, não da conexão** no psycopg3.
+  `con.executemany(...)` estoura com `AttributeError`
+
+### O SSE do chat (15/10/2026)
+
+`GET /api/conversas/stream`, uma conexão por pessoa logada. Cinco coisas
+que decidem o desenho:
+
+- **o stream é por PESSOA, não por conversa.** Por conversa, abrir 5
+  conversas seriam 5 conexões, e o navegador limita ~6 por origem em
+  HTTP/1.1. Pior: o contador de não lidas só atualizaria nas conversas
+  abertas. Assim o `POST` avisa **os participantes** daquela conversa —
+  uma consulta a mais, e resolve os dois problemas
+- **`def`, não `async def`.** O FastAPI roda função síncrona num pool de
+  threads, e aí `fila.get(timeout=...)` pode bloquear à vontade. Com
+  `async def` seria preciso `asyncio.Queue` e `await`, e todo o resto do
+  hub é síncrono
+- **a fila é o que deixa a thread dormir.** `fila.get(timeout=20)` não
+  queima CPU perguntando "chegou?"; dorme até chegar ou estourar, e o
+  estouro é o gancho do batimento
+- **quem registra, desregistra — `try/finally`.** Mesma lição do `parar()`
+  da trama, e aqui mais cara: fila esquecida no `_ouvintes` nunca mais é
+  lida e todo `POST` seguinte escreve nela. Vazamento puro
+- **avisar DEPOIS do commit.** O `_avisar(...)` fica FORA do
+  `with conexao()`. De dentro, um rollback depois deixaria os colegas com
+  mensagem que não existe no banco
+
+O registro (`_ouvintes`) mora na **memória do processo**, e é por isso que
+o hub precisa continuar com **um worker só**. Com `uvicorn --workers 2`
+cada worker teria o seu dicionário e metade das pessoas não receberia
+nada. A saída, nesse dia, é `LISTEN/NOTIFY` do Postgres, já instalado.
+
+Medido em 15/10/2026: duas conexões abertas, mensagem na conversa direta
+chega nas DUAS; mensagem em grupo de um só chega para UM (o controle de
+acesso vale no fanout, não só na leitura); 2 batimentos em 46s com
+`ESPERA=20`; e o registro volta a `{}` quando as abas fecham — a chave do
+usuário some em vez de ficar `set` vazio.
+
+**Falta a tela.** O "+ Criar grupo" da gaveta segue desabilitado.
 
 ---
 

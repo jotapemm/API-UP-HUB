@@ -233,3 +233,78 @@ CREATE TABLE uso_eventos (
     visto_em      TIMESTAMPTZ NOT NULL DEFAULT now(),
     PRIMARY KEY (automacao_id, evento_id)
 );
+
+
+-- ---------------------------------------------------------------------
+--  conversas — uma conversa direta (duas pessoas) ou um grupo.
+--
+--  `nome` só existe em grupo; conversa direta se chama pelo outro, e
+--  quem monta esse rótulo é a tela, que sabe quem está olhando.
+--
+--  ARMADILHA conhecida e ainda não resolvida: conversa direta pode
+--  DUPLICAR. Se o Pablo abre com o Saymon e o Saymon abre com o Pablo,
+--  nascem duas conversas paralelas que nunca se encontram. Isso não se
+--  resolve com UNIQUE — o Postgres não sabe dizer "único conjunto de
+--  participantes". Resolve-se na hora de criar: procurar antes, criar só
+--  se não achou, tudo na mesma transação.
+-- ---------------------------------------------------------------------
+CREATE TABLE conversas (
+    id          INTEGER     GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    tipo        TEXT        NOT NULL CHECK (tipo IN ('direta', 'grupo')),
+    nome        TEXT,
+    criada_por  INTEGER     REFERENCES usuarios (id),
+    criada_em   TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+
+-- ---------------------------------------------------------------------
+--  participantes — quem está em cada conversa.
+--
+--  Sem id próprio, como `favoritos`: o par já É a identidade. E
+--  conversa_id vem primeiro na chave porque a pergunta mais frequente é
+--  "quem está nesta conversa".
+--
+--  `lido_ate` é o truque que evita uma tabela inteira. A tentação é
+--  guardar "fulano leu a mensagem X", mas isso é UMA LINHA POR MENSAGEM
+--  POR PESSOA — num grupo de dez, cada mensagem vira dez linhas só para
+--  dizer quem viu. Aqui é uma coluna: "li até a mensagem número N". Não
+--  lidas = contar mensagens com id > lido_ate. Uma linha por pessoa por
+--  conversa, para sempre.
+--
+--  Entrar num grupo deixa rastro visível (esta linha), de propósito: o
+--  suporte entrando aparece para o grupo inteiro. A alternativa, ler sem
+--  aparecer, seria vigilância.
+-- ---------------------------------------------------------------------
+CREATE TABLE participantes (
+    conversa_id  INTEGER     NOT NULL REFERENCES conversas (id) ON DELETE CASCADE,
+    usuario_id   INTEGER     NOT NULL REFERENCES usuarios (id)  ON DELETE CASCADE,
+    entrou_em    TIMESTAMPTZ NOT NULL DEFAULT now(),
+    lido_ate     INTEGER     NOT NULL DEFAULT 0,
+    PRIMARY KEY (conversa_id, usuario_id)
+);
+
+
+-- ---------------------------------------------------------------------
+--  mensagens — tabela de FATO. Sem soft delete, sem edição.
+--
+--  A ordem é pelo `id`, NUNCA pelo `criada_em`: duas mensagens no mesmo
+--  milissegundo empatam no relógio, e o IDENTITY é monotônico e não
+--  empata. O índice abaixo é exatamente essa pergunta.
+--
+--  `autor_id` segue a regra de `chamados`: sem CASCADE. Mensagem é
+--  histórico e não some com a conta — apagar quem já escreveu falha, e
+--  falhar é o certo.
+--
+--  INTEGER e não BIGINT porque a conta fecha: 30 pessoas, 100 mensagens
+--  por dia, 250 dias úteis dá 750 mil por ano. INTEGER vai até 2,1
+--  bilhões. Não é limitação, é a mesma convenção do resto do esquema.
+-- ---------------------------------------------------------------------
+CREATE TABLE mensagens (
+    id           INTEGER     GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    conversa_id  INTEGER     NOT NULL REFERENCES conversas (id) ON DELETE CASCADE,
+    autor_id     INTEGER     REFERENCES usuarios (id),
+    corpo        TEXT        NOT NULL,
+    criada_em    TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX mensagens_por_conversa ON mensagens (conversa_id, id);

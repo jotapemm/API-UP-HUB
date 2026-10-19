@@ -1306,3 +1306,280 @@
   height: 9px;
   border-radius: 2px;
 }
+
+/* ── CONVERSAS ───────────────────────────────────────────────────────
+   Duas colunas: a lista à esquerda, a conversa aberta à direita. Mesma
+   ideia do Configurações, mas aqui a coluna da direita rola sozinha e a
+   caixa de escrever fica colada embaixo.                               */
+.conv-topo {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.conv-topo h2 {
+  margin: 0;
+  font-size: 17px;
+}
+
+.conv-topo .btn {
+  margin-left: auto;
+  padding: 5px 12px;
+  font-size: 12px;
+}
+
+.conv-corpo {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: var(--gap);
+  /* altura fixa para a coluna da direita poder rolar por dentro; sem
+     isto a página inteira é que rolaria, e a caixa de escrever fugiria
+     para fora da tela                                                  */
+  height: min(62vh, 560px);
+}
+
+.conv-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  overflow-y: auto;
+  padding-right: 4px;
+  /* item de grid nasce com min-width:auto e CRESCE para caber o
+     conteúdo; sem isto um nome comprido empurraria a coluna            */
+  min-width: 0;
+}
+
+.conv-nova {
+  width: 100%;
+  margin-bottom: 4px;
+}
+
+.conv-busca {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.conv-busca input,
+.conv-escrever input {
+  width: 100%;
+  padding: 9px 12px;
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 0;
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+}
+
+.conv-busca input:focus-visible,
+.conv-escrever input:focus-visible {
+  outline: none;
+  border-color: var(--brand);
+}
+
+.conv-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 10px;
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-2);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  min-width: 0;
+}
+
+.conv-item:hover {
+  background: var(--panel-2);
+  color: var(--text);
+}
+
+.conv-item.aberta {
+  background: var(--panel-2);
+  border-color: var(--brand);
+  color: var(--text);
+}
+
+.conv-meio {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.conv-nome {
+  font-size: 13px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.conv-previa {
+  font-size: 11px;
+  color: var(--text-3);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.conv-badge,
+.side-badge {
+  min-width: 18px;
+  padding: 1px 5px;
+  background: var(--brand);
+  color: var(--bg);
+  border-radius: var(--r-xl);
+  font-size: 11px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.side-badge {
+  margin-left: auto;
+}
+
+.conv-foto {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 30px;
+  height: 30px;
+  background: var(--panel-3);
+  border-radius: var(--r-xl);
+  object-fit: cover;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-2);
+}
+
+.conv-foto.grande {
+  width: 38px;
+  height: 38px;
+  font-size: 14px;
+}
+
+.conv-aberta {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  border: 1px solid var(--line);
+  background: var(--panel);
+}
+
+.conv-cabeca {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--line);
+}
+
+.conv-cabeca strong {
+  display: block;
+  font-size: 14px;
+}
+
+.conv-cabeca small {
+  font-size: 11px;
+  color: var(--text-3);
+}
+
+.conv-fluxo {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px;
+}
+
+.msg {
+  align-self: flex-start;
+  max-width: 72%;
+  padding: 8px 11px;
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+}
+
+/* A minha mensagem vai para a direita e ganha a cor da marca. É o único
+   verde desta tela — o resto fica em cinza de propósito.               */
+.msg.minha {
+  align-self: flex-end;
+  background: var(--brand);
+  border-color: var(--brand);
+  color: var(--bg);
+}
+
+.msg p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.msg-autor {
+  display: block;
+  margin-bottom: 2px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--brand);
+}
+
+.msg-hora {
+  display: block;
+  margin-top: 3px;
+  font-size: 10px;
+  color: var(--text-3);
+  text-align: right;
+}
+
+.msg.minha .msg-hora {
+  color: var(--bg);
+  opacity: .7;
+}
+
+.conv-escrever {
+  display: flex;
+  gap: 8px;
+  padding: 10px;
+  border-top: 1px solid var(--line);
+}
+
+.conv-escrever input {
+  flex: 1;
+}
+
+.conv-vazio {
+  margin: 10px 2px;
+  font-size: 12px;
+  color: var(--text-3);
+}
+
+.conv-vazio.centro {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  margin: 0;
+}
+
+@media (max-width: 760px) {
+  .conv-corpo {
+    grid-template-columns: 1fr;
+    height: auto;
+  }
+
+  .conv-lista {
+    max-height: 220px;
+  }
+
+  .conv-aberta {
+    min-height: 340px;
+  }
+}

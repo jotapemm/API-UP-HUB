@@ -103,6 +103,44 @@ def _exigir_participante(con, conversa_id: int, usuario_id: int) -> None:
         raise HTTPException(404, "Conversa não encontrada.")
 
 
+@router.get("/pessoas")
+def pessoas(busca: str = "", usuario=Depends(usuario_atual)):
+    """Com quem dá para conversar. Catálogo interno, não rede social.
+
+    Devolve nome, apelido e a chave de cache da foto — nada de e-mail,
+    setor ou qualquer coisa que a pessoa não escolheu expor para iniciar
+    uma conversa. Quem está pedindo nunca aparece na própria lista.
+
+    `ILIKE` com o termo como VALOR (%s), nunca concatenado na consulta.
+    O `%` entra na ponta do parâmetro, do lado do Python.
+    """
+    termo = f"%{busca.strip()}%"
+
+    with conexao() as con:
+        linhas = con.execute(
+            """SELECT id, nome, apelido, foto_em
+                 FROM usuarios
+                WHERE ativo
+                  AND id <> %s
+                  AND (%s = '%%' OR nome ILIKE %s OR coalesce(apelido, '') ILIKE %s)
+                ORDER BY nome
+                LIMIT 50""",
+            (usuario["id"], termo, termo, termo),
+        ).fetchall()
+
+    return {
+        "pessoas": [
+            {
+                "id": l["id"],
+                "nome": l["nome"],
+                "apelido": l["apelido"],
+                "foto_em": l["foto_em"].isoformat() if l["foto_em"] else None,
+            }
+            for l in linhas
+        ]
+    }
+
+
 @router.get("/conversas")
 def listar(usuario=Depends(usuario_atual)):
     """As conversas desta pessoa, com não lidas e a última mensagem.

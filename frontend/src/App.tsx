@@ -2,6 +2,8 @@ import { useEffect, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboa
 import Trama from './Trama'
 import BotaoLuz from './BotaoLuz'
 import Calendario from './Calendario'
+import Conversas from './Conversas'
+import { useChat } from './useChat'
 import { useDigitacao } from './useDigitacao'
 import { lerRecentes, registrarRecente } from './recentes'
 import './App.css'
@@ -52,7 +54,7 @@ type ChamadoFila = Chamado & {
   atendido_por: string | null
 }
 
-type Vista = 'inicio' | 'entrada' | 'triagem' | 'config' | 'perfil'
+type Vista = 'inicio' | 'entrada' | 'triagem' | 'config' | 'perfil' | 'conversas'
 
 /* As Configurações são UMA vista com cinco cômodos. A seção é estado
    próprio: trocar de cômodo não recarrega nada nem mexe na vista.      */
@@ -119,6 +121,7 @@ const TRACOS: Record<string, string[]> = {
   chamados: ['M8 6h13', 'M8 12h13', 'M8 18h13', 'M3 6h.01', 'M3 12h.01', 'M3 18h.01'],
   entrada: ['M22 12h-6l-2 3h-4l-2-3H2', 'M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z'],
   automacoes: ['M13 2 3 14h9l-1 8 10-12h-9l1-8z'],
+  conversas: ['M21 11.5a8.4 8.4 0 0 1-9 8.4 9 9 0 0 1-3.9-.9L3 21l1.9-5.1A8.4 8.4 0 0 1 4 11.5a8.4 8.4 0 0 1 8.5-8.4h.5a8.4 8.4 0 0 1 8 8.4z'],
 
   perfil: ['M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2', 'M12 3a4 4 0 1 0 0 8 4 4 0 0 0 0-8'],
   conta: ['M12 3 4 6v5c0 4.5 3.2 8.6 8 10 4.8-1.4 8-5.5 8-10V6l-8-3z', 'M9.5 12l1.8 1.8 3.5-3.6'],
@@ -200,6 +203,11 @@ function App() {
   const [recentes, setRecentes] = useState<string[]>([])
   const [vista, setVista] = useState<Vista>('inicio')
   const [secao, setSecao] = useState<Secao>('perfil')
+
+  /* O chat vive aqui, e nao dentro da vista: a conexao precisa ficar
+     aberta em QUALQUER tela, senao o contador de nao lidas so subiria
+     enquanto o chat estivesse na frente. */
+  const chat = useChat(!!usuario, usuario?.id)
   const [chamados, setChamados] = useState<Chamado[] | null>(null)
   const [erroChamados, setErroChamados] = useState(false)
   const [fila, setFila] = useState<ChamadoFila[] | null>(null)
@@ -684,6 +692,16 @@ function App() {
               Chamados
             </button>
           )}
+
+          <button
+            className="side-acao"
+            type="button"
+            onClick={() => { setVista('conversas'); setMenuAberto(false) }}
+          >
+            <Icone nome="conversas" />
+            Conversas
+            {chat.naoLidas > 0 && <span className="side-badge">{chat.naoLidas}</span>}
+          </button>
 
           <button
             className="side-acao"
@@ -1263,6 +1281,17 @@ function App() {
                   </div>
                 )}
               </section>
+            ) : vista === 'conversas' ? (
+              <Conversas
+                euId={usuario?.id ?? 0}
+                conversas={chat.conversas}
+                erro={chat.erro}
+                chegou={chat.chegou}
+                recarregar={chat.recarregar}
+                marcarLido={chat.marcarLido}
+                aoVoltar={() => setVista('inicio')}
+              />
+
             ) : vista === 'entrada' ? (
               <section className="entrada">
                 <div className="entrada-topo">

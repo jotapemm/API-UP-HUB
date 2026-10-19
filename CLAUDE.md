@@ -190,7 +190,37 @@ acesso vale no fanout, não só na leitura); 2 batimentos em 46s com
 `ESPERA=20`; e o registro volta a `{}` quando as abas fecham — a chave do
 usuário some em vez de ficar `set` vazio.
 
-**Falta a tela.** O "+ Criar grupo" da gaveta segue desabilitado.
+### A tela do chat (19/10/2026)
+
+Vista `conversas` em `frontend/src/Conversas.tsx`, alimentada pelo hook
+`frontend/src/useChat.ts`. Mais `GET /api/pessoas`, que não existia e sem
+a qual não há como escolher com quem falar.
+
+Três coisas que decidem o desenho:
+
+- **o `EventSource` vive no `App`, não na vista.** Na vista ele só
+  existiria com o chat aberto, e o contador de não lidas — que foi a
+  razão de o stream ser por pessoa — nunca subiria em outra tela. Medido:
+  com o chat FECHADO e três mensagens chegando, o badge da gaveta foi a 3
+- **a forma de função em todo `setState` dentro do `onmessage`.** O
+  handler é criado UMA vez: as variáveis que ele enxerga são as do
+  primeiro render, para sempre. `setConversas([...conversas, x])` usaria
+  a lista de quando a conexão abriu, e cada mensagem apagaria o que
+  chegou depois. Com `antes => ...` o React entrega a lista atual
+- **`onopen` recarrega a lista.** O `EventSource` reconecta sozinho (por
+  isso não há código de retentativa), mas cair significa que pode ter
+  passado mensagem no intervalo
+
+A mensagem enviada chega duas vezes — pela resposta do `POST` e pelo
+stream. Os dois caminhos filtram por `id` antes de inserir.
+
+Medido em 19/10/2026: mensagem enviada do navegador aparece; mensagem
+mandada pelo outro usuário (via curl) aparece **sem recarregar**; o badge
+zera ao abrir a conversa; e **seis idas e vindas entre vistas mantiveram
+2 conexões na 8090**, ou seja, não acumula.
+
+**Falta:** criar grupo pela tela (a rota aceita, a tela não oferece) — o
+"+ Criar grupo" da gaveta segue desabilitado.
 
 ---
 
